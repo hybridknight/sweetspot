@@ -23,7 +23,7 @@ export function Footer() {
             <Link href="/" aria-label="Sweet Spot home" className="ss-footer-logo">
               <Logo size={30} />
             </Link>
-            <p>Your music. Just right.</p>
+            <p>Make room for music.</p>
             <span>A little more room for the way you listen.</span>
             <span className="ss-footer-platforms">Windows · macOS</span>
           </div>

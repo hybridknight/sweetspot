@@ -1,11 +1,9 @@
 import { PlayerHero } from "@/components/player-hero";
 import { SoundArtwork } from "@/components/sound-artwork";
-import { BrandWordmark } from "@/components/brand-wordmark";
 import { ReleaseDownloadPanel } from "@/components/release-download-panel";
 import { getLatestReleasesByChannel } from "@/lib/github";
 import { assetPath } from "@/lib/paths";
 import {
-  BookOpen,
   Bot,
   ArrowUpRight,
   SlidersHorizontal,
@@ -43,26 +41,20 @@ export default async function HomePage() {
     <main className="ss-home">
       <section className="ss-hero">
         <div className="ss-hero-copy">
-          <p className="ss-eyebrow">YOUR DESKTOP. YOUR LISTENING ROOM.</p>
-          <BrandWordmark width={260} />
           <h1>
-            Your music.
+            Make room
             <br />
-            <span>Just right.</span>
+            for music.
           </h1>
           <p className="ss-intro">
-            YouTube Music, with room to make it yours. A dedicated player, thoughtful sound
-            controls, and AI assistant connections through MCP.
+            Your desktop home for YouTube Music.
           </p>
           <div className="ss-actions">
             <a className="ss-button ss-button-primary" href="#download">
               Get Sweet Spot <ArrowUpRight size={17} />
             </a>
-            <Link className="ss-button" href="/docs">
-              Explore the docs <BookOpen size={17} />
-            </Link>
-            <Link className="ss-button" href="/docs/integrations/mcp">
-              Connect your AI assistant <Bot size={17} />
+            <Link className="ss-hero-docs-link" href="/docs">
+              Read the docs <ArrowUpRight size={15} />
             </Link>
           </div>
           <p className="ss-caption">For Windows and macOS · Open source</p>

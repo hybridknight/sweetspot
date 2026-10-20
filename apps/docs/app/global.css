@@ -73,15 +73,16 @@ html > body[data-scroll-locked] {
   padding-bottom: 72px;
 }
 .ss-hero h1 {
-  font-size: clamp(52px, 6.4vw, 84px);
-  line-height: 1.03;
-  letter-spacing: -0.045em;
+  font-size: clamp(36px, 4.2vw, 56px);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
   font-weight: 600;
-  margin: 30px 0 24px;
+  margin: 0 0 18px;
 }
-.ss-hero h1 span {
-  color: #b52c39;
-}
+.ss-hero-docs-link { display: inline-flex; align-items: center; gap: 8px; padding: 12px 0; font-size: 13px; color: var(--color-fd-muted-foreground); }
+.ss-hero-docs-link:hover { color: var(--color-fd-foreground); }
+.ss-hero-copy .ss-actions { align-items: center; gap: 24px; margin-top: 24px; }
+.ss-hero-copy .ss-caption { margin-top: 20px; }
 .ss-intro {
   font-size: 17px;
   line-height: 1.7;

@@ -1,7 +1,7 @@
 {
 	"name": "sweetspot",
-	"description": "Sweet Spot for YouTube Music with themes and a local API.",
-	"version": "1.0.0",
+	"description": "Your desktop home for YouTube Music.",
+	"version": "1.0.1",
 	"private": false,
 	"author": {
 		"name": "Sweet Spot contributors"

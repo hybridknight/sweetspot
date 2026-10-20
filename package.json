@@ -6,7 +6,7 @@
 		"name": "Sweet Spot contributors"
 	},
 	"homepage": "https://sweetspot.bkk.ooo",
-	"description": "Sweet Spot for YouTube Music for Windows and macOS | Monorepo",
+	"description": "Your desktop home for YouTube Music.",
 	"scripts": {
 		"brand:build": "node scripts/generate-brand-assets.mjs",
 		"deps:install": "node scripts/install-dependencies.mjs",

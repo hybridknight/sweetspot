@@ -90,9 +90,9 @@ export const siteUrl =
 export const brandColor = '#B52C39';
 export const brandColorRgb = '181, 44, 57';
 
-export const appTagline = 'Your music. Just right.';
+export const appTagline = 'Make room for music.';
 export const appDescription =
-  'YouTube Music for your desktop, with player skins, a ten-band equalizer, and synced lyrics.';
+  'Your desktop home for YouTube Music.';
 
 export const docsDescription = `Documentation for ${appName} — features, install, API, and changelog.`;
 

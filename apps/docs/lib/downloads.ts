@@ -16,6 +16,8 @@ export interface LatestRelease {
   assets: ReleaseAsset[];
   prerelease?: boolean;
   draft?: boolean;
+  distribution_notice?: string;
+  checksum_url?: string;
 }
 
 export type DownloadPlatform = "windows" | "macos";

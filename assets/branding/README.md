@@ -15,9 +15,9 @@ The symbol uses two offset lobes around a transparent central aperture, represen
 - `identity.json`: selected typography, palette, and official copy.
 - `brand-preview.png`: contact sheet of the actual production exports.
 
-Primary tagline: **Your music. Just right.**
+Primary tagline: **Make room for music.**
 
-Descriptor: **Desktop Player for YouTube Music**.
+Descriptor: **Your desktop home for YouTube Music.**
 
 Palette: **Crimson & Ink** — ink `#242121`, warm white `#FFF7F0`, crimson `#B52C39`, warm gray `#B2A39B`, surface `#393331`.
 

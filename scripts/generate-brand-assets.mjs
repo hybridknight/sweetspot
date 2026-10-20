@@ -62,7 +62,7 @@ const traySvg = monochrome.replace('viewBox="0 0 512 512"','viewBox="108 108 296
 for (const size of [16,32]) await save(`apps/sweetspot/build/trayTemplate${size === 32 ? '@2x' : ''}.png`, await sharp(Buffer.from(traySvg)).resize(size,size,{fit:'contain'}).png().toBuffer());
 
 const inner = icon.toString().replace(/^<svg[^>]*>/,'').replace(/<\/svg>\s*$/,'');
-const { colors, palette } = JSON.parse(await readFile(path.join(brand, 'identity.json'), 'utf8'));
+const { colors, palette, tagline, descriptor } = JSON.parse(await readFile(path.join(brand, 'identity.json'), 'utf8'));
 const dark = colors.ink, ivory = colors.paper, amber = colors.accent, copper = colors.muted;
 const svg = (body, width, height) => `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">${body}</svg>`;
 const strip = value => value.replace(/^<svg[^>]*>/,'').replace(/<\/svg>\s*$/,'');
@@ -82,7 +82,7 @@ const artwork = svg(`<rect width="1600" height="900" fill="${dark}"/><g transfor
 await save('assets/branding/hi-fi-art.svg', artwork);
 await save('assets/branding/hi-fi-art.png', await sharp(Buffer.from(artwork)).png().toBuffer());
 await save('apps/docs/public/images/sweetspot-sound.webp', await sharp(Buffer.from(artwork)).webp({quality:90}).toBuffer());
-const banner = svg(`<rect width="1200" height="630" fill="${dark}"/><g transform="translate(870 20) scale(.5)">${symbol}</g><g transform="translate(55 225) scale(1.05)">${strip(word)}</g><text x="85" y="500" font-family="Inter,Arial,sans-serif" font-size="34" fill="${ivory}">Your music. Just right.</text><text x="85" y="562" font-family="Inter,Arial,sans-serif" font-size="20" fill="${ivory}">Desktop Player for YouTube Music</text>`,1200,630);
+const banner = svg(`<rect width="1200" height="630" fill="${dark}"/><g transform="translate(870 20) scale(.5)">${symbol}</g><g transform="translate(55 225) scale(1.05)">${strip(word)}</g><text x="85" y="500" font-family="Inter,Arial,sans-serif" font-size="34" fill="${ivory}">${tagline}</text><text x="85" y="562" font-family="Inter,Arial,sans-serif" font-size="20" fill="${ivory}">${descriptor}</text>`,1200,630);
 await save('apps/docs/public/images/sweetspot-banner.svg',banner);
 const bannerPng = await sharp(Buffer.from(banner)).png().toBuffer();
 await save('apps/docs/public/images/opengraph-banner.png',bannerPng);
@@ -105,6 +105,6 @@ for(const size of [16,32,64,128]) {review.push({input:raster.get(size),left:curs
 await save('assets/branding/brand-preview.png',await sharp(sheet).composite(review).png().toBuffer());
 console.log('Generated the selected Parkinsans 600 / Quiet Aperture identity across all app and docs artwork.');
 
-const paletteCard = svg(`<rect width="1400" height="740" fill="${dark}"/><text x="60" y="65" font-family="Arial,sans-serif" font-size="24" fill="${ivory}">SWEET SPOT · ${palette.toUpperCase().replaceAll('&','&amp;')}</text><g transform="translate(60 170) scale(.44)">${inner}</g><g transform="translate(340 175)">${strip(word)}</g><text x="374" y="450" font-family="Arial,sans-serif" font-size="30" fill="${ivory}">Your music. Just right.</text><rect y="530" width="1400" height="210" fill="${ivory}"/>${[['Ink',dark],['Warm white',ivory],['Crimson',amber],['Warm gray',copper]].map(([name,color],i)=>`<rect x="${60+i*330}" y="580" width="60" height="60" rx="14" fill="${color}" stroke="${dark}" stroke-opacity=".12"/><text x="${138+i*330}" y="605" font-family="Arial,sans-serif" font-size="23" fill="${dark}">${name}</text><text x="${138+i*330}" y="635" font-family="Arial,sans-serif" font-size="18" fill="${dark}">${color}</text>`).join('')}`,1400,740);
+const paletteCard = svg(`<rect width="1400" height="740" fill="${dark}"/><text x="60" y="65" font-family="Arial,sans-serif" font-size="24" fill="${ivory}">SWEET SPOT · ${palette.toUpperCase().replaceAll('&','&amp;')}</text><g transform="translate(60 170) scale(.44)">${inner}</g><g transform="translate(340 175)">${strip(word)}</g><text x="374" y="450" font-family="Arial,sans-serif" font-size="30" fill="${ivory}">${tagline}</text><rect y="530" width="1400" height="210" fill="${ivory}"/>${[['Ink',dark],['Warm white',ivory],['Crimson',amber],['Warm gray',copper]].map(([name,color],i)=>`<rect x="${60+i*330}" y="580" width="60" height="60" rx="14" fill="${color}" stroke="${dark}" stroke-opacity=".12"/><text x="${138+i*330}" y="605" font-family="Arial,sans-serif" font-size="23" fill="${dark}">${name}</text><text x="${138+i*330}" y="635" font-family="Arial,sans-serif" font-size="18" fill="${dark}">${color}</text>`).join('')}`,1400,740);
 await save('assets/branding/palette-preview.svg',paletteCard);
 await save('assets/branding/palette-preview.png',await sharp(Buffer.from(paletteCard)).png().toBuffer());

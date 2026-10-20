@@ -1,4 +1,5 @@
 import { createFetch } from "@better-fetch/fetch";
+import preparedRelease from "@/content/releases/1.0.1.json";
 import {
   type LatestRelease,
   type ReleaseChannel,
@@ -68,6 +69,8 @@ function mapRelease(data: GitHubReleaseResponse): LatestRelease {
         .join("\n") ?? null,
     prerelease: data.prerelease,
     draft: data.draft,
+    distribution_notice: data.tag_name === preparedRelease.tag_name ? preparedRelease.distribution_notice : undefined,
+    checksum_url: data.assets.find((asset) => asset.name === "SHA256SUMS.txt")?.browser_download_url,
     assets: listUserDownloads(data.assets).map((asset) => ({
       name: asset.name,
       browser_download_url: asset.browser_download_url,
@@ -167,8 +170,11 @@ export async function listReleases(options?: {
       }
     }
   } catch {
-    return releases;
+    // Keep the prepared download catalog available when GitHub is unreachable or private.
   }
 
+  if (releases.length === 0 && (!preparedRelease.prerelease || includePrereleases)) {
+    releases.push(preparedRelease);
+  }
   return releases;
 }

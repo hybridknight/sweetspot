@@ -227,6 +227,11 @@ export function ReleaseDownloadPanel({ releases }: ReleaseDownloadPanelProps) {
       </div>
 
       <h2 className="text-xl font-semibold tracking-tight">{release.name}</h2>
+      {release.distribution_notice ? (
+        <p className="mt-3 rounded-xl border bg-fd-secondary/40 px-3 py-2.5 text-sm text-fd-muted-foreground">
+          {release.distribution_notice}
+        </p>
+      ) : null}
       <p className="mt-1 text-sm text-fd-muted-foreground">
         Published {formatReleaseDate(release.published_at)}
         {channel !== "stable" ? ` · ${RELEASE_CHANNEL_LABELS[channel]}` : ""}
@@ -315,6 +320,12 @@ export function ReleaseDownloadPanel({ releases }: ReleaseDownloadPanelProps) {
           </a>
         </div>
       )}
+
+      {release.checksum_url ? (
+        <a href={release.checksum_url} className="mt-4 inline-flex text-xs text-fd-muted-foreground hover:text-fd-foreground hover:underline">
+          SHA-256 checksums
+        </a>
+      ) : null}
 
       <a
         href={release.html_url}
