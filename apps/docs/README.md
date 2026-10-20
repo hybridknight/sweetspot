@@ -48,6 +48,10 @@ When changing docs dependencies, update both the workspace lockfile and the stan
 
 ## Static build (GitHub Pages)
 
+Production is hosted on Vercel. The **Validate docs** GitHub Actions workflow checks the static export and uploads it as an artifact without requiring GitHub Pages.
+
+To use GitHub Pages instead, enable Pages with GitHub Actions as its source and set the repository Actions variable `DEPLOY_GITHUB_PAGES` to `true`. Pages setup, deployment, and release-triggered refreshes run only with that explicit opt-in. Pull requests validate the export without deploying. Leave the variable unset for Vercel hosting.
+
 ```bash
 REPO_OWNER=hybridknight REPO_NAME=sweetspot REPO_TITLE="Sweet Spot" \
 NEXT_PUBLIC_URL=https://sweetspot.bkk.ooo \
