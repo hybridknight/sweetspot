@@ -1,0 +1,43 @@
+{
+  "tag_name": "v1.0.2",
+  "name": "Sweet Spot 1.0.2",
+  "html_url": "https://github.com/hybridknight/sweetspot/releases/tag/v1.0.2",
+  "published_at": "2026-10-20T12:55:12.359Z",
+  "body": "Your desktop home for YouTube Music.\n\n## Changes\n\n- Explain macOS Keychain access before opening browser windows.\n- Share secure-storage initialization between browser sign-in and paired integrations, and reuse unlocked keys during the app session.\n- Stop automatic unlock retries after cancellation or denial.\n- Preserve existing paired-client credentials and encrypted-store migration.\n- Improve the website download panel.\n\n## Downloads\n\n- Windows x64 installer.\n- macOS Apple Silicon: DMG and ZIP.\n- macOS Intel: DMG and ZIP.\n- SHA-256 checksums and update metadata.\n\nAll packages use the Sweet Spot product name and standard installed-app profile.\n\n## Signing and access\n\nWindows is unsigned. macOS packages are ad-hoc signed and not notarized by Apple. A consistent Developer ID signature is still needed for reliable Keychain approval across app updates. Password-dialog behavior has not been verified against a real login Keychain in these builds.\n\nGitHub sign-in with repository access is required while this repository is private.\n\n## Verification\n\nProduction compilation, both type checks, and all 343 automated tests passed. Package versions, identities, target architectures, native media binaries, archive integrity, macOS signatures, and DMG checksums were checked. Windows and Intel macOS packages have not been launched on this Apple Silicon build host.\n",
+  "prerelease": false,
+  "draft": false,
+  "distribution_notice": "Windows is unsigned. macOS downloads are ad-hoc signed and not notarized. GitHub access is required while the repository is private.",
+  "checksum_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.2/SHA256SUMS.txt",
+  "assets": [
+    {
+      "name": "sweetspot-1.0.2-setup.exe",
+      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.2/sweetspot-1.0.2-setup.exe",
+      "size": 133976549,
+      "content_type": "application/vnd.microsoft.portable-executable"
+    },
+    {
+      "name": "Sweet-Spot-1.0.2-arm64.dmg",
+      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.2/Sweet-Spot-1.0.2-arm64.dmg",
+      "size": 184131706,
+      "content_type": "application/x-apple-diskimage"
+    },
+    {
+      "name": "Sweet-Spot-1.0.2.dmg",
+      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.2/Sweet-Spot-1.0.2.dmg",
+      "size": 191986758,
+      "content_type": "application/x-apple-diskimage"
+    },
+    {
+      "name": "Sweet-Spot-1.0.2-arm64-mac.zip",
+      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.2/Sweet-Spot-1.0.2-arm64-mac.zip",
+      "size": 160126464,
+      "content_type": "application/zip"
+    },
+    {
+      "name": "Sweet-Spot-1.0.2-mac.zip",
+      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.2/Sweet-Spot-1.0.2-mac.zip",
+      "size": 166972334,
+      "content_type": "application/zip"
+    }
+  ]
+}

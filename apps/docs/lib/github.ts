@@ -1,5 +1,5 @@
 import { createFetch } from "@better-fetch/fetch";
-import preparedRelease from "@/content/releases/1.0.1.json";
+import preparedRelease from "@/content/releases/1.0.2.json";
 import {
   type LatestRelease,
   type ReleaseChannel,
