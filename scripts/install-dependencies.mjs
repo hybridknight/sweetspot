@@ -27,7 +27,9 @@ const directory = mkdtempSync(path.join(tmpdir(), 'sweetspot-install-'));
 try {
   const userConfig = path.join(directory, 'npmrc');
   writeFileSync(userConfig, registryConfig, { mode: 0o600 });
-  const result = spawnSync(process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
+  // pnpm/setup can install a native executable on Windows, without pnpm.cmd.
+  // Let the Windows shell resolve either form through PATH / PATHEXT.
+  const result = spawnSync('pnpm',
     ['install', '--frozen-lockfile', ...process.argv.slice(2)], {
       stdio: 'inherit',
       shell: process.platform === 'win32',
