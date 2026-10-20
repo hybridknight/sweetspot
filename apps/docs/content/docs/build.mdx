@@ -1,0 +1,55 @@
+---
+title: Build from source
+description: Develop and package sweetspot
+---
+
+## Requirements
+
+Build and package the desktop app on Windows or macOS.
+
+- Node.js (see CI: Node 24.x)
+- [pnpm](https://pnpm.io/) 11+
+- GitHub CLI (`gh`) for native media dependencies hosted on GitHub Packages
+
+```bash
+gh auth refresh -s read:packages
+pnpm deps:install
+pnpm dev
+```
+
+On macOS, unpackaged development and production-preview builds use isolated browser profiles with a mock Keychain to avoid permission prompts from the shared Electron binary. Development uses `sweetspot-dev`; production previews use `sweetspot-preview`, separate from the installed `sweetspot` profile. You will need to sign in once in each local profile. Their cookies are not protected by the macOS Keychain. Packaged releases retain OS-backed cookie encryption. See [Local data and privacy](/docs/internals/encrypted-stores) for credential protection and permission prompts.
+
+## Workspace layout
+
+| Path | Package |
+| --- | --- |
+| `apps/sweetspot` | Electron app |
+| `apps/docs` | This documentation site |
+
+## Useful scripts
+
+```bash
+pnpm dev              # Electron app
+pnpm --filter sweetspot-docs dev
+pnpm build            # typecheck + electron-vite build
+```
+
+## Packaging
+
+```bash
+pnpm build:win
+pnpm build:mac
+# or full release via electron-builder:
+pnpm release
+```
+
+For a local macOS ZIP without a Developer ID certificate, use:
+
+```bash
+pnpm release:compile
+pnpm release:pack:mac:local --arm64
+```
+
+Use `--x64` for Intel Macs. Local packages are named **Sweet Spot Local**, use ad-hoc signing, and are not notarized. They keep settings, sign-in sessions, and paired clients in a separate `sweetspot-local` profile and retain Keychain encryption. Sign in again in this local profile. Their separate entitlements allow Electron’s framework to load without a matching Developer ID team; normal signed releases retain the production entitlements.
+
+Each local packaging run creates the next numbered folder, such as `apps/sweetspot/dist/release-1.0.0-build-001`, then `release-1.0.0-build-002`. Earlier builds are preserved.

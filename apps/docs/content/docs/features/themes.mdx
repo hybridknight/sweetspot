@@ -1,0 +1,35 @@
+---
+title: Themes
+description: Compare built-in light and dark themes, or create your own style for YouTube Music.
+---
+
+import { ThemeCatalog } from '@/components/theme-catalog';
+
+Themes change the embedded YouTube Music interface. For the dedicated player window, use [Player skins](/docs/features/player).
+
+## Choose a theme
+
+1. Open **Settings → Appearance → Themes**.
+2. Enable themes, then select a preview card. The style applies automatically within a moment; no restart is needed. Use Tab to focus the gallery and arrow keys to choose a theme.
+3. To restore YouTube Music’s original appearance, turn **Enable themes** off. Your selected theme is remembered.
+
+## Built-in themes
+
+<ThemeCatalog />
+
+These previews illustrate each theme’s palette and shapes. Artwork and changes to YouTube Music may affect the final appearance. **Original** is a bundled charcoal theme; turn themes off to use YouTube Music without a theme applied.
+
+## Use a custom theme
+
+1. Select **Custom file** in the theme gallery.
+2. Choose a `.scss`, `.sass`, or `.css` file under **Custom theme file**, or use the generated starter file.
+3. Use **Open file** to edit it, then save your changes.
+4. Enable **Reload when the file changes** to apply saved edits automatically, or use **Reload styles** to apply them manually.
+
+The default custom file location is `sweetspot/custom.scss` inside your Documents folder. Your file path is personal information: leave it out of screenshots and shared bug reports.
+
+## Background and blur
+
+**Use artwork as the background** adds album art behind the player view. Turn it off for a more consistent theme palette. **Blur backgrounds** softens the background and adds glass effects to menus. These options have their own switches and can also be used with themes off. Disable blur if playback or scrolling feels sluggish.
+
+YouTube Music can change its page structure, which may require updates to custom selectors. Keep a backup of working styles.

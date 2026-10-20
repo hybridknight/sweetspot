@@ -1,0 +1,125 @@
+/* Settings typography is scoped so player skins and other windows keep their own scale. */
+.settings-shell {
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.settings-shell .settings-page {
+	gap: 28px;
+	padding: 28px;
+	padding-bottom: 64px;
+}
+
+.settings-shell .settings-page-heading h1,
+.settings-shell .settings-search-heading {
+	font-size: 28px;
+	font-weight: 650;
+	line-height: 1.2;
+	letter-spacing: -0.025em;
+	text-wrap: balance;
+}
+
+.settings-shell .settings-page-heading > p:first-child {
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.5;
+	letter-spacing: 0.02em;
+}
+
+.settings-shell .settings-page-heading > p:last-child {
+	max-width: 65ch;
+	font-size: 14px;
+	line-height: 1.6;
+}
+
+.settings-shell [data-slot="card"] {
+	--card-spacing: 24px;
+	font-size: 14px;
+	line-height: 1.6;
+}
+
+.settings-shell [data-slot="card-header"] {
+	gap: 6px;
+}
+
+.settings-shell [data-slot="card-title"] {
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.4;
+	letter-spacing: -0.01em;
+}
+
+.settings-shell [data-slot="card-description"],
+.settings-shell [data-slot="field-description"] {
+	max-width: 68ch;
+	font-size: 13px;
+	line-height: 1.6;
+	text-wrap: pretty;
+}
+
+.settings-shell [data-slot="field-label"] {
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.5;
+}
+
+.settings-shell [data-slot="field-content"] {
+	min-width: 0;
+	gap: 4px;
+}
+
+.settings-shell [data-slot="field-group"] {
+	gap: 16px;
+}
+
+.settings-shell [data-slot="field"][data-orientation="horizontal"] {
+	gap: 20px;
+	padding-block: 10px;
+}
+
+.settings-shell [data-slot="field"] > [role="switch"] {
+	flex-shrink: 0;
+	margin-top: 3px;
+}
+
+.settings-shell [data-slot="input"],
+.settings-shell [data-slot="select-trigger"] {
+	min-height: 36px;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.settings-shell [data-slot="button"] {
+	font-size: 13px;
+	line-height: 1.4;
+}
+
+.settings-shell [data-slot="sidebar-group-label"] {
+	height: 28px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+}
+
+.settings-shell [data-slot="sidebar-menu-button"] {
+	height: 32px;
+	font-size: 13px;
+	line-height: 1.4;
+}
+
+.settings-select-menu [data-slot="select-item"] {
+	min-height: 36px;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+@media (max-width: 800px) {
+	.settings-shell .settings-page {
+		padding: 20px;
+		padding-bottom: 48px;
+	}
+
+	.settings-shell [data-slot="card"] {
+		--card-spacing: 20px;
+	}
+}

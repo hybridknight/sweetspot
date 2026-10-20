@@ -1,0 +1,53 @@
+{
+  "name": "electron-trpc",
+  "description": "Electron support for tRPC",
+  "version": "0.7.1-sweetspot.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hybridknight/electron-trpc.git"
+  },
+  "homepage": "https://electron-trpc.dev",
+  "bugs": {
+    "url": "https://github.com/jsonnull/electron-trpc/issues"
+  },
+  "keywords": [
+    "electron",
+    "trpc",
+    "ipc",
+    "rpc",
+    "typescript"
+  ],
+  "exports": {
+    "./main": {
+      "types": "./dist/main.d.ts",
+      "import": "./dist/main.mjs",
+      "require": "./dist/main.cjs"
+    },
+    "./renderer": {
+      "types": "./dist/renderer.d.ts",
+      "import": "./dist/renderer.mjs",
+      "require": "./dist/renderer.cjs"
+    }
+  },
+  "author": "Jason Nall <jsonnull@gmail.com>",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "src",
+    "main.d.ts",
+    "renderer.d.ts",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "@trpc/client": ">10.0.0",
+    "@trpc/server": ">10.0.0",
+    "electron": ">19.0.0"
+  },
+  "dependencies": {
+    "debug": "^4.3.4"
+  },
+  "sweetspotSource": {
+    "commit": "9b533d21f7e97f68ec9eaf3aba5d5df4db6f24be",
+    "url": "https://github.com/hybridknight/electron-trpc"
+  }
+}

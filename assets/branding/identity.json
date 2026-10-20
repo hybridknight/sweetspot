@@ -1,0 +1,21 @@
+{
+  "name": "Sweet Spot",
+  "symbol": "Quiet Aperture",
+  "wordmark": {
+    "family": "Parkinsans",
+    "weight": 600,
+    "style": "normal",
+    "source": "https://fonts.google.com/specimen/Parkinsans"
+  },
+  "tagline": "Your music. Just right.",
+  "descriptor": "Desktop Player for YouTube Music",
+  "colors": {
+    "ink": "#242121",
+    "paper": "#FFF7F0",
+    "accent": "#B52C39",
+    "muted": "#B2A39B",
+    "surface": "#393331",
+    "primaryLight": "#B52C39"
+  },
+  "palette": "Crimson & Ink"
+}

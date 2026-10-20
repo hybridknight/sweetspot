@@ -1,0 +1,6 @@
+/* This WebContentsView is only 40px tall, including its portaled tooltips. */
+html:has([data-toolbar-pane]),
+body:has([data-toolbar-pane]) {
+  height: 100%;
+  overflow: hidden;
+}

@@ -1,0 +1,51 @@
+---
+title: Local data & privacy
+description: Protected local credentials, macOS Keychain prompts, and safe sharing.
+---
+
+Sweet Spot protects paired-client credentials with encryption and your operating system's credential storage. This is a built-in security feature: the app can remember approved integrations while keeping their credentials protected on your device.
+
+Settings such as themes and zoom use readable YAML in your local app profile. Google sign-in sessions are managed separately by the embedded browser.
+
+## Protected local credentials
+
+Paired-client tokens are encrypted with authenticated encryption, which detects changes to the encrypted data. Your operating system protects the encryption keys: macOS uses Keychain and Windows uses its account protection.
+
+Sweet Spot opens pairing storage when you manage paired clients or an enabled integration needs authentication. Thumbnail and release-note caches use temporary keys and do not request keychain access. If protected credential storage is unavailable, pairing changes stop with an error while music playback remains available.
+
+## Why macOS may ask for your password
+
+macOS may display a Keychain or Secret Storage permission dialog when Sweet Spot accesses a protected encryption key. The password is requested by macOS to authorize access to the named keychain item. Sweet Spot does not receive your Mac login password from this dialog.
+
+Using Keychain is the safer way to remember credentials than leaving their encryption key readable beside the data.
+
+Only approve a request when you recognize Sweet Spot, trust the installed build, and expect it to access stored credentials. Enter your Mac password only in the macOS system dialog, never in a Sweet Spot settings field or a web page. You can deny access; features that need the protected credentials may then be unavailable.
+
+### Repeated prompts
+
+Repeated requests can happen when the keychain is locked or macOS no longer recognizes a build as the same app. Electron recommends a valid, consistent app signature to preserve keychain access across updates. Install official releases from the [download page](/) and avoid switching between installed releases and unsigned local builds with the same profile.
+
+Packages made with `pnpm release:pack:mac:local` use the name **Sweet Spot Local** and a separate profile. They retain Keychain encryption and do not open the release’s saved browser sessions or paired-client credentials. Existing release data stays in its original profile; local builds require a separate sign-in.
+
+Local macOS development and preview builds use separate profiles to avoid opening the installed app's protected data. Installed builds retain OS-backed credential protection. A local preview may need its own sign-in.
+
+If prompts continue after installing an official release, report the app version and the name of the requested keychain item. Do not include your password or tokens. There is no need to delete your keychain or disable credential protection as a routine troubleshooting step.
+
+See [Apple's keychain access guidance](https://support.apple.com/en-gb/guide/mac-help/kychn002/26/mac/26) and [Electron's credential storage guidance](https://www.electronjs.org/docs/latest/api/safe-storage) for the platform behavior.
+
+## Protect your profile
+
+The encrypted data and OS-protected key files live in your profile. Treat the profile as private even though those keys are protected. Credential storage complements your operating system's account permissions and disk encryption; it does not make every setting or backup safe to share.
+
+Do not publish a profile backup, browser cookies, authentication tokens, API keys, or custom file paths. Settings can contain an optional lyrics provider key, so inspect them before sharing.
+
+## Sharing a screenshot or bug report
+
+- Hide your avatar, account name, email, and personal playlists.
+- Leave token fields and provider keys hidden.
+- Remove personal file paths and network addresses.
+- Inspect logs before attaching them; they may contain track or diagnostic information.
+
+Documentation screenshots use current UI components in an isolated session with sample content and no real credentials.
+
+See [Authentication](/docs/api/authentication) to revoke a client’s access.

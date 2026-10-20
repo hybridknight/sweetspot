@@ -1,0 +1,50 @@
+---
+title: Welcome to Sweet Spot
+description: Set up your desktop player and make it your own.
+---
+
+Sweet Spot brings YouTube Music to your desktop with a dedicated player, customizable skins, sound controls, synced lyrics, and optional AI assistant connections through MCP.
+
+## Start listening
+
+1. [Install Sweet Spot](/docs/install) for your computer.
+2. Sign in to YouTube Music in the main window.
+3. Open **Settings** to choose your sound and appearance.
+
+## Make it yours
+
+<Cards>
+  <Card title="Player mode & skins" href="/docs/features/player">Seven built-in looks, a playlist, video, and a live spectrum.</Card>
+  <Card title="Equalizer" href="/docs/features/equalizer">Ten bands, ready-made presets, and your own saved sound.</Card>
+  <Card title="Playback & shortcuts" href="/docs/features/playback">Consistent volume, smooth play/pause, song fades, and keyboard controls.</Card>
+  <Card title="Synced lyrics" href="/docs/features/lyrics">Follow timed lyrics and choose your providers.</Card>
+  <Card title="AI assistants & MCP" href="/docs/integrations/mcp">Ask what’s playing, check your queue, and allow your assistant to control playback.</Card>
+  <Card title="Local API" href="/docs/api">Connect your own tools with HTTP and WebSocket events.</Card>
+</Cards>
+
+## Your music, in the conversation
+
+Connect a desktop AI assistant through **MCP (Model Context Protocol)** to keep your music close while you work. Try “What’s playing in Sweet Spot?” or “What’s coming up in my queue?” Enable playback control to ask it to pause, skip a song, change volume, or queue a song from a YouTube link.
+
+Start at **Settings → AI & MCP**. The guided setup helps you create a client and copy its connection config. The server is off by default, runs only on your computer, and requires a client token. Assistants have read-only access until you allow playback control. Sweet Spot must stay open, and music search is not available.
+
+[Connect your AI assistant →](/docs/integrations/mcp)
+
+## Find a setting
+
+| In Settings | What you will find |
+| --- | --- |
+| Generic | Startup, close-to-tray, hardware acceleration, updates |
+| Player → General | Playback, shortcuts, shared links, video preferences |
+| Player → Equalizer | Frequency bands, presets, automatic headroom |
+| Player → Lyrics | Timed lyrics, providers, highlighting |
+| Appearance → Player skins | Skin gallery, customization, import/export |
+| Appearance → Themes | Styles for the full YouTube Music view |
+| Appearance → Display | YouTube Music zoom |
+| AI & MCP | AI assistant setup, local MCP server, optional playback control |
+| Local API | HTTP server and port |
+| Access & pairing | Client tokens and revoking access |
+
+Sweet Spot uses YouTube Music for your library and playback. Account availability and music access follow YouTube Music. Experimental Chromecast support is described in [playback](/docs/features/playback).
+
+For development, see [Build from source](/docs/build). The desktop app and docs use CC0-1.0; the browser userscript and third-party assets retain their respective licenses.

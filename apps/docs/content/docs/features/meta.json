@@ -1,0 +1,17 @@
+{
+  "title": "Listening & appearance",
+  "pages": [
+    "index",
+    "themes",
+    "player",
+    "equalizer",
+    "playback",
+    "lyrics",
+    "tray-view",
+    "display",
+    "shared-links",
+    "userscript",
+    "ui-enhancements"
+  ],
+  "defaultOpen": true
+}

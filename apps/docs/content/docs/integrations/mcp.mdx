@@ -1,0 +1,83 @@
+---
+title: AI assistants & MCP
+description: Connect your AI assistant to Sweet Spot with a guided local MCP setup.
+---
+
+Sweet Spot can act as a **Model Context Protocol (MCP) server**, giving a desktop AI assistant access to the music player already running on your computer. It is experimental and off by default.
+
+## Things to try
+
+- **Stay in your flow:** “What’s playing in Sweet Spot?” Get the song, artist, and playback state without switching windows.
+- **Understand your listening session:** “What’s coming up in my queue?” Your assistant can summarize the existing queue.
+- **Hands-free controls:** “Pause the music” or “Set the volume to 25%.” Enable playback control first.
+- **Listen to a shared song:** Give your assistant a YouTube song link and ask it to play or queue it. The assistant extracts the video ID from the link.
+- **Return to a moment:** “Seek to 45 seconds in this song.”
+
+The server does not search the YouTube Music catalog, generate playlists from a mood, fetch lyrics, or download audio. An assistant must have a real video or playlist ID to play or queue music. It must not invent IDs. Multi-step routines depend on your assistant; the server does not schedule future actions.
+
+## Connect in three steps
+
+1. Open **Settings → AI & MCP**, then turn on **Enable MCP server**. Wait for **Ready to connect**. Keep Sweet Spot open.
+2. Enter a name for your assistant and choose **Create client**. Select that client, choose a config format, and choose **Copy config with token**.
+3. Paste the config into your assistant’s MCP configuration and enable the server. Sign in to YouTube Music, start a song, then ask **“What’s playing in Sweet Spot?”**
+
+For Cursor, use `.cursor/mcp.json`. For VS Code, choose its format in Sweet Spot and paste into `.vscode/mcp.json`. The settings page produces the appropriate `mcpServers` or `servers` wrapper. Exact client menus can vary with client versions.
+
+The copied config includes a private bearer token. Keep it out of shared repositories. Create a separate client for each assistant. Remove access at **Settings → Access & pairing → Revoke**. Revocation applies to subsequent requests immediately.
+
+### Manual configuration
+
+Use a desktop client that supports **Streamable HTTP** and a custom `Authorization` header. The default URL is `http://127.0.0.1:13092/mcp`.
+
+```json
+{
+  "mcpServers": {
+    "sweetspot": {
+      "url": "http://127.0.0.1:13092/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_CLIENT_TOKEN"
+      }
+    }
+  }
+}
+```
+
+This example uses the `mcpServers` format. Replace the placeholder with a token from **Access & pairing**, or use the app’s copy button. For VS Code, use `servers` instead of `mcpServers` and add `"type": "http"` to the server entry.
+
+Cloud-only assistants cannot reach a server bound to your computer’s loopback interface. Clients that only support stdio, legacy SSE, or OAuth discovery are not directly compatible. This server uses manually configured bearer tokens, not an OAuth authorization flow.
+
+## Choose what your assistant can do
+
+**Read-only is the default.** Paired clients can read your current song, playback state, and queue. Turn on **Allow playback control** to enable the five additional tools below. This permission applies to every paired client using MCP. Reconnect your assistant after changing it so its tool list refreshes. The server also checks control permission when executing a command.
+
+| Tool | Purpose | Requires playback control |
+| --- | --- | --- |
+| `get_now_playing` | Current song and playback state | No |
+| `get_queue` | Current queue | No |
+| `control_playback` | Play, pause, next, previous | Yes |
+| `set_volume` | Set volume from 0 to 100 | Yes |
+| `seek_to` | Seek to an absolute position in seconds | Yes |
+| `play_song` | Play a known video ID immediately | Yes |
+| `add_to_queue` | Append exactly one video or playlist ID | Yes |
+
+Resource-aware clients can read `sweetspot://player/now-playing` and `sweetspot://player/queue`. Clients with prompt support can use `listening-assistant` to summarize the session. Resources are snapshots; live subscriptions are not available.
+
+## Local access and privacy
+
+The server listens only on `127.0.0.1`, uses a separate port from the Local API, validates Host and Origin headers, and always requires a paired-client token. Turning off authorization for the Local API does not remove MCP authentication. You do not need to enable the Local API to use MCP.
+
+Your assistant receives song and queue metadata. How it handles that data depends on the assistant you connect. The MCP server itself does not send your listening session to an AI service. Metadata is data, not instructions for your assistant.
+
+## Troubleshooting
+
+| Symptom | What to do |
+| --- | --- |
+| Off or connection refused | Enable MCP and keep Sweet Spot open on the same computer as the client. |
+| Port in use | Change the MCP port to an unused port from 9999–39999, different from the Local API port. Copy the config again. |
+| Unauthorized / 401 | Choose an existing paired client and copy its config again. Revoked tokens stop working. |
+| Origin / Host rejected / 403 | Use the loopback URL from the app in a desktop client. Web origins on other ports are intentionally rejected. |
+| Only two tools appear | Enable Allow playback control, then reconnect the assistant. |
+| Player unavailable or empty song | Sign in to YouTube Music, wait for it to load, and start a song manually. |
+| GET returns 405 | Expected: this stateless transport accepts MCP messages over POST, with JSON responses. |
+
+Protocol implementation follows the [official MCP TypeScript SDK](https://ts.sdk.modelcontextprotocol.io/server) using stateless Streamable HTTP. See also the [transport specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports).

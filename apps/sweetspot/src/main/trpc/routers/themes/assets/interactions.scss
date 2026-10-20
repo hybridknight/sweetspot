@@ -1,0 +1,314 @@
+// Upstream components set their own font families. Inheritance alone leaves
+// titles, metadata, controls and dialogs in different fonts (especially Terminal).
+html,
+html * {
+	font-family: var(--sweetspot-theme-font) !important;
+}
+
+// Theme the painted control, not its custom-element wrapper. Keep the same
+// silhouette through hover, focus, pressed and disabled states.
+html
+	:is(
+		.ytSpecButtonShapeNextHost,
+		[class*="yt-spec-button-shape-next--"],
+		yt-icon-button,
+		tp-yt-paper-icon-button,
+		tp-yt-paper-button,
+		ytmusic-play-button-renderer,
+		.content-wrapper.ytmusic-play-button-renderer,
+		.av-toggle.ytmusic-av-toggle,
+		.song-button.ytmusic-av-toggle,
+		.video-button.ytmusic-av-toggle,
+		ytmusic-chip-cloud-chip-renderer a,
+		ytmusic-player.ytmusic-player-page,
+		.left-items.ytmusic-player-queue-item,
+		.thumbnail.ytmusic-player-queue-item,
+		.image.ytmusic-player-bar,
+		.icon.ytmusic-play-button-renderer,
+		yt-img-shadow.ytmusic-responsive-list-item-renderer,
+		yt-img-shadow.ytmusic-two-row-item-renderer,
+		#hover-time-info.ytmusic-player-bar
+	) {
+	border-radius: var(--sweetspot-theme-radius) !important;
+}
+html :is(yt-icon-button, tp-yt-paper-icon-button) > button {
+	border-radius: inherit !important;
+	color: inherit;
+}
+html :is(.ytSpecTouchFeedbackShapeHover, .ytSpecTouchFeedbackShapeFill, yt-interaction, yt-interaction .fill, yt-interaction .stroke) {
+	border-radius: inherit !important;
+}
+
+// Search has three nested painted layers upstream. Let only the outer field
+// draw its outline so square wrapper borders cannot peek past rounded corners.
+html ytmusic-search-box {
+	position: relative;
+	background: transparent !important;
+	border: 0 !important;
+	box-shadow: none !important;
+}
+html ytmusic-search-box :is(.search-container, .search-box, .suggestion-container) {
+	border-radius: var(--sweetspot-theme-radius) !important;
+}
+html ytmusic-search-box .search-container {
+	background: var(--sweetspot-theme-elevated) !important;
+	border: 0 !important;
+	box-shadow: inset 0 0 0 1px var(--sweetspot-theme-border) !important;
+	overflow: visible !important;
+	transition: box-shadow 150ms ease;
+}
+html ytmusic-search-box:focus-within .search-container {
+	box-shadow: inset 0 0 0 1px var(--sweetspot-theme-accent) !important;
+}
+html ytmusic-search-box .search-box {
+	background: transparent !important;
+	border: 0 !important;
+	box-shadow: none !important;
+}
+html ytmusic-search-box input {
+	min-width: 0;
+	background: transparent !important;
+	border: 0 !important;
+	outline: none !important;
+	box-shadow: none !important;
+}
+html ytmusic-search-box .search-button {
+	border: 0 !important;
+	box-shadow: none !important;
+}
+// Current Music nests this list inside search-container; older layouts use
+// suggestion-container. Both must paint their own opaque, bounded surface.
+html ytmusic-search-box :is(#suggestion-list, .suggestion-container) {
+	top: calc(100% + 8px) !important;
+	left: 0 !important;
+	right: 0 !important;
+	width: auto !important;
+	margin: 0 !important;
+	box-sizing: border-box;
+	background: var(--sweetspot-theme-surface) !important;
+	border: 1px solid var(--sweetspot-theme-border) !important;
+	border-radius: var(--sweetspot-theme-radius) !important;
+	box-shadow: 0 12px 32px #00000026;
+	overflow: hidden;
+}
+html ytmusic-search-box #suggestion-list {
+	padding: 6px !important;
+}
+html ytmusic-search-box .suggestion-container #suggestion-list {
+	position: static !important;
+	border: 0 !important;
+	box-shadow: none !important;
+	margin: 0 !important;
+}
+html ytmusic-search-suggestions-section {
+	background: transparent !important;
+}
+html ytmusic-search-suggestion {
+	min-height: 48px;
+	background: transparent !important;
+	border-radius: var(--sweetspot-theme-radius);
+}
+html ytmusic-search-suggestion:is(:hover, :focus-within, .hover, .selected-suggestion),
+html ytmusic-search-suggestions-section #suggestions > :is(:hover, :focus-within, .hover, .selected-suggestion) {
+	background: var(--sweetspot-theme-elevated) !important;
+	box-shadow: none;
+}
+html ytmusic-search-suggestion :is(yt-icon-button, tp-yt-paper-icon-button):focus-visible,
+html ytmusic-search-suggestion button:focus-visible {
+	outline: 2px solid var(--sweetspot-theme-accent);
+	outline-offset: -2px;
+}
+
+// Explicit foreground/background pairs prevent white icons disappearing on
+// hover. The upstream play button has a separate active-background variable.
+html ytmusic-play-button-renderer {
+	--ytmusic-play-button-active-background-color: var(--sweetspot-theme-accent) !important;
+}
+html ytmusic-play-button-renderer .content-wrapper,
+html ytmusic-player-bar .play-pause-button {
+	background: var(--sweetspot-theme-accent) !important;
+	color: var(--sweetspot-theme-on-accent) !important;
+}
+html ytmusic-player-bar :is(yt-icon-button, tp-yt-paper-icon-button):hover:not(.play-pause-button) {
+	background: var(--sweetspot-theme-elevated) !important;
+	color: var(--sweetspot-theme-text) !important;
+}
+html ytmusic-player-bar :is(yt-icon-button, tp-yt-paper-icon-button):hover:not(.play-pause-button) :is(yt-icon, .ytIconWrapperHost) {
+	color: var(--sweetspot-theme-text) !important;
+}
+html ytmusic-player-bar .play-pause-button:hover,
+html ytmusic-play-button-renderer:hover:not([disabled], [aria-disabled="true"]) .content-wrapper {
+	box-shadow: inset 0 0 0 2px var(--sweetspot-theme-on-accent);
+}
+html .ytSpecButtonShapeNextHost:not(:disabled, [disabled], [aria-disabled="true"]):hover {
+	box-shadow: inset 0 0 0 1px var(--sweetspot-theme-text);
+}
+html .ytSpecButtonShapeNextHost.ytSpecButtonShapeNextFilled:not(:disabled, [disabled], [aria-disabled="true"]):hover {
+	box-shadow: inset 0 0 0 1px var(--sweetspot-theme-on-accent);
+}
+html ytmusic-chip-cloud-chip-renderer a:hover {
+	box-shadow: inset 0 0 0 1px currentColor;
+}
+html ytmusic-av-toggle :is(.song-button, .video-button):hover:not(:disabled) {
+	box-shadow: inset 0 0 0 1px currentColor;
+}
+// Disabled modes keep their selected fill and never acquire a hover ring.
+html ytmusic-av-toggle[toggle-disabled] :is(.song-button, .video-button):hover {
+	box-shadow: none;
+}
+
+// The current seek rail uses a background IMAGE as well as a color. Replacing
+// only background-color leaves YouTube's red/pink gradient on top of the accent.
+html ytmusic-player-bar :is(#progress-bar, #volume-slider, #expand-volume-slider) {
+	--paper-slider-active-color: var(--sweetspot-theme-accent) !important;
+	--paper-slider-knob-color: var(--sweetspot-theme-accent) !important;
+	--paper-slider-knob-start-color: var(--sweetspot-theme-accent) !important;
+	--paper-slider-container-color: var(--sweetspot-theme-border) !important;
+}
+html ytmusic-player-bar :is(#progress-bar, #volume-slider, #expand-volume-slider) :is(#primaryProgress, #sliderKnobInner) {
+	background: var(--sweetspot-theme-accent) !important;
+}
+
+// Queue and track overflow menus share service, toggle, download and navigation
+// renderers. Their labels use literal white upstream, including focused items.
+html :is(ytmusic-menu-popup-renderer, ytmusic-multi-page-menu-renderer, yt-multi-page-menu-renderer) :is(yt-formatted-string, yt-icon, .ytIconWrapperHost, a) {
+	color: var(--sweetspot-theme-text) !important;
+	--yt-endpoint-color: var(--sweetspot-theme-text);
+	--yt-endpoint-hover-color: var(--sweetspot-theme-text);
+}
+html
+	:is(ytmusic-menu-service-item-renderer, ytmusic-toggle-menu-service-item-renderer, ytmusic-menu-navigation-item-renderer, ytmusic-menu-service-item-download-renderer):is(
+		:hover,
+		:focus,
+		:focus-within,
+		[focused],
+		.iron-selected
+	) {
+	background: var(--sweetspot-theme-elevated) !important;
+}
+// Only the outer popup draws a border; nesting a bordered listbox creates a
+// second frame. Clip the popup contents to its own corners, including scrolling.
+html ytmusic-menu-popup-renderer {
+	overflow: hidden;
+}
+// Upstream row dividers wrap around rounded corners, drawing a stray U shape.
+// Spacing separates rows; the active track keeps its accent edge.
+html ytmusic-player-queue-item {
+	border: 0 !important;
+}
+html tp-yt-paper-listbox.ytmusic-menu-popup-renderer {
+	border: 0;
+	border-radius: inherit;
+	box-shadow: none;
+}
+
+// Popup destinations: save queue/track, new playlist, share and song credits.
+html :is(tp-yt-paper-dialog, ytmusic-dialog) :is(yt-formatted-string, h2, h3, label, input, textarea, yt-icon, .ytListItemViewModelTitle) {
+	color: var(--sweetspot-theme-text) !important;
+	--yt-endpoint-color: var(--sweetspot-theme-text);
+}
+html :is(tp-yt-paper-dialog, ytmusic-dialog) :is(input, textarea) {
+	caret-color: var(--sweetspot-theme-accent);
+}
+html :is(tp-yt-paper-dialog, ytmusic-dialog) :is(input, textarea)::placeholder {
+	color: var(--sweetspot-theme-muted) !important;
+}
+html :is(ytmusic-playlist-add-to-option-renderer, ytmusic-playlist-add-to-option-renderer a):is(:hover, :focus-visible) {
+	background: var(--sweetspot-theme-elevated) !important;
+}
+
+// All scrollable queue/menu paths use the same radius, including the horizontal
+// filter list. Slider knobs, avatars and circular badges keep their native shape.
+html,
+html * {
+	// Standard scrollbar-color takes precedence over WebKit's thumb geometry.
+	scrollbar-color: auto !important;
+}
+html *::-webkit-scrollbar-thumb {
+	border-radius: var(--sweetspot-theme-radius) !important;
+	background-color: var(--sweetspot-theme-muted) !important;
+}
+html *::-webkit-scrollbar-thumb:hover {
+	background-color: var(--sweetspot-theme-text) !important;
+}
+html *::-webkit-scrollbar-track {
+	background-color: var(--sweetspot-theme-background);
+}
+
+// The playlist editor is mounted directly under body, outside ytmusic-app.
+// Its child form has an opaque literal dark background, independent of the shell.
+html :is(tp-yt-paper-dialog, ytmusic-dialog, ytmusic-add-to-playlist-renderer, ytmusic-playlist-form) {
+	background: var(--sweetspot-theme-surface) !important;
+	color: var(--sweetspot-theme-text) !important;
+	border-radius: var(--sweetspot-theme-radius) !important;
+}
+html :is(tp-yt-paper-dialog, ytmusic-dialog) {
+	overflow: hidden;
+}
+html ytmusic-dialog tp-yt-paper-listbox {
+	background: var(--sweetspot-theme-surface) !important;
+	color: var(--sweetspot-theme-text) !important;
+	border-radius: var(--sweetspot-theme-radius) !important;
+}
+html ytmusic-dialog :is(.dropdown-trigger, tp-yt-paper-item) {
+	// The trigger's prefix icon sits behind it. An opaque trigger hides the icon.
+	background: transparent !important;
+	color: var(--sweetspot-theme-text) !important;
+}
+html ytmusic-dropdown-item-renderer {
+	background: var(--sweetspot-theme-surface) !important;
+	color: var(--sweetspot-theme-text) !important;
+}
+html ytmusic-dropdown-item-renderer :is(.label, yt-icon) {
+	color: var(--sweetspot-theme-text) !important;
+}
+html ytmusic-dialog .ytSpecButtonShapeNextHost.ytSpecButtonShapeNextMono {
+	color: var(--sweetspot-theme-text) !important;
+	border-color: var(--sweetspot-theme-border) !important;
+}
+html ytmusic-dialog .ytSpecButtonShapeNextHost:is(.ytSpecButtonShapeNextMono, .ytSpecButtonShapeNextCallToAction).ytSpecButtonShapeNextFilled {
+	background-color: var(--sweetspot-theme-accent) !important;
+	color: var(--sweetspot-theme-on-accent) !important;
+}
+html :is(tp-yt-paper-dialog, ytmusic-dialog) .ytSpecButtonShapeNextHost.ytSpecButtonShapeNextFilled :is(yt-icon, .ytIconWrapperHost) {
+	color: var(--sweetspot-theme-on-accent) !important;
+}
+html ytmusic-dialog ytmusic-dropdown-item-renderer .description {
+	color: var(--sweetspot-theme-muted) !important;
+}
+html ytmusic-dropdown-item-renderer:is(:hover, :focus, [focused], [selected], .iron-selected) {
+	background: var(--sweetspot-theme-elevated) !important;
+}
+html :is(tp-yt-paper-dialog, ytmusic-dialog) :is(button, yt-img-shadow),
+html #bar.yt-copy-link-renderer {
+	border-radius: var(--sweetspot-theme-radius) !important;
+}
+html #bar.yt-copy-link-renderer {
+	background: var(--sweetspot-theme-elevated) !important;
+	border-color: var(--sweetspot-theme-border) !important;
+}
+html #share-url.yt-copy-link-renderer {
+	background: transparent !important;
+	color: var(--sweetspot-theme-text) !important;
+}
+
+// Playlist/album actions paint their background on the renderer wrapper as
+// well as on the inner button. Shape both layers, including hover feedback.
+html
+	.action-buttons.ytmusic-responsive-header-renderer
+	> :is(ytmusic-download-playlist-button-renderer, ytmusic-menu-renderer, ytmusic-toggle-button-renderer, ytmusic-button-renderer, yt-button-renderer),
+html ytmusic-responsive-header-renderer ytmusic-thumbnail-renderer img,
+html .fullscreen-art.ytmusic-responsive-header-renderer {
+	border-radius: var(--sweetspot-theme-radius) !important;
+}
+html
+	:is(
+		yt-img-shadow.ytmusic-responsive-list-item-renderer,
+		yt-img-shadow.ytmusic-two-row-item-renderer,
+		.thumbnail.ytmusic-player-queue-item,
+		tp-yt-paper-dialog yt-img-shadow,
+		ytmusic-dialog yt-img-shadow
+	)
+	> img {
+	border-radius: inherit !important;
+}

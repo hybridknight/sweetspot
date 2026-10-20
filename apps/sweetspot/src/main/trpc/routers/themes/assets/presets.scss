@@ -1,0 +1,398 @@
+// All bundled presets share behavior and page coverage; their tokens set the finish.
+// Use page-specific selectors so album images and video overlays keep their colors.
+ytmusic-app {
+	font-family: var(--sweetspot-theme-font);
+	accent-color: var(--sweetspot-theme-accent);
+	scrollbar-color: var(--sweetspot-theme-muted) var(--sweetspot-theme-background);
+	--yt-endpoint-color: var(--sweetspot-theme-text);
+	--yt-endpoint-hover-color: var(--sweetspot-theme-accent);
+	--yt-endpoint-visited-color: var(--sweetspot-theme-text);
+}
+
+ytmusic-nav-bar,
+ytmusic-guide-renderer,
+#nav-bar-background.ytmusic-app-layout,
+#guide-wrapper.ytmusic-app,
+#mini-guide-background.ytmusic-app-layout {
+	background: var(--sweetspot-theme-surface) !important;
+	color: var(--sweetspot-theme-text);
+}
+ytmusic-nav-bar {
+	border-bottom: 1px solid var(--sweetspot-theme-border);
+}
+#guide-wrapper.ytmusic-app {
+	border-right: 1px solid var(--sweetspot-theme-border);
+}
+
+// Home, Explore, Library, search, playlist, album and artist page foundations.
+ytmusic-browse-response,
+ytmusic-search-page,
+ytmusic-library-landing-page-renderer {
+	background-color: var(--sweetspot-theme-background);
+}
+.background-gradient.ytmusic-browse-response,
+.background-gradient.ytmusic-immersive-carousel-shelf-renderer,
+.background-gradient.ytmusic-player-page {
+	background-image: linear-gradient(to bottom, var(--sweetspot-theme-surface), var(--sweetspot-theme-background)) !important;
+	background-repeat: no-repeat !important;
+	background-size: 100% 100% !important;
+}
+yt-formatted-string:is(.subtitle, .second-subtitle, .strapline, .description),
+.autoplay.ytmusic-player-queue .subtitle.ytmusic-player-queue,
+.time-info.ytmusic-player-bar {
+	color: var(--sweetspot-theme-muted) !important;
+	--yt-endpoint-color: var(--sweetspot-theme-muted);
+	--yt-endpoint-hover-color: var(--sweetspot-theme-text);
+	--yt-endpoint-visited-color: var(--sweetspot-theme-muted);
+	opacity: 1;
+}
+
+// Search, suggestions and empty states need opaque, readable light-mode surfaces.
+ytmusic-search-box {
+	color: var(--sweetspot-theme-text) !important;
+	--ytmusic-search-background: var(--sweetspot-theme-elevated);
+	--ytmusic-search-suggestion-focus-active-background: var(--sweetspot-theme-elevated);
+}
+ytmusic-search-box input {
+	color: var(--sweetspot-theme-text) !important;
+	caret-color: var(--sweetspot-theme-accent);
+}
+ytmusic-search-box input::placeholder {
+	color: var(--sweetspot-theme-muted) !important;
+	opacity: 1;
+}
+ytmusic-search-suggestions-section,
+.suggestion-container.ytmusic-search-box {
+	background: var(--sweetspot-theme-surface) !important;
+	color: var(--sweetspot-theme-text);
+}
+
+// Suggestions define their own overlay colors, independent of the search input.
+// Keep history, live completions and their emphasized query fragments readable.
+ytmusic-search-suggestion {
+	--ytmusic-overlay-text-primary: var(--sweetspot-theme-text);
+	--ytmusic-overlay-text-secondary: var(--sweetspot-theme-text);
+	--yt-endpoint-color: var(--sweetspot-theme-text);
+	--yt-endpoint-hover-color: var(--sweetspot-theme-text);
+	--yt-endpoint-visited-color: var(--sweetspot-theme-text);
+	color: var(--sweetspot-theme-text) !important;
+}
+ytmusic-search-suggestion :is(yt-formatted-string, yt-formatted-string span, yt-formatted-string a, yt-icon, button) {
+	color: var(--sweetspot-theme-text) !important;
+}
+ytmusic-search-suggestions-section #suggestions > :is(:hover, :focus-within, .hover, .selected-suggestion) {
+	background: var(--sweetspot-theme-elevated) !important;
+	box-shadow: inset 3px 0 var(--sweetspot-theme-accent);
+}
+
+// Explore navigation tiles also hard-code white text and translucent white
+// backgrounds. Pair opaque palette colors for every preset and both layouts.
+html ytmusic-app ytmusic-navigation-button-renderer button {
+	background: var(--sweetspot-theme-surface) !important;
+	color: var(--sweetspot-theme-text) !important;
+	border-radius: var(--sweetspot-theme-radius) !important;
+}
+html ytmusic-app ytmusic-navigation-button-renderer :is(yt-formatted-string, yt-icon),
+html ytmusic-grid-header-renderer yt-formatted-string[role="heading"] {
+	color: var(--sweetspot-theme-text) !important;
+}
+html ytmusic-app ytmusic-navigation-button-renderer button:hover:not(:disabled, [disabled], [aria-disabled="true"]) {
+	background: var(--sweetspot-theme-elevated) !important;
+}
+// The stripe is category identity and remains visible while hovering.
+html ytmusic-app ytmusic-navigation-button-renderer[button-style="STYLE_SOLID"] button.ytmusic-navigation-button-renderer:hover {
+	border-left-color: var(--ytmusic-navigation-button-left-stripe-color) !important;
+}
+
+// Chips use literal white/black in the upstream stylesheet; override both states.
+ytmusic-app ytmusic-chip-cloud-chip-renderer a.ytmusic-chip-cloud-chip-renderer {
+	background-color: var(--sweetspot-theme-elevated) !important;
+	color: var(--sweetspot-theme-text) !important;
+	border: 1px solid var(--sweetspot-theme-border);
+	border-radius: var(--sweetspot-theme-radius);
+}
+ytmusic-app ytmusic-chip-cloud-chip-renderer:is([selected], [is-selected], .iron-selected) a.ytmusic-chip-cloud-chip-renderer {
+	background-color: var(--sweetspot-theme-accent) !important;
+	color: var(--sweetspot-theme-on-accent) !important;
+	border-color: var(--sweetspot-theme-accent);
+}
+ytmusic-guide-entry-renderer {
+	border-radius: var(--sweetspot-theme-radius);
+}
+ytmusic-guide-entry-renderer:is([active], [selected]),
+ytmusic-guide-entry-renderer:hover {
+	background-color: var(--sweetspot-theme-elevated) !important;
+}
+ytmusic-guide-entry-renderer[active] :is(yt-icon, .title) {
+	color: var(--sweetspot-theme-accent);
+}
+// Search draws its focus ring on the rounded field wrapper.
+html :is(button, a, input, [tabindex]):focus-visible:not(input.ytmusic-search-box) {
+	outline: 2px solid var(--sweetspot-theme-accent) !important;
+	outline-offset: 3px;
+}
+
+// Modern button views coexist with legacy paper buttons.
+ytmusic-app :is(.yt-spec-button-shape-next--mono.yt-spec-button-shape-next--filled, .yt-spec-button-shape-next--call-to-action.yt-spec-button-shape-next--filled) {
+	background: var(--sweetspot-theme-accent) !important;
+	color: var(--sweetspot-theme-on-accent) !important;
+}
+ytmusic-app :is(.yt-spec-button-shape-next--mono.yt-spec-button-shape-next--tonal, .yt-spec-button-shape-next--mono.yt-spec-button-shape-next--outline) {
+	color: var(--sweetspot-theme-text) !important;
+	background-color: var(--sweetspot-theme-elevated);
+	border-color: var(--sweetspot-theme-border);
+}
+ytmusic-app .yt-spec-button-shape-next--mono.yt-spec-button-shape-next--text {
+	color: var(--sweetspot-theme-text) !important;
+}
+
+// Lists retain readable metadata; hovering never changes row geometry.
+ytmusic-responsive-list-item-renderer,
+ytmusic-player-queue-item {
+	border-radius: var(--sweetspot-theme-radius);
+	opacity: 1;
+}
+ytmusic-responsive-list-item-renderer:hover,
+ytmusic-player-queue-item:hover:not([selected]) {
+	background-color: var(--sweetspot-theme-elevated) !important;
+}
+ytmusic-player-queue-item[selected] {
+	background-color: var(--sweetspot-theme-elevated) !important;
+	box-shadow: inset 3px 0 var(--sweetspot-theme-accent);
+}
+yt-formatted-string.ytmusic-player-queue-item {
+	color: var(--sweetspot-theme-text);
+}
+
+// Match rounding across real artwork, without clipping whole cards or titles.
+.image.ytmusic-player-bar,
+#song-image.ytmusic-player,
+.song-media-controls.ytmusic-player,
+ytmusic-player.ytmusic-player-page,
+.thumbnail.ytmusic-player-queue-item,
+.thumbnail-overlay,
+yt-img-shadow.ytmusic-two-row-item-renderer,
+yt-img-shadow.ytmusic-responsive-list-item-renderer,
+.image.ytmusic-detail-header-renderer {
+	border-radius: var(--sweetspot-theme-radius);
+}
+ytmusic-two-row-item-renderer.ytmusic-carousel {
+	border-radius: 0;
+	overflow: visible;
+}
+
+// The persistent player, queue, lyrics, related tracks and comments share a surface.
+ytmusic-player-page.ytmusic-app,
+#player-bar-background.ytmusic-app-layout {
+	background-color: var(--sweetspot-effects-surface, var(--sweetspot-theme-surface)) !important;
+	color: var(--sweetspot-theme-text);
+}
+ytmusic-player-bar {
+	border-top: 1px solid var(--sweetspot-theme-border);
+}
+yt-icon-button.ytmusic-player-bar,
+tp-yt-paper-icon-button.ytmusic-player-bar {
+	color: var(--sweetspot-theme-text);
+}
+#progress-bar.ytmusic-player-bar,
+#volume-slider.ytmusic-player-bar {
+	--paper-slider-active-color: var(--sweetspot-theme-accent);
+	--paper-slider-knob-color: var(--sweetspot-theme-accent);
+	--paper-slider-container-color: var(--sweetspot-theme-border);
+}
+#progress-bar.ytmusic-player-bar {
+	--yt-spec-static-brand-red: var(--sweetspot-theme-accent);
+}
+ytmusic-player-bar .play-pause-button {
+	color: var(--sweetspot-theme-on-accent) !important;
+	background: var(--sweetspot-theme-accent);
+	border-radius: var(--sweetspot-theme-radius);
+}
+
+// Popovers must remain opaque enough for text even with artwork behind them.
+tp-yt-paper-dialog,
+tp-yt-paper-listbox.ytmusic-menu-popup-renderer,
+ytmusic-menu-popup-renderer,
+ytmusic-multi-page-menu-renderer,
+yt-multi-page-menu-renderer,
+ytmusic-dialog {
+	background-color: var(--sweetspot-effects-surface, var(--sweetspot-theme-surface)) !important;
+	color: var(--sweetspot-theme-text);
+	border: 1px solid var(--sweetspot-theme-border);
+	border-radius: var(--sweetspot-theme-radius);
+	box-shadow: 0 12px 36px #0003;
+}
+ytmusic-menu-service-item-renderer:hover,
+ytmusic-menu-navigation-item-renderer:hover {
+	background: var(--sweetspot-theme-elevated);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	ytmusic-app :is(ytmusic-player-queue-item, ytmusic-responsive-list-item-renderer, ytmusic-guide-entry-renderer) {
+		transition: none !important;
+	}
+}
+@media (prefers-reduced-transparency: reduce) {
+	ytmusic-app {
+		--sweetspot-effects-surface: var(--sweetspot-theme-surface);
+	}
+}
+
+// Legacy controls still contain literal colors, even after baseline tokens change.
+ytmusic-app :is(ytmusic-button-renderer, ytmusic-menu-renderer) {
+	color: var(--sweetspot-theme-text);
+}
+ytmusic-app ytmusic-button-renderer :is(tp-yt-paper-button, button),
+ytmusic-app ytmusic-toggle-button-renderer :is(tp-yt-paper-button, button),
+ytmusic-app ytmusic-carousel-shelf-renderer > #header :is(button, tp-yt-paper-button) {
+	color: var(--sweetspot-theme-text) !important;
+	border-color: var(--sweetspot-theme-border);
+}
+ytmusic-app ytmusic-button-renderer.style-primary :is(tp-yt-paper-button, button),
+ytmusic-app ytmusic-play-button-renderer {
+	--ytmusic-play-button-icon-color: var(--sweetspot-theme-on-accent) !important;
+	--ytmusic-play-button-background-color: var(--sweetspot-theme-accent) !important;
+}
+ytmusic-app ytmusic-button-renderer.style-primary :is(tp-yt-paper-button, button) {
+	color: var(--sweetspot-theme-on-accent) !important;
+	background-color: var(--sweetspot-theme-accent) !important;
+}
+ytmusic-app :is(ytmusic-nav-bar, ytmusic-guide-renderer, ytmusic-menu-renderer, ytmusic-menu-popup-renderer, ytmusic-player-bar) :is(.ytIconWrapperHost, yt-icon) {
+	color: var(--sweetspot-theme-text);
+}
+ytmusic-app ytmusic-player-bar .play-pause-button :is(.ytIconWrapperHost, yt-icon) {
+	color: var(--sweetspot-theme-on-accent) !important;
+}
+
+// Current Music button views use camel-case classes; retain legacy selectors above.
+ytmusic-app .ytSpecButtonShapeNextHost.ytSpecButtonShapeNextMono {
+	color: var(--sweetspot-theme-text) !important;
+	border-color: var(--sweetspot-theme-border) !important;
+}
+ytmusic-app .ytSpecButtonShapeNextHost.ytSpecButtonShapeNextMono:is(.ytSpecButtonShapeNextTonal, .ytSpecButtonShapeNextOutline) {
+	background-color: var(--sweetspot-theme-elevated) !important;
+}
+ytmusic-app .ytSpecButtonShapeNextHost:is(.ytSpecButtonShapeNextMono, .ytSpecButtonShapeNextCallToAction).ytSpecButtonShapeNextFilled {
+	color: var(--sweetspot-theme-on-accent) !important;
+	background-color: var(--sweetspot-theme-accent) !important;
+}
+ytmusic-app .ytSpecButtonShapeNextHost :is(.ytIconWrapperHost, yt-icon) {
+	color: inherit;
+}
+
+// Hero artwork stays visible at the top; text sits on the theme's opaque base.
+.gradient-container.ytmusic-immersive-header-renderer {
+	background-image: linear-gradient(to top, var(--sweetspot-theme-background) 35%, var(--sweetspot-theme-hero-scrim) 70%, transparent) !important;
+}
+.card-container.ytmusic-card-shelf-renderer {
+	background: var(--sweetspot-theme-surface) !important;
+	border: 1px solid var(--sweetspot-theme-border);
+	border-radius: var(--sweetspot-theme-radius);
+	overflow: hidden;
+}
+.immersive-background.ytmusic-card-shelf-renderer {
+	opacity: 0.08;
+}
+.immersive-background.ytmusic-card-shelf-renderer::before {
+	background-image: none !important;
+}
+.title.ytmusic-carousel-shelf-basic-header-renderer {
+	color: var(--sweetspot-theme-text) !important;
+	--yt-endpoint-color: var(--sweetspot-theme-text);
+	--yt-endpoint-hover-color: var(--sweetspot-theme-accent);
+}
+
+// Search tabs and player tabs use literal overlay colors in the upstream CSS.
+ytmusic-app tp-yt-paper-tab {
+	color: var(--sweetspot-theme-muted) !important;
+	--paper-tab-ink: var(--sweetspot-theme-accent);
+}
+ytmusic-app tp-yt-paper-tab.iron-selected {
+	color: var(--sweetspot-theme-accent) !important;
+}
+ytmusic-app tp-yt-paper-tabs {
+	--paper-tabs-selection-bar-color: var(--sweetspot-theme-accent);
+}
+yt-formatted-string:is(.byline, .duration).ytmusic-player-queue-item {
+	color: var(--sweetspot-theme-muted) !important;
+}
+ytmusic-av-toggle .av-toggle {
+	background: var(--sweetspot-theme-elevated) !important;
+}
+ytmusic-av-toggle :is(.song-button, .video-button) {
+	color: var(--sweetspot-theme-text) !important;
+	background-color: transparent;
+}
+ytmusic-av-toggle :is(.song-button, .video-button)[aria-pressed="true"] {
+	color: var(--sweetspot-theme-on-accent) !important;
+	background-color: var(--sweetspot-theme-accent) !important;
+}
+ytmusic-av-toggle :is(.song-button, .video-button):disabled:not([aria-pressed="true"]) {
+	color: var(--sweetspot-theme-muted) !important;
+}
+
+// Preserve white transport icons only over actual media, not on theme surfaces.
+ytmusic-item-thumbnail-overlay-renderer,
+.song-media-controls.ytmusic-player {
+	--ytmusic-overlay-text-primary: #fff;
+	--yt-sys-color-baseline--overlay-text-primary: #fff;
+}
+
+// Let the upstream responsive player layout size the artwork panel normally.
+@media (max-width: 968px) {
+	.content.ytmusic-player-page #main-panel {
+		padding: 0 !important;
+		height: auto;
+		min-width: 0;
+	}
+}
+
+// Album/playlist play buttons use a separate icon color from the persistent bar.
+ytmusic-play-button-renderer :is(yt-icon, .ytIconWrapperHost) {
+	color: var(--sweetspot-theme-on-accent) !important;
+	fill: currentColor;
+}
+.strapline-text.ytmusic-responsive-header-renderer,
+.strapline-text.ytmusic-responsive-header-renderer a {
+	color: var(--sweetspot-theme-text) !important;
+	--yt-endpoint-color: var(--sweetspot-theme-text);
+	--yt-endpoint-visited-color: var(--sweetspot-theme-text);
+}
+yt-formatted-string.strapline.ytmusic-responsive-header-renderer {
+	color: var(--sweetspot-theme-text) !important;
+}
+
+// Keep the selected mode crisp rather than blending it into a fixed gray pill.
+ytmusic-av-toggle {
+	opacity: 1 !important;
+}
+ytmusic-av-toggle :is(.song-button, .video-button) {
+	background-color: var(--sweetspot-theme-elevated) !important;
+	opacity: 1;
+}
+ytmusic-av-toggle :is(.song-button, .video-button)[aria-pressed="true"] {
+	background-color: var(--sweetspot-theme-accent) !important;
+}
+#progress-bar.ytmusic-player-bar {
+	--yt-sys-color-baseline--static-brand-red: var(--sweetspot-theme-accent);
+	--paper-slider-knob-start-color: var(--sweetspot-theme-accent);
+}
+#progress-bar.ytmusic-player-bar :is(#sliderKnobInner, #primaryProgress) {
+	background-color: var(--sweetspot-theme-accent) !important;
+}
+
+// Inline badges also need an explicit foreground on light surfaces.
+.icon.ytmusic-inline-badge-renderer {
+	color: var(--sweetspot-theme-muted) !important;
+}
+// Availability changes interaction, not the appearance of the current mode.
+ytmusic-av-toggle[toggle-disabled] :is(.song-button, .video-button) {
+	background: var(--sweetspot-theme-elevated) !important;
+	color: var(--sweetspot-theme-muted) !important;
+	opacity: 1;
+}
+html ytmusic-av-toggle[toggle-disabled] :is(.song-button, .video-button)[aria-pressed="true"] {
+	background: var(--sweetspot-theme-accent) !important;
+	color: var(--sweetspot-theme-on-accent) !important;
+	box-shadow: none !important;
+}

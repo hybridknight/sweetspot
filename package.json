@@ -1,0 +1,53 @@
+{
+	"name": "sweetspot-workspace",
+	"version": "0.0.0",
+	"private": true,
+	"author": {
+		"name": "Sweet Spot contributors"
+	},
+	"homepage": "https://sweetspot.bkk.ooo",
+	"description": "Sweet Spot for YouTube Music for Windows and macOS | Monorepo",
+	"scripts": {
+		"brand:build": "node scripts/generate-brand-assets.mjs",
+		"deps:install": "node scripts/install-dependencies.mjs",
+		"format": "pnpm --filter sweetspot format",
+		"lint": "pnpm --filter sweetspot lint",
+		"typecheck": "pnpm --filter sweetspot typecheck",
+		"start": "pnpm --filter sweetspot start",
+		"dev": "pnpm --filter sweetspot dev",
+		"build": "pnpm --filter sweetspot build",
+		"release:nocheck": "pnpm --filter sweetspot release:nocheck",
+		"release": "pnpm --filter sweetspot release",
+		"release:compile": "pnpm --filter sweetspot release:compile",
+		"release:pack": "pnpm --filter sweetspot release:pack",
+		"release:pack:win": "pnpm --filter sweetspot release:pack:win",
+		"release:pack:mac": "pnpm --filter sweetspot release:pack:mac",
+		"release:pack:mac:local": "pnpm --filter sweetspot release:pack:mac:local",
+		"build:unpack": "pnpm --filter sweetspot build:unpack",
+		"build:win": "pnpm --filter sweetspot build:win",
+		"build:mac": "pnpm --filter sweetspot build:mac",
+		"biome:lint": "pnpm --filter sweetspot biome:lint",
+		"biome:format": "pnpm --filter sweetspot biome:format",
+		"biome:check": "pnpm --filter sweetspot biome:check",
+		"biome:check:apply": "pnpm --filter sweetspot biome:check:apply",
+		"userscript:dev": "pnpm --filter sweetspot-userscript dev",
+		"userscript:build": "pnpm --filter sweetspot-userscript build",
+		"docs:dev": "pnpm --filter sweetspot-docs dev",
+		"docs:build": "pnpm --filter sweetspot-docs build",
+		"docs:build:pages": "pnpm --filter sweetspot-docs build:pages",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"deps:build-vendor": "node scripts/build-vendored-dependencies.mjs"
+	},
+	"license": "CC0-1.0",
+	"repository": "https://github.com/hybridknight/sweetspot",
+	"engines": {
+		"node": ">=24.14.0",
+		"pnpm": ">=11.0.0"
+	},
+	"packageManager": "pnpm@11.15.1",
+	"devDependencies": {
+		"vitest": "^4.1.10",
+		"esbuild": "0.28.1"
+	}
+}

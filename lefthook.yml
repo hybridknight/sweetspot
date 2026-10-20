@@ -1,0 +1,13 @@
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      glob: 
+        - apps/sweetspot/src/**/*.{js,jsx,ts,tsx,json,yaml,yml,html,vue}
+        - apps/sweetspot/vite.config.ts
+        - apps/sweetspot/electron.vite.config.ts
+        - apps/sweetspot/tsconfig.*.json
+        - apps/sweetspot/tsconfig.json
+        - "!apps/sweetspot/src/**/*.generated.d.ts"
+      run: npx @biomejs/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
+      stage_fixed: true

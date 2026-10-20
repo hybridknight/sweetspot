@@ -1,0 +1,42 @@
+---
+title: Authentication
+description: Require authorization for API clients
+---
+
+![Current authentication settings](/screenshots/authentication.png)
+
+*Current UI captured in an isolated session with no client credentials.*
+
+Settings → **API & Integrations** → **Authentication**.
+
+## Require authorization
+
+Turn on **Require authorization** when clients (scripts and other clients) must pair before using gated API routes.
+
+## Pairing flow
+
+1. Client requests a code with an `appId` / app name.
+2. A pending request appears under Authentication.
+3. **Approve** or **Deny** in the app.
+4. Approved clients receive a token for later requests.
+
+## Manual clients
+
+Create a manual client from Authentication when an app cannot complete the pairing UI (paste the token into scripts or other clients).
+
+## Revoke
+
+Revoke a single client or all clients from Authentication when access should be removed.
+
+## How credentials are protected
+
+Sweet Spot encrypts approved-client tokens and protects the encryption keys through your operating system. On macOS, Keychain may ask permission when you access these credentials. This is part of the app's credential protection; enter your Mac password only in the macOS system dialog.
+
+Pairing storage opens only when needed. If secure storage is locked or unavailable, unlock it and try again. Sweet Spot preserves unreadable credential data instead of replacing it with an empty store. See [Local data and privacy](/docs/internals/encrypted-stores) for keychain prompts and safe troubleshooting.
+
+## Related
+
+<Cards>
+  <Card title="Local API" href="/docs/api" />
+  <Card title="Routes" href="/docs/api/routes" />
+</Cards>

@@ -1,0 +1,335 @@
+name: Release Desktop App
+
+on:
+  push:
+    tags:
+      - "v*"
+
+# One release per tag; do not cancel mid-publish (assets would be partial).
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  packages: read # Native media dependencies on GitHub Packages
+
+env:
+  NODE_VERSION: "24.14.0"
+  COMPILE_ARTIFACT: electron-compile
+
+jobs:
+  # Shared electron-vite build (sidecar builds world0 + embeds).
+  # Pack jobs download this artifact and run electron-builder only (no vite).
+  compile:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.getVersion.outputs.value }}
+      version_ok: ${{ steps.getVersion.outputs.ok }}
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/setup@v2
+        with:
+          runtime: node@${{ env.NODE_VERSION }}
+          cache: true
+          install: false
+
+      - if: github.ref_type == 'tag'
+        id: getVersion
+        uses: actions/github-script@v9
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        with:
+          script: |
+            const isVersion = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+            const id = process.env.REF_NAME && process.env.REF_NAME.split('v')[1] || process.env.REF_NAME
+            const isRC = id.includes('-rc.')
+            core.setOutput("value", id);
+            core.setOutput("ok", String(isVersion.test(id)))
+            core.setOutput("releaseType", isRC ? 'rc' : 'stable')
+
+      # outputs.ok is the string "true"/"false" — bare `if: outputs.ok` is truthy for "false".
+      - if: github.ref_type == 'tag' && steps.getVersion.outputs.ok == 'true'
+        name: set app version
+        shell: bash
+        env:
+          APP_VERSION: ${{ steps.getVersion.outputs.value }}
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const p = 'apps/sweetspot/package.json';
+          const text = fs.readFileSync(p, 'utf8');
+          const next = text.replace(/("version"\s*:\s*")[^"]*(")/, `$1${process.env.APP_VERSION}$2`);
+          fs.writeFileSync(p, next);
+          EOF
+
+      - name: Install dependencies
+        run: node scripts/install-dependencies.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compile Electron app
+        run: pnpm release:compile
+        env:
+          VITE_GITHUB_REPOSITORY: ${{ github.repository }}
+          VITE_APP_GIT_HASH: ${{ github.sha }}
+
+      - name: Verify compile output
+        shell: bash
+        run: |
+          test -f apps/sweetspot/out/main/index.js
+          test -f apps/sweetspot/resources/embeds/now-playing/index.html
+          test -f apps/sweetspot/src/preload/generated/sweetspot-world0-host.js
+
+      # out/ + resources/embeds (sidecar). upload-artifact strips common apps/sweetspot prefix.
+      - name: Upload compile artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.COMPILE_ARTIFACT }}
+          path: |
+            apps/sweetspot/out
+            apps/sweetspot/resources/embeds
+          if-no-files-found: error
+          retention-days: 3
+
+      # Avoid parallel pack jobs racing on release create.
+      - name: Ensure draft GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          tag="${{ github.ref_name }}"
+          title="v${{ steps.getVersion.outputs.value }} - "
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists"
+          else
+            gh release create "$tag" --draft --title "$title" --notes "Publishing assets…"
+          fi
+
+  build-windows:
+    needs: compile
+    runs-on: windows-2025-vs2026
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/setup@v2
+        with:
+          runtime: node@${{ env.NODE_VERSION }}
+          cache: true
+          install: false
+
+      - if: needs.compile.outputs.version_ok == 'true'
+        name: set app version
+        shell: bash
+        env:
+          APP_VERSION: ${{ needs.compile.outputs.version }}
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const p = 'apps/sweetspot/package.json';
+          const text = fs.readFileSync(p, 'utf8');
+          const next = text.replace(/("version"\s*:\s*")[^"]*(")/, `$1${process.env.APP_VERSION}$2`);
+          fs.writeFileSync(p, next);
+          EOF
+
+      - name: install windows deps
+        uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.5
+        with:
+          sdk-version: 20348
+
+      # windows-2025-vs2026 ships VS 2026 (18.x). node-gyp <12.1 cannot detect it
+      # (@electron/rebuild used to pull node-gyp@11 → install-app-deps fails on @parcel/watcher).
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install dependencies
+        run: node scripts/install-dependencies.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          npm_config_msvs_version: "2026"
+
+      # Artifact root is out/ + resources/ (common apps/sweetspot prefix stripped).
+      - name: Download compile artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ env.COMPILE_ARTIFACT }}
+          path: apps/sweetspot
+
+      - name: Verify compile output
+        shell: pwsh
+        run: |
+          if (-not (Test-Path -LiteralPath "apps/sweetspot/out/main/index.js")) {
+            throw "missing apps/sweetspot/out/main/index.js"
+          }
+          if (-not (Test-Path -LiteralPath "apps/sweetspot/resources/embeds/now-playing/index.html")) {
+            throw "missing embeds now-playing/index.html"
+          }
+
+      - name: Pack Windows release
+        run: pnpm release:pack:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VITE_GITHUB_REPOSITORY: ${{ github.repository }}
+
+  build-macos:
+    needs: compile
+    runs-on: macos-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/setup@v2
+        with:
+          runtime: node@${{ env.NODE_VERSION }}
+          cache: true
+          install: false
+
+      - if: needs.compile.outputs.version_ok == 'true'
+        name: set app version
+        shell: bash
+        env:
+          APP_VERSION: ${{ needs.compile.outputs.version }}
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const p = 'apps/sweetspot/package.json';
+          const text = fs.readFileSync(p, 'utf8');
+          const next = text.replace(/("version"\s*:\s*")[^"]*(")/, `$1${process.env.APP_VERSION}$2`);
+          fs.writeFileSync(p, next);
+          EOF
+
+      - name: Install dependencies
+        run: node scripts/install-dependencies.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download compile artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ env.COMPILE_ARTIFACT }}
+          path: apps/sweetspot
+
+      - name: Verify compile output
+        shell: bash
+        run: |
+          test -f apps/sweetspot/out/main/index.js
+          test -f apps/sweetspot/resources/embeds/now-playing/index.html
+
+      # Outside Mac App Store: Developer ID Application + notarize
+      # Secrets: MACOS_DEVELOPER_ID_APPLICATION_P12 (+ _PASSWORD),
+      #          APPLE_NOTARY_API_KEY_P8, APPLE_NOTARY_API_KEY_ID, APPLE_NOTARY_API_ISSUER_ID
+      #
+      # Do not pass CSC_LINK. electron-builder 26.x calls
+      # `security set-key-partition-list -k` with the .p12 password instead of the
+      # temp keychain password (electron-userland/electron-builder#10066). That
+      # fails on some macos-latest images (SecKeychainUnlock: passphrase not
+      # correct) and succeeds on others where securityd is more lenient.
+      - name: Import Developer ID certificate
+        uses: apple-actions/import-codesign-certs@v7
+        with:
+          p12-file-base64: ${{ secrets.MACOS_DEVELOPER_ID_APPLICATION_P12 }}
+          p12-password: ${{ secrets.MACOS_DEVELOPER_ID_APPLICATION_PASSWORD }}
+
+      - name: Verify codesigning identity
+        run: |
+          security find-identity -v -p codesigning | grep -F "Developer ID Application"
+
+      - name: Prepare Apple notarization key
+        run: |
+          mkdir -p .secrets
+          echo "${{ secrets.APPLE_NOTARY_API_KEY_P8 }}" > .secrets/AuthKey.p8
+          chmod 600 .secrets/AuthKey.p8
+
+      - name: Pack macOS release
+        run: pnpm release:pack:mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_ENV: production
+          CSC_IDENTITY_AUTO_DISCOVERY: "true"
+          APPLE_API_KEY: ${{ format('{0}/.secrets/AuthKey.p8', github.workspace) }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_NOTARY_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_NOTARY_API_ISSUER_ID }}
+
+      - if: always()
+        name: Cleanup Apple secrets
+        run: rm -rf .secrets
+
+  finalize-release:
+    needs:
+      - build-windows
+      - build-macos
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Parse version from tag
+        id: version
+        shell: bash
+        run: |
+          tag="${{ github.ref_name }}"
+          version="${tag#v}"
+          echo "Tag=$tag Version=$version"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Build release notes from commits
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          tag="${{ steps.version.outputs.tag }}"
+          prev=""
+          if prev=$(gh release list --exclude-drafts --limit 20 --json tagName --jq ".[] | select(.tagName != \"$tag\") | .tagName" | head -n1); then
+            :
+          else
+            prev=""
+          fi
+
+          if [ -z "$prev" ]; then
+            prev=$(git describe --tags --abbrev=0 "${tag}^" 2>/dev/null || true)
+          fi
+
+          if [ -z "$prev" ]; then
+            echo "No previous published release — listing all commits reachable from $tag"
+            git log --pretty=tformat:"- %s (%h)" "$tag" > release-notes-commits.txt || true
+          else
+            echo "Commits: $prev..$tag"
+            git log --pretty=tformat:"- %s (%h)" "$prev..$tag" > release-notes-commits.txt || true
+          fi
+
+          if [ ! -s release-notes-commits.txt ]; then
+            echo "- No commits listed for this range." > release-notes-commits.txt
+          fi
+
+          {
+            echo "## Changes"
+            echo
+            cat release-notes-commits.txt
+            echo
+          } > release-notes.md
+          cat release-notes.md
+
+      - name: Set draft release title and notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          tag="${{ steps.version.outputs.tag }}"
+          version="${{ steps.version.outputs.version }}"
+          gh release edit "$tag" \
+            --draft \
+            --title "v$version - " \
+            --notes-file release-notes.md

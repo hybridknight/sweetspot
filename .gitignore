@@ -1,0 +1,70 @@
+.DS_Store
+node_modules/
+.pnpm-store/
+.vite/
+
+# Build output
+.next/
+**/electron.vite.config.*.mjs
+/dist/
+/out/
+apps/sweetspot/dist/
+apps/sweetspot/out/
+apps/sweetspot/src/preload/generated/
+
+# local env files
+.env.local
+.env.*.local
+.secrets
+.secrets.*
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Electron-builder output
+/dist_electron
+/dist_electron*
+apps/sweetspot/dist_electron
+apps/sweetspot/dist_electron*
+/.VSCodeCounter
+/*config*.mjs
+
+/*.node
+/*.tgz
+
+routeTree.gen.ts
+
+# Private docs for deployment docs
+.github/*.md
+.cursor/rules/**/*.mdc
+!.cursor/rules/commit.mdc
+
+# Tanstack Router tmp files
+**/.tanstack/tmp/
+# Vitest / CI
+test-results/
+coverage/
+
+# Internal testing scripts
+apps/sweetspot/scripts/find-player-api-console.js
+
+# TypeScript build caches
+*.tsbuildinfo
+
+# Local research, design notes, and security audits. Only skin authoring docs are public.
+/apps/docs/local/asset-prompts/
+/old-reference-audit.txt
+/docs/*
+!/docs/skins/

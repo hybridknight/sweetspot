@@ -1,0 +1,87 @@
+name: Deploy docs to GitHub Pages
+
+on:
+  # Docs/workflow changes on default branch, or manual run.
+  # branches: required so tag pushes (which ignore path filters) do not run this job.
+  # Release publishes use docs-on-release.yml → workflow_dispatch on default branch
+  # (github-pages env protection rejects tag refs like v1.0.2).
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - "apps/docs/**"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read # Native media dependencies on GitHub Packages
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - uses: pnpm/setup@v2
+        with:
+          runtime: node@24.14.0
+          cache: true
+          install: false
+
+      - name: Install docs dependencies
+        run: node scripts/install-dependencies.mjs --filter sweetspot-docs...
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v6
+
+      - name: Fetch repo stars
+        id: stars
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          count="$(gh api "repos/${{ github.repository }}" --jq '.stargazers_count')"
+          echo "count=${count}" >> "$GITHUB_OUTPUT"
+
+      # Build fetches GitHub releases (stable + prerelease beta/alpha) via GITHUB_TOKEN
+      - name: Build static site
+        working-directory: apps/docs
+        run: pnpm run build:pages
+        env:
+          GITHUB_PAGES: "true"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEXT_PUBLIC_URL: https://sweetspot.bkk.ooo
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+          REPO_TITLE: Sweet Spot
+          REPO_BRANCH: ${{ github.event.repository.default_branch }}
+          REPO_STARS: ${{ steps.stars.outputs.count }}
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: apps/docs/out
+          # build-pages.mjs writes out/.nojekyll (hidden); v5 excludes dotfiles by default
+          include-hidden-files: true
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

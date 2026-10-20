@@ -1,0 +1,11 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "index",
+    "install",
+    "features",
+    "integrations",
+    "internals",
+    "build"
+  ]
+}

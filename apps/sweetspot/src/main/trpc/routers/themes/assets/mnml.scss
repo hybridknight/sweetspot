@@ -1,0 +1,286 @@
+// Digital Minimalist's white canvas, quiet cards, Inter type and black pills.
+// This sheet is appended only for MNML, after the shared interaction rules.
+html {
+	--mnml-hover-neutral: #dedede;
+	--mnml-hover-primary: #262626;
+}
+html
+	:is(
+		.ytSpecButtonShapeNextHost,
+		[class*="yt-spec-button-shape-next--"],
+		yt-icon-button,
+		tp-yt-paper-icon-button,
+		tp-yt-paper-button,
+		ytmusic-play-button-renderer,
+		.content-wrapper.ytmusic-play-button-renderer,
+		.icon.ytmusic-play-button-renderer,
+		.action-buttons.ytmusic-responsive-header-renderer > *,
+		ytmusic-chip-cloud-chip-renderer a,
+		.av-toggle.ytmusic-av-toggle,
+		.song-button.ytmusic-av-toggle,
+		.video-button.ytmusic-av-toggle
+	) {
+	// Shared hover/focus rules read this local token at every painted layer.
+	--sweetspot-theme-radius: 999px;
+	border-radius: 999px !important;
+}
+// Search wrappers can also contain the suggestion list. Keep the pill shape
+// local to the field instead of passing a 999px radius down to the popup.
+html ytmusic-search-box :is(.search-container, .search-box):not(#suggestion-list, .suggestion-container) {
+	border-radius: 999px !important;
+}
+html :is(tp-yt-paper-dialog, ytmusic-dialog, ytmusic-menu-popup-renderer, .suggestion-container.ytmusic-search-box) {
+	border-radius: 20px !important;
+	box-shadow: 0 8px 28px #0000000d !important;
+}
+html ytmusic-search-box #suggestion-list {
+	border-radius: 20px !important;
+	overflow: hidden;
+}
+// Hover is a quiet fill; only selection uses black and keyboard focus a ring.
+html ytmusic-app ytmusic-chip-cloud-chip-renderer a.ytmusic-chip-cloud-chip-renderer {
+	background: var(--sweetspot-theme-elevated) !important;
+	color: var(--sweetspot-theme-text) !important;
+	border-color: transparent !important;
+	box-shadow: none !important;
+}
+html ytmusic-app ytmusic-chip-cloud-chip-renderer a.ytmusic-chip-cloud-chip-renderer:hover {
+	background: var(--mnml-hover-neutral) !important;
+}
+html ytmusic-app ytmusic-chip-cloud-chip-renderer:is([selected], [is-selected], .iron-selected) a.ytmusic-chip-cloud-chip-renderer,
+html ytmusic-app ytmusic-chip-cloud-chip-renderer a.ytmusic-chip-cloud-chip-renderer[aria-selected="true"] {
+	background: var(--sweetspot-theme-accent) !important;
+	color: var(--sweetspot-theme-on-accent) !important;
+}
+html ytmusic-app ytmusic-chip-cloud-chip-renderer a.ytmusic-chip-cloud-chip-renderer:focus-visible {
+	outline: 2px solid currentColor !important;
+	// Keep the first/last pill's focus ring inside the clipped chip scroller.
+	outline-offset: -3px;
+}
+// MNML uses fill feedback instead of the shared themes' hover rings.
+// Cover modern/legacy buttons and their painted wrappers, including dialogs.
+html
+	ytmusic-app
+	:is(
+		button,
+		a[role="button"],
+		.ytSpecButtonShapeNextHost,
+		[class*="yt-spec-button-shape-next--"],
+		yt-icon-button,
+		tp-yt-paper-icon-button,
+		tp-yt-paper-button,
+		ytmusic-play-button-renderer,
+		.content-wrapper.ytmusic-play-button-renderer,
+		ytmusic-chip-cloud-chip-renderer a,
+		.song-button.ytmusic-av-toggle,
+		.video-button.ytmusic-av-toggle,
+		ytmusic-guide-entry-renderer,
+		ytmusic-responsive-list-item-renderer,
+		ytmusic-player-queue-item:not([selected]),
+		ytmusic-menu-service-item-renderer,
+		ytmusic-toggle-menu-service-item-renderer,
+		ytmusic-menu-navigation-item-renderer,
+		ytmusic-menu-service-item-download-renderer,
+		ytmusic-playlist-add-to-option-renderer
+	):hover {
+	box-shadow: none !important;
+	border-color: transparent !important;
+	// A mouse hover must not look like keyboard focus.
+	&:not(:focus-visible) {
+		outline: none !important;
+	}
+}
+// Share the same fill across buttons, pills, icons and menu actions. Native
+// feedback overlays are transparent so they cannot darken nested layers twice.
+html ytmusic-app :is(.ytSpecTouchFeedbackShapeHover, .ytSpecTouchFeedbackShapeFill, yt-interaction .fill) {
+	background: transparent !important;
+}
+html
+	ytmusic-app
+	:is(
+		button,
+		a[role="button"],
+		.ytSpecButtonShapeNextHost,
+		[class*="yt-spec-button-shape-next--"],
+		yt-icon-button,
+		tp-yt-paper-icon-button,
+		tp-yt-paper-button,
+		ytmusic-chip-cloud-chip-renderer a,
+		.song-button.ytmusic-av-toggle,
+		.video-button.ytmusic-av-toggle
+	):hover:not(:disabled, [disabled], [aria-disabled="true"], ytmusic-av-toggle[toggle-disabled] *) {
+	background: var(--mnml-hover-neutral) !important;
+	color: var(--sweetspot-theme-text) !important;
+}
+html
+	ytmusic-app
+	:is(
+		.ytSpecButtonShapeNextHost.ytSpecButtonShapeNextFilled,
+		.yt-spec-button-shape-next--filled,
+		ytmusic-button-renderer.style-primary button,
+		ytmusic-button-renderer.style-primary tp-yt-paper-button,
+		.play-pause-button,
+		.play-pause-button button,
+		ytmusic-play-button-renderer,
+		ytmusic-play-button-renderer .content-wrapper,
+		ytmusic-play-button-renderer button,
+		ytmusic-chip-cloud-chip-renderer:is([selected], [is-selected], .iron-selected) a,
+		ytmusic-chip-cloud-chip-renderer a[aria-selected="true"],
+		.song-button.ytmusic-av-toggle[aria-pressed="true"],
+		.video-button.ytmusic-av-toggle[aria-pressed="true"]
+	):hover:not(:disabled, [disabled], [aria-disabled="true"], ytmusic-av-toggle[toggle-disabled] *) {
+	background: var(--mnml-hover-primary) !important;
+	color: var(--sweetspot-theme-on-accent) !important;
+}
+html
+	ytmusic-app
+	:is(
+		ytmusic-guide-entry-renderer,
+		ytmusic-responsive-list-item-renderer,
+		ytmusic-player-queue-item:not([selected]),
+		ytmusic-menu-service-item-renderer,
+		ytmusic-toggle-menu-service-item-renderer,
+		ytmusic-menu-navigation-item-renderer,
+		ytmusic-menu-service-item-download-renderer,
+		ytmusic-playlist-add-to-option-renderer
+	):hover {
+	background: var(--mnml-hover-neutral) !important;
+}
+// Explore follows MNML's neutral button fills and heading scale.
+html ytmusic-app ytmusic-navigation-button-renderer button {
+	background: var(--sweetspot-theme-elevated) !important;
+}
+html ytmusic-app ytmusic-navigation-button-renderer button:hover:not(:disabled, [disabled], [aria-disabled="true"]) {
+	background: var(--mnml-hover-neutral) !important;
+}
+html ytmusic-grid-header-renderer yt-formatted-string[role="heading"] {
+	font-size: var(--mnml-heading-size) !important;
+	font-weight: 650 !important;
+	line-height: var(--mnml-heading-line) !important;
+}
+html :is(ytmusic-browse-response, ytmusic-search-page, .background-gradient.ytmusic-browse-response, .background-gradient.ytmusic-immersive-carousel-shelf-renderer) {
+	background: var(--sweetspot-theme-background) !important;
+}
+// One type scale across browse, search, navigation, menus and playback.
+html {
+	--mnml-text-size: 16px;
+	--mnml-text-line: 22px;
+	--mnml-detail-size: 14px;
+	--mnml-detail-line: 20px;
+	--mnml-heading-size: 28px;
+	--mnml-heading-line: 34px;
+}
+html
+	:where(
+		yt-formatted-string,
+		.ytSpecButtonShapeNextHost,
+		.ytSpecButtonShapeNextLabel,
+		.yt-spec-button-shape-next__button-text-content,
+		tp-yt-paper-button,
+		tp-yt-paper-tab,
+		ytmusic-search-box input,
+		.song-button.ytmusic-av-toggle,
+		.video-button.ytmusic-av-toggle
+	) {
+	font-size: var(--mnml-text-size) !important;
+	font-weight: 500 !important;
+	line-height: var(--mnml-text-line) !important;
+	letter-spacing: -0.015em;
+}
+// Inline links and text runs must follow their title/metadata container.
+html yt-formatted-string :is(a, span) {
+	font-size: inherit !important;
+	font-weight: inherit !important;
+	line-height: inherit !important;
+}
+
+// Larger titles balance the 72px artwork; secondary information stays quieter.
+// Preserve upstream truncation, wrapping and responsive column widths.
+html :is(ytmusic-responsive-list-item-renderer, ytmusic-two-row-item-renderer, ytmusic-player-queue-item) yt-formatted-string {
+	font-size: var(--mnml-detail-size) !important;
+	font-weight: 400 !important;
+	line-height: var(--mnml-detail-line) !important;
+	letter-spacing: 0;
+}
+html :is(ytmusic-responsive-list-item-renderer, ytmusic-two-row-item-renderer) yt-formatted-string.title,
+html ytmusic-player-queue-item .song-title,
+html ytmusic-player-bar .title,
+html ytmusic-search-suggestion .title,
+html ytmusic-guide-entry-renderer .title,
+html ytmusic-queue-header-renderer .subtitle {
+	font-size: var(--mnml-text-size) !important;
+	font-weight: 550 !important;
+	line-height: var(--mnml-text-line) !important;
+	letter-spacing: -0.015em;
+}
+html :where(h2, h3, .title.ytmusic-carousel-shelf-basic-header-renderer, .title.ytmusic-shelf-renderer, .title.ytmusic-header-renderer) {
+	font-size: var(--mnml-heading-size) !important;
+	font-weight: 650 !important;
+	letter-spacing: -0.03em;
+	line-height: var(--mnml-heading-line) !important;
+}
+html :is(h1, .title.ytmusic-responsive-header-renderer, .title.ytmusic-detail-header-renderer, .title.ytmusic-immersive-header-renderer) {
+	font-size: clamp(28px, 3vw, 40px) !important;
+	font-weight: 650 !important;
+	letter-spacing: -0.04em;
+	line-height: 1.2 !important;
+}
+html
+	:is(
+		.subtitle.ytmusic-guide-entry-renderer,
+		.subtitle.ytmusic-player-bar,
+		.byline.ytmusic-player-bar,
+		.byline.ytmusic-player-queue-item,
+		.duration.ytmusic-player-queue-item,
+		.time-info.ytmusic-player-bar,
+		.title.ytmusic-queue-header-renderer,
+		.strapline.ytmusic-carousel-shelf-basic-header-renderer,
+		.subtitle.ytmusic-responsive-header-renderer,
+		.second-subtitle.ytmusic-responsive-header-renderer,
+		.subtitle.ytmusic-detail-header-renderer,
+		.second-subtitle.ytmusic-detail-header-renderer,
+		.description.ytmusic-menu-service-item-renderer
+	) {
+	font-size: var(--mnml-detail-size) !important;
+	font-weight: 400 !important;
+	line-height: var(--mnml-detail-line) !important;
+	letter-spacing: 0;
+}
+html :is(.duration.ytmusic-player-queue-item, .time-info.ytmusic-player-bar) {
+	font-variant-numeric: tabular-nums;
+}
+// Upstream clamps still use the original 16.8px line height. Match both
+// text containers to MNML's line heights so second lines aren't cut in half.
+html ytmusic-two-row-item-renderer .title-group,
+html ytmusic-two-row-item-renderer .details .title {
+	max-height: calc(2 * var(--mnml-text-line)) !important;
+	line-height: var(--mnml-text-line) !important;
+}
+html ytmusic-two-row-item-renderer .subtitle {
+	max-height: calc(2 * var(--mnml-detail-line)) !important;
+}
+html ytmusic-carousel-shelf-renderer {
+	margin-bottom: 40px;
+}
+// Give Quick picks, artist Top songs and other song shelves prominent artwork.
+// Size the row as well so images and their play overlays never overlap.
+html ytmusic-carousel ytmusic-responsive-list-item-renderer,
+html ytmusic-shelf-renderer ytmusic-responsive-list-item-renderer {
+	--ytmusic-responsive-list-item-thumbnail-size: 72px !important;
+	--ytmusic-list-item-height: 88px !important;
+	height: 88px !important;
+}
+// Let landscape thumbnails use shorter rows instead of square-artwork spacing.
+// Square covers retain their 72px size with 8px of breathing room per side.
+html ytmusic-carousel:has(ytmusic-responsive-list-item-renderer) {
+	--ytmusic-carousel-item-margin-bottom: 8px !important;
+}
+html ytmusic-carousel ytmusic-responsive-list-item-renderer {
+	height: auto !important;
+	min-height: 64px !important;
+	padding: 8px !important;
+	box-sizing: border-box !important;
+}
+html ytmusic-player-queue-item {
+	opacity: 1;
+}

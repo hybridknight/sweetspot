@@ -1,0 +1,87 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/electron-userland/electron-builder/refs/heads/master/packages/app-builder-lib/scheme.json
+
+appId: ooo.bkk.sweetspot
+productName: Sweet Spot
+copyright: "Copyright © 2026 hybridknight (https://github.com/hybridknight)"
+extraMetadata:
+  name: sweetspot
+directories:
+  buildResources: build
+files:
+  - "!dist/**"
+  - "!**/.vscode/*"
+  - "!**/{dist_electron,.github,screenshots}/*"
+  - "!{dist_electron,.github,screenshots}/*"
+  - "!.*/*"
+  - "!src/*"
+  - "!electron.vite.config.{js,ts,mjs,cjs}"
+  - "!{.*rc,*.config.js,*.config.ts,*config.json,.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}"
+  - "!{.env,.env.*,.npmrc,pnpm-lock.yaml}"
+  - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json,tsconfig*.json}"
+asarUnpack:
+  - resources/**
+  # electron-vite may hash asset names — match stem; ICNS needs real path (not asar).
+  - "**/*favicon*"
+  - "**/*32x32*"
+  - "**/*16x16*"
+  - "**/*icon*.icns"
+  - "**/*.icns"
+  - "**/assets/**"
+protocols:
+  - name: Sweet Spot
+    schemes:
+      - ssytm
+win:
+  executableName: sweetspot
+  artifactName: ${name}-${version}-setup.${ext}
+  compression: maximum
+  target:
+    - target: nsis
+      arch: x64
+  icon: build/icon.ico
+nsis:
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+  installerIcon: build/icon.ico
+  installerHeaderIcon: build/icon.ico
+  deleteAppDataOnUninstall: true
+
+mac:
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    - NSCameraUsageDescription: Application requests access to the device's camera.
+    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
+    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+  category: public.app-category.music 
+  notarize: true
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  target:
+    - target: dmg
+      arch: x64
+    - target: dmg
+      arch: arm64
+    - target: zip
+      arch: x64
+    - target: zip
+      arch: arm64
+  icon: build/icon.icns
+dmg:
+  title: "Install or Update ${productName} ${version}"
+# appx:
+#   electronUpdaterAware: true
+#   addAutoLaunchExtension: true
+afterPack: ./scripts/afterPack.js
+
+# Fixed version required in monorepo: install-app-deps cannot resolve
+# hoisted root node_modules/electron from apps/sweetspot.
+electronVersion: 44.9.0
+npmRebuild: false
+publish:
+  - provider: github
+    owner: hybridknight
+    repo: sweetspot
+    releaseType: draft

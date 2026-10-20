@@ -1,0 +1,22 @@
+// Thumbnail background (blur lives in chrome/blur.scss via themes.blur)
+
+ytmusic-player-page:not([is-mweb-modernization-enabled]) .content.ytmusic-player-page:before {
+  content: "";
+  background-image: var(--sweetspot-thumbnail-url);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: var(--sweetspot-thumbnail-accent);
+  opacity: 0.33;
+  mix-blend-mode: exclusion;
+  border-radius: 8px;
+  overflow: hidden;
+  transform: translate3d(0, 0, 1px) scale(1.1);
+  position: absolute;
+  top: -12px;
+  left: calc(var(--ytmusic-guide-width) * -1);
+  right: calc(var(--ytmusic-guide-width) * -1);
+  bottom: -20px;
+  z-index: -1;
+}
+

@@ -1,0 +1,47 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Keep script startup non-destructive; install explicitly with pnpm deps:install.
+verifyDepsBeforeRun: warn
+
+# Required for Electron app installs/builds under pnpm (CI + local).
+shamefullyHoist: true
+nodeLinker: hoisted
+onlyBuiltDependencies:
+  - '@biomejs/biome'
+  - '@parcel/watcher'
+  - 'electron-winstaller'
+  - electron
+  - esbuild
+  - lefthook
+  - sharp
+
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  bufferutil: true
+  electron: true
+  electron-winstaller: true
+  esbuild: true
+  lefthook: true
+  protobufjs: true
+  sharp: true
+  utf-8-validate: true
+
+# @electron/rebuild@4 pulls node-gyp@11 which cannot detect VS 2026 (18.x).
+# node-gyp >=12.1 required on windows-2025-vs2026 runners.
+# node-abi <4.32 cannot resolve Electron 43 ABI (installAppDeps / @electron/rebuild).
+overrides:
+  node-gyp: ^13.0.1
+  node-abi: ^4.33.0
+
+minimumReleaseAgeExclude:
+  - '@venipa/xosms-darwin-arm64@0.8.5'
+  - '@venipa/xosms-darwin-universal@0.8.5'
+  - '@venipa/xosms-darwin-x64@0.8.5'
+  - '@venipa/xosms-linux-arm64-gnu@0.8.5'
+  - '@venipa/xosms-linux-x64-gnu@0.8.5'
+  - '@venipa/xosms-win32-arm64-msvc@0.8.5'
+  - '@venipa/xosms-win32-x64-msvc@0.8.5'
+  - '@venipa/xosms@0.8.5'

@@ -1,0 +1,24 @@
+{
+  "name": "castv2",
+  "version": "0.1.10-sweetspot.1",
+  "description": "An implementation of the Chromecast CASTV2 protocol",
+  "author": "thibauts",
+  "license": "MIT",
+  "main": "index.js",
+  "dependencies": {
+    "debug": "^4.1.1",
+    "protobufjs": "8.8.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hybridknight/node-castv2.git"
+  },
+  "keywords": [
+    "chromecast",
+    "castv2"
+  ],
+  "sweetspotSource": {
+    "commit": "41d589abbf8619ec582e2b2707eb5e3266e7a14a",
+    "url": "https://github.com/hybridknight/node-castv2"
+  }
+}

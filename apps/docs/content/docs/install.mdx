@@ -1,0 +1,45 @@
+---
+title: Install
+description: Download and install Sweet Spot
+---
+
+## Downloads
+
+Grab the latest build from the [landing page](/) (OS is auto-detected) or from GitHub Releases on the repository.
+
+| Platform | Artifact | Notes |
+| --- | --- | --- |
+| Windows | `*-setup.exe` (NSIS) | When published |
+| macOS Apple Silicon | `.dmg` / `.zip` (arm64) | Shown on the landing page when published |
+| macOS Intel | `.dmg` / `.zip` (x64) | Shown on the landing page when published |
+
+macOS tabs stay visible even before assets ship — once Apple Silicon and Intel `.dmg` / `.zip` builds are attached to a release, both show in the listing (Apple Silicon preferred when detected).
+
+## App identity
+
+The app name is **Sweet Spot**, also described as **Sweet Spot for YouTube Music**. Its codename, executable, and package name are `sweetspot`. Shared links use `ssytm://`.
+
+| Integration | Identifier |
+| --- | --- |
+| Desktop app | `ooo.bkk.sweetspot` |
+| Browser userscript namespace | `sweetspot` |
+
+Sweet Spot uses its own app identity and data profile. When moving from an earlier installation, sign in and reconnect integrations in Sweet Spot; the earlier profile remains separate. Development uses an isolated `sweetspot-dev` profile.
+
+## First launch
+
+1. Install or unpack the build for your OS.
+2. Sign in to YouTube Music in the embedded browser.
+3. Open **Settings → Appearance → Player skins** to choose a look and open the dedicated player.
+4. Try **Player → Equalizer**, **Player → General**, and **Player → Lyrics** to set up your sound.
+5. Enable the local API only if you need a custom client.
+
+## macOS credential protection
+
+Sweet Spot uses macOS Keychain to protect the keys for stored credentials. This is a security feature that lets the app remember approved integrations without leaving their encryption keys readable in its profile. Disposable caches do not request keychain access.
+
+If macOS shows a Keychain or Secret Storage dialog, approve it only when you recognize Sweet Spot and trust the installed build. The password belongs in the macOS system dialog; Sweet Spot does not receive it. Repeated prompts can indicate a locked keychain or a changed app signature. Read [Local data and privacy](/docs/internals/encrypted-stores#why-macos-may-ask-for-your-password) for details.
+
+## Updates
+
+Official builds use electron-updater against GitHub Releases. Keep the app updated for security and feature fixes.

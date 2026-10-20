@@ -1,0 +1,27 @@
+{
+	"name": "sweetspot-userscript",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"description": "Tampermonkey userscript — open YouTube / YouTube Music links via ssytm://",
+	"author": {
+		"name": "Sweet Spot contributors"
+	},
+	"homepage": "https://sweetspot.bkk.ooo",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/hybridknight/sweetspot",
+		"directory": "packages/userscript"
+	},
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc --noEmit && vite build",
+		"preview": "vite preview"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3",
+		"vite": "^8.2.1",
+		"vite-plugin-monkey": "^8.1.0"
+	}
+}

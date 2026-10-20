@@ -1,0 +1,24 @@
+export const LYRICS_ROOT_ID = "sweetspot-lyrics-root";
+
+/** Prefer page-type; fall back to 2nd tab header (YTM lyrics). */
+export const SELECTORS = {
+	/** Lyrics is 2nd tab header on player page. */
+	lyricsTabHeader: "#tabsContent > .tab-header:nth-of-type(2)",
+	tabHeaders: "#tabsContent > .tab-header",
+	lyricsTabBody: '#tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]',
+	/** Some YTM builds expose the same page-type on the custom element without relying on id alone. */
+	lyricsTabBodyAlt: 'ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]',
+	tabRenderer: "#tab-renderer",
+} as const;
+
+export function lyricsRootSelector(): string {
+	return `#${LYRICS_ROOT_ID}`;
+}
+
+/** Only the lyrics page-type renderer — never the shared queue/related panel without page-type. */
+export function findLyricsBody(): HTMLElement | null {
+	return (
+		(document.querySelector(SELECTORS.lyricsTabBody) as HTMLElement | null) ??
+		(document.querySelector(SELECTORS.lyricsTabBodyAlt) as HTMLElement | null)
+	);
+}
