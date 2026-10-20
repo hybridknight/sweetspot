@@ -1,6 +1,8 @@
 name: Release Desktop App
 
 on:
+  # Manual runs validate packaging and retain artifacts without publishing.
+  workflow_dispatch:
   push:
     tags:
       - "v*"
@@ -19,9 +21,36 @@ env:
   COMPILE_ARTIFACT: electron-compile
 
 jobs:
+  release-state:
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    steps:
+      - name: Preserve already published releases
+        id: check
+        uses: actions/github-script@v9
+        with:
+          script: |
+            if (context.eventName === 'push' && context.ref.startsWith('refs/tags/')) {
+              const tag = context.ref.slice('refs/tags/'.length);
+              try {
+                const { data } = await github.rest.repos.getReleaseByTag({ ...context.repo, tag });
+                if (!data.draft) {
+                  core.notice(`${tag} is already published; its downloads will not be changed.`);
+                  core.setOutput('build', 'false');
+                  return;
+                }
+              } catch (error) {
+                if (error.status !== 404) throw error;
+              }
+            }
+            core.setOutput('build', 'true');
+
   # Shared electron-vite build (sidecar builds world0).
   # Pack jobs download this artifact and run electron-builder only (no vite).
   compile:
+    needs: release-state
+    if: needs.release-state.outputs.build == 'true'
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.getVersion.outputs.value }}
@@ -96,6 +125,7 @@ jobs:
 
       # Avoid parallel pack jobs racing on release create.
       - name: Ensure draft GitHub release
+        if: github.event_name == 'push' && github.ref_type == 'tag'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
@@ -168,10 +198,21 @@ jobs:
           }
 
       - name: Pack Windows release
-        run: pnpm release:pack:win
+        run: pnpm release:pack:win --publish ${{ github.event_name == 'push' && 'always' || 'never' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VITE_GITHUB_REPOSITORY: ${{ github.repository }}
+
+      - name: Upload Windows packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-packages
+          path: |
+            apps/sweetspot/dist/*.exe
+            apps/sweetspot/dist/*.blockmap
+            apps/sweetspot/dist/latest.yml
+          if-no-files-found: error
+          retention-days: 3
 
   build-macos:
     needs: compile
@@ -227,24 +268,51 @@ jobs:
       # temp keychain password (electron-userland/electron-builder#10066). That
       # fails on some macos-latest images (SecKeychainUnlock: passphrase not
       # correct) and succeeds on others where securityd is more lenient.
+      - name: Select macOS signing mode
+        id: signing
+        shell: bash
+        env:
+          CERTIFICATE: ${{ secrets.MACOS_DEVELOPER_ID_APPLICATION_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.MACOS_DEVELOPER_ID_APPLICATION_PASSWORD }}
+          NOTARY_KEY: ${{ secrets.APPLE_NOTARY_API_KEY_P8 }}
+          NOTARY_KEY_ID: ${{ secrets.APPLE_NOTARY_API_KEY_ID }}
+          NOTARY_ISSUER: ${{ secrets.APPLE_NOTARY_API_ISSUER_ID }}
+        run: |
+          if [[ -n "$CERTIFICATE" && -n "$CERTIFICATE_PASSWORD" && -n "$NOTARY_KEY" && -n "$NOTARY_KEY_ID" && -n "$NOTARY_ISSUER" ]]; then
+            echo "mode=developer-id" >> "$GITHUB_OUTPUT"
+          elif [[ -n "$CERTIFICATE$CERTIFICATE_PASSWORD$NOTARY_KEY$NOTARY_KEY_ID$NOTARY_ISSUER" ]]; then
+            echo "::error::Signing is partially configured. Provide all five Developer ID and notarization secrets."
+            exit 1
+          else
+            echo "mode=ad-hoc" >> "$GITHUB_OUTPUT"
+            echo "::notice::No signing credentials configured: macOS packages will be ad-hoc signed and not notarized."
+            echo "macOS packages are ad-hoc signed and not notarized. Configure Developer ID and notarization secrets for trusted distribution." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Import Developer ID certificate
+        if: steps.signing.outputs.mode == 'developer-id'
         uses: apple-actions/import-codesign-certs@v7
         with:
           p12-file-base64: ${{ secrets.MACOS_DEVELOPER_ID_APPLICATION_P12 }}
           p12-password: ${{ secrets.MACOS_DEVELOPER_ID_APPLICATION_PASSWORD }}
 
       - name: Verify codesigning identity
+        if: steps.signing.outputs.mode == 'developer-id'
         run: |
           security find-identity -v -p codesigning | grep -F "Developer ID Application"
 
       - name: Prepare Apple notarization key
+        if: steps.signing.outputs.mode == 'developer-id'
+        env:
+          NOTARY_KEY: ${{ secrets.APPLE_NOTARY_API_KEY_P8 }}
         run: |
           mkdir -p .secrets
-          echo "${{ secrets.APPLE_NOTARY_API_KEY_P8 }}" > .secrets/AuthKey.p8
+          printf '%s' "$NOTARY_KEY" > .secrets/AuthKey.p8
           chmod 600 .secrets/AuthKey.p8
 
       - name: Pack macOS release
-        run: pnpm release:pack:mac
+        if: steps.signing.outputs.mode == 'developer-id'
+        run: pnpm release:pack:mac --publish ${{ github.event_name == 'push' && 'always' || 'never' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_ENV: production
@@ -252,6 +320,25 @@ jobs:
           APPLE_API_KEY: ${{ format('{0}/.secrets/AuthKey.p8', github.workspace) }}
           APPLE_API_KEY_ID: ${{ secrets.APPLE_NOTARY_API_KEY_ID }}
           APPLE_API_ISSUER: ${{ secrets.APPLE_NOTARY_API_ISSUER_ID }}
+
+      - name: Pack ad-hoc macOS release
+        if: steps.signing.outputs.mode == 'ad-hoc'
+        run: pnpm release:pack:mac --publish ${{ github.event_name == 'push' && 'always' || 'never' }} -c.mac.identity=- -c.mac.notarize=false -c.mac.hardenedRuntime=false
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_ENV: production
+
+      - name: Upload macOS packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: macos-packages
+          path: |
+            apps/sweetspot/dist/*.dmg
+            apps/sweetspot/dist/*.zip
+            apps/sweetspot/dist/*.blockmap
+            apps/sweetspot/dist/latest-mac.yml
+          if-no-files-found: error
+          retention-days: 3
 
       - if: always()
         name: Cleanup Apple secrets
@@ -262,7 +349,7 @@ jobs:
       - build-windows
       - build-macos
     runs-on: ubuntu-latest
-    if: github.ref_type == 'tag'
+    if: github.event_name == 'push' && github.ref_type == 'tag'
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v7
