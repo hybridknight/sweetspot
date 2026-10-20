@@ -1,6 +1,7 @@
+import { RiFolderOpenLine, RiGithubFill, RiGlobalLine } from "@remixicon/react";
 import { UPDATE_CHANNEL_LABELS, type UpdateChannel } from "@shared/utils/updater";
 import { createFileRoute } from "@tanstack/react-router";
-import { RiFolderOpenLine, RiGithubFill, RiGlobalLine } from "@remixicon/react";
+import { MacUpdateDownload } from "@/components/mac-update-download";
 import { SettingsCheckbox } from "@/components/settings-checkbox";
 import { SettingsSelect } from "@/components/settings-select";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,8 @@ const CHANNEL_OPTIONS = (Object.keys(UPDATE_CHANNEL_LABELS) as UpdateChannel[]).
 
 function AboutSettingsPage() {
 	const appVersion = window.api.version;
-	const { updateInfo, progress, status, checking, installing, check, install } = useUpdater();
+	const isMacOS = window.api.platform.isMacOS;
+	const { updateInfo, progress, status, checking, installing, check, install, downloadTarget, openingDownload, downloadOpened, downloadError, downloadDmg } = useUpdater();
 	const { mutateAsync: openLogsFolder, isLoading: openingLogs } = trpc.app.openLogsFolder.useMutation();
 
 	return (
@@ -44,7 +46,7 @@ function AboutSettingsPage() {
 							<span className="text-xs font-medium">Version</span>
 							<span className="text-xs text-muted-foreground">v{appVersion}</span>
 						</div>
-						{status === "ready" && updateInfo ? (
+						{!isMacOS && status === "ready" && updateInfo ? (
 							<Button variant="outline" onClick={() => void install(true)} disabled={installing}>
 								Install {updateInfo.version}
 								{installing ? (
@@ -71,6 +73,13 @@ function AboutSettingsPage() {
 							</Button>
 						)}
 					</div>
+					{isMacOS && updateInfo && <MacUpdateDownload
+						targetLabel={downloadTarget?.label}
+						opening={openingDownload}
+						opened={downloadOpened}
+						error={downloadError}
+						onDownload={downloadDmg}
+					/>}
 					<nav aria-label="Sweet Spot links" className="flex flex-wrap gap-4 border-t border-border pt-4">
 						{[
 							{ href: "https://github.com/hybridknight/sweetspot", label: "GitHub", icon: RiGithubFill },
@@ -109,12 +118,12 @@ function AboutSettingsPage() {
 			<Card>
 				<CardHeader>
 					<CardTitle>Update preferences</CardTitle>
-					<CardDescription>Choose automatic updates and the releases you receive.</CardDescription>
+					<CardDescription>Choose update checks and the releases you receive.</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<FieldGroup>
-						<SettingsCheckbox configKey="app.autoupdate" description="Automatically check for and install app updates.">
-							Automatic updates
+						<SettingsCheckbox configKey="app.autoupdate" description={isMacOS ? "Check for new versions and notify you when a DMG is available." : "Automatically check for and install app updates."}>
+							{isMacOS ? "Automatic update checks" : "Automatic updates"}
 						</SettingsCheckbox>
 						<SettingsSelect configKey="app.channel" defaultValue="stable" label="Update channel" options={CHANNEL_OPTIONS} />
 					</FieldGroup>

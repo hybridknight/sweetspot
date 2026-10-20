@@ -1,5 +1,5 @@
 import type { ProgressInfo, UpdateInfo, UpdateStatus } from "@shared/utils/updater";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 
 /**
@@ -7,10 +7,15 @@ import { trpc } from "@/lib/trpc";
  */
 export function useUpdater() {
 	const utils = trpc.useUtils();
+	const isMacOS = window.api.platform.isMacOS;
+	const { data: downloadTarget } = trpc.update.downloadTarget.useQuery();
+	const dmgMutation = trpc.update.downloadDmg.useMutation();
 	const { data: updateInfo = null } = trpc.update.get.useQuery();
 	const { data: downloaded = false } = trpc.update.downloaded.useQuery();
 	const { data: progress = null } = trpc.update.progress.useQuery();
 	const { data: checking = false } = trpc.update.checking.useQuery();
+
+	useEffect(() => { dmgMutation.reset(); }, [updateInfo?.version]);
 
 	const checkMutation = trpc.update.check.useMutation();
 	const installMutation = trpc.update.install.useMutation();
@@ -28,7 +33,7 @@ export function useUpdater() {
 	});
 	trpc.update.onDownloaded.useSubscription(undefined, {
 		onData: (info) => {
-			utils.update.downloaded.setData(undefined, true);
+			utils.update.downloaded.setData(undefined, !isMacOS && !!info);
 			utils.update.progress.setData(undefined, null);
 			if (info) utils.update.get.setData(undefined, info as UpdateInfo);
 		},
@@ -42,7 +47,9 @@ export function useUpdater() {
 		[checking, checkMutation],
 	);
 
-	const install = useCallback((quitAndInstall = true) => installMutation.mutateAsync(quitAndInstall), [installMutation]);
+	const install = useCallback((quitAndInstall = true) => isMacOS
+		? dmgMutation.mutateAsync().then(() => true)
+		: installMutation.mutateAsync(quitAndInstall), [isMacOS, dmgMutation, installMutation]);
 
 	const cancel = useCallback(() => cancelMutation.mutateAsync(), [cancelMutation]);
 
@@ -55,8 +62,8 @@ export function useUpdater() {
 		return check(true);
 	}, [downloaded, install, check]);
 
-	const installing = installMutation.isLoading;
-	const isPending = checking || checkMutation.isLoading || installing;
+	const installing = !isMacOS && installMutation.isLoading;
+	const isPending = checking || checkMutation.isLoading || installing || dmgMutation.isLoading;
 
 	const status = useMemo<UpdateStatus>(() => {
 		if (installing) return "installing";
@@ -68,6 +75,11 @@ export function useUpdater() {
 	}, [installing, checking, checkMutation.isLoading, progress, downloaded, updateInfo]);
 
 	return {
+		downloadTarget,
+		openingDownload: dmgMutation.isLoading,
+		downloadOpened: dmgMutation.data?.kind,
+		downloadError: dmgMutation.error?.message,
+		downloadDmg: () => dmgMutation.mutate(),
 		updateInfo: updateInfo as UpdateInfo | null,
 		downloaded,
 		progress: progress as ProgressInfo | null,

@@ -6,8 +6,8 @@ import { isDevelopment, isProduction } from "@main/infra/devUtils";
 import SettingsProvider from "@main/trpc/routers/settings/service";
 import { createAppWindow } from "@main/windows/windowUtils";
 import { cacheWithFile } from "@shared/utils/filecache";
-import { authorName, githubRepoFetch, repoName } from "@shared/utils/github";
 import type { GithubRelease } from "@shared/utils/github";
+import { authorName, githubRepoFetch, repoName } from "@shared/utils/github";
 import type { ProgressInfo, ReleaseNoteEntry, UpdateChannel, UpdateInfo } from "@shared/utils/updater";
 import {
 	electronUpdaterChannelFor,
@@ -15,10 +15,11 @@ import {
 	parseUpdateChannel,
 } from "@shared/utils/updater";
 import { observable } from "@trpc/server/observable";
-import { App, BrowserWindow } from "electron";
+import { App, BrowserWindow, shell } from "electron";
 import { autoUpdater, CancellationToken, type UpdateInfo as ElectronUpdateInfo } from "electron-updater";
 import { clamp } from "lodash-es";
 import semver from "semver";
+import { macDownloadTarget, selectMacDmg } from "./macDmg";
 
 const UPDATE_CHECK_INTERVAL_MS = 1000 * 60 * 15;
 const GITHUB_FEED = { owner: authorName, repo: repoName };
@@ -305,7 +306,7 @@ export default class UpdateProvider extends BaseProvider implements BeforeStart,
 	}
 
 	private async handleUpdateDownloaded(ev: ElectronUpdateInfo) {
-		if (this._ignoreUpdaterEvents) return;
+		if (this._ignoreUpdaterEvents || process.platform === "darwin") return;
 		this.setDownloaded(await this.resolveUpdateInfo(ev));
 		if (this.isAutoUpdate) this.quitAndInstall();
 	}
@@ -341,14 +342,14 @@ export default class UpdateProvider extends BaseProvider implements BeforeStart,
 			const parent = this.windowContext.main;
 			const { width: parentWidth, height: parentHeight } = parent.getBounds();
 			const width = clamp(parentWidth, 600, 800);
-			const height = clamp(Math.round(parentHeight * 0.45), 400, 480);
+			const height = process.platform === "darwin" ? 480 : clamp(Math.round(parentHeight * 0.45), 400, 480);
 			this._window = await createAppWindow({
 				path: "/update",
 				height,
 				width,
 				minWidth: 600,
 				maxWidth: 800,
-				minHeight: 400,
+				minHeight: process.platform === "darwin" ? 480 : 400,
 				maxHeight: 480,
 				maximizeable: false,
 				minimizeable: false,
@@ -383,7 +384,7 @@ export default class UpdateProvider extends BaseProvider implements BeforeStart,
 		});
 		if (devShowUpdateDialog) autoUpdater.forceDevUpdateConfig = true;
 		autoUpdater.autoDownload = false;
-		autoUpdater.autoInstallOnAppQuit = isProduction;
+		autoUpdater.autoInstallOnAppQuit = isProduction && process.platform !== "darwin";
 		autoUpdater.fullChangelog = false;
 		this.applyUpdateChannel();
 
@@ -442,7 +443,7 @@ export default class UpdateProvider extends BaseProvider implements BeforeStart,
 	}
 
 	isUpdateDownloaded() {
-		return this._updateDownloaded;
+		return process.platform !== "darwin" && this._updateDownloaded;
 	}
 
 	getProgress() {
@@ -454,12 +455,38 @@ export default class UpdateProvider extends BaseProvider implements BeforeStart,
 	}
 
 	private quitAndInstall() {
-		if (isAppQuitting() || this._updateQueuedForInstall) return;
+		if (process.platform === "darwin" || isAppQuitting() || this._updateQueuedForInstall) return;
 		this._updateQueuedForInstall = true;
 		void requestQuitAndInstall();
 	}
 
+	getDownloadTarget() {
+		return process.platform === "darwin" ? macDownloadTarget(process.arch, this.app.runningUnderARM64Translation) : null;
+	}
+
+	async openMacDmgDownload() {
+		const target = this.getDownloadTarget();
+		if (!target || !this._update || !this._updateAvailable) throw new Error("No Mac update is available. Check for updates again.");
+		const tag = `v${this._update.version}`;
+		const releaseUrl = `https://github.com/${GITHUB_FEED.owner}/${GITHUB_FEED.repo}/releases/tag/${encodeURIComponent(tag)}`;
+		let downloadUrl: string | null = null;
+		try {
+			const { data, error } = await githubRepoFetch<GithubReleaseJson>(`/releases/tags/${encodeURIComponent(tag)}`);
+			if (!error && data && !data.draft && data.tag_name === tag) {
+				downloadUrl = selectMacDmg(data.assets ?? [], { ...GITHUB_FEED, tag, architecture: target.architecture });
+			}
+		} catch (error) {
+			this.logger.debug("Could not resolve Mac DMG; opening the release page", error);
+		}
+		await shell.openExternal(downloadUrl ?? releaseUrl);
+		return { kind: downloadUrl ? "dmg" as const : "release" as const, ...target };
+	}
+
 	async onAutoUpdateRun(_ev: unknown = null, quitAndInstall = true) {
+		if (process.platform === "darwin") {
+			await this.openMacDmgDownload();
+			return true;
+		}
 		if (this._downloadToken) throw new Error("Download already in progress [E002]");
 		if (!this._updateDownloaded && !this._updateQueuedForInstall) {
 			const [downloadPromise] = this.onDownloadUpdate();
@@ -529,6 +556,7 @@ export default class UpdateProvider extends BaseProvider implements BeforeStart,
 	}
 
 	onDownloadUpdate(): [Promise<string[]> | null, (() => void) | null] {
+		if (process.platform === "darwin") return [null, null];
 		if (!this._updateAvailable || this._updateDownloaded || this._updateQueuedForInstall) {
 			return [null, null];
 		}
