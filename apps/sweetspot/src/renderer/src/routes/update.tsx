@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ArrowDownCircleIcon, ArrowRightIcon, CheckCircle2Icon, DownloadIcon, RefreshCwIcon } from "lucide-react";
 import _prettyBytes from "pretty-bytes";
 import { MacUpdateDownload } from "@/components/mac-update-download";
-import { ReleaseTimeline } from "@/components/release-notes";
+import { ReleaseHighlights } from "@/components/release-notes";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress";
@@ -160,11 +160,11 @@ function UpdatePage() {
 					</div>
 				</aside>
 
-				{/* right — changelog timeline */}
+				{/* right — release highlights */}
 				<main className="flex min-w-0 flex-1 flex-col">
 					<ScrollArea className="min-h-0 flex-1">
 						<div className="px-5 py-4">
-							<ReleaseTimeline releases={releases} />
+							<ReleaseHighlights releases={releases} />
 						</div>
 					</ScrollArea>
 				</main>

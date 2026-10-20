@@ -1,5 +1,5 @@
 import { type EvaluateOptions, evaluate } from "@mdx-js/mdx";
-import { authorName, compareUrlParse } from "@shared/utils/github";
+import { compareUrlParse } from "@shared/utils/github";
 import type { MDXContent, MDXModule } from "mdx/types";
 import type { ComponentType, ReactNode } from "react";
 import * as runtime from "react/jsx-runtime";
@@ -28,33 +28,9 @@ export class MarkdownStringParser {
 		} as EvaluateOptions;
 	}
 
-	/**
-	 * Normalize GitHub release notes: contributor avatars + changelog links.
-	 */
+	/** Normalize changelog links without adding contributor names or images. */
 	preprocessReleaseNotes(content: string): string {
-		const lines = content.split("\n");
-		const next = lines.map((line) => {
-			if (line.startsWith("- ")) {
-				const mainContent = line.split(";")[0];
-				const context = line.split(";")[2] ?? "@" + authorName;
-				const mentions = context
-					?.split(" ")
-					.filter((word) => word.startsWith("@"))
-					.map((mention) => {
-						const username = mention.replace("@", "");
-						const avatarUrl = `https://github.com/${username}.png`;
-						return `[![${mention}](${avatarUrl})](https://github.com/${username})`;
-					});
-				if (!mentions?.length) return line;
-				return mainContent.replace(/&nbsp/g, "") + " – " + mentions.join(" ");
-			}
-			if (compareUrlParse.test(line)) {
-				compareUrlParse.lastIndex = 0;
-				return line.replace(compareUrlParse, `[View on Github]($1)`);
-			}
-			return line;
-		});
-		return next.join("\n");
+		return content.replace(compareUrlParse, "[View on GitHub]($1)");
 	}
 
 	async parseModule(source: string, options: MarkdownParseOptions = {}): Promise<MDXModule> {

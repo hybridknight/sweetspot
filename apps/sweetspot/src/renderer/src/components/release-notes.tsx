@@ -14,9 +14,7 @@ const mdxComponents = {
 	a: (props: ComponentProps<"a">) => (
 		<a {...props} className={cn("text-primary underline-offset-2 hover:underline", props.className)} target="_blank" rel="noreferrer" />
 	),
-	img: (props: ComponentProps<"img">) => (
-		<img {...props} className={cn("inline-block size-5 rounded-full align-middle ring-1 ring-border", props.className)} alt={props.alt ?? ""} />
-	),
+	img: () => null,
 	ul: (props: ComponentProps<"ul">) => <ul {...props} className={cn("my-1 flex flex-col gap-1.5 pl-4 list-disc", props.className)} />,
 	ol: (props: ComponentProps<"ol">) => <ol {...props} className={cn("my-1 flex flex-col gap-1.5 pl-4 list-decimal", props.className)} />,
 	li: (props: ComponentProps<"li">) => <li {...props} className={cn("text-xs/relaxed text-muted-foreground", props.className)} />,
@@ -73,67 +71,28 @@ function MarkdownBody({ markdown, className }: MarkdownBodyProps) {
 	);
 }
 
-interface ReleaseTimelineProps {
+interface ReleaseHighlightsProps {
 	releases: ReleaseNoteEntry[];
 	className?: string;
 }
 
-export function ReleaseTimeline({ releases, className }: ReleaseTimelineProps) {
-	if (!releases.length) {
-		return <p className={cn("text-center text-xs text-muted-foreground", className)}>No release notes for this version.</p>;
-	}
-
+export function ReleaseHighlights({ releases, className }: ReleaseHighlightsProps) {
+	const release = releases[0];
 	return (
-		<ol className={cn("relative flex flex-col", className)}>
-			{/* single continuous rail — sits behind dots, never clipped by sticky bg */}
-			<span
-				className="pointer-events-none absolute top-4 bottom-4 left-[7px] z-0 w-px bg-border"
-				aria-hidden
-			/>
-
-			{releases.map((release, index) => {
-				const isNewest = index === 0;
-
-				return (
-					<li key={release.version} className="relative grid grid-cols-[16px_minmax(0,1fr)] gap-x-3 pb-5 last:pb-0">
-						{/* rail column — transparent, no sticky bg */}
-						<div className="relative z-10 flex justify-center pt-3">
-							<span className="relative flex size-4 items-center justify-center">
-								{isNewest ? (
-									<>
-										<span className="absolute size-3 animate-ping rounded-full bg-green-500/40" aria-hidden />
-										<span className="relative size-2.5 rounded-full bg-green-500 ring-2 ring-background" />
-									</>
-								) : (
-									<span className="size-2 rounded-full bg-muted-foreground/50 ring-2 ring-background" />
-								)}
-							</span>
-						</div>
-
-						{/* content column */}
-						<div className="min-w-0">
-							<div className="sticky top-0 z-20 bg-background/95 py-2.5 backdrop-blur-sm">
-								<div className="flex flex-wrap items-center gap-2">
-									<Badge variant={isNewest ? "default" : "outline"}>v{release.version}</Badge>
-									{release.name ? <span className="truncate text-xs text-muted-foreground">{release.name}</span> : null}
-								</div>
-							</div>
-							<div className="pt-1">
-								{release.body ? (
-									<MarkdownBody markdown={release.body} />
-								) : (
-									<p className="text-xs text-muted-foreground">No notes for this release.</p>
-								)}
-							</div>
-						</div>
-					</li>
-				);
-			})}
-		</ol>
+		<section className={cn("flex flex-col gap-4", className)} aria-label="Release highlights">
+			<div className="flex items-center gap-2">
+				<h2 className="text-sm font-medium">What’s new</h2>
+				{release ? <Badge variant="outline">v{release.version}</Badge> : null}
+			</div>
+			{release?.body ? (
+				<MarkdownBody markdown={release.body} />
+			) : (
+				<p className="text-xs text-muted-foreground">No release notes for this version.</p>
+			)}
+		</section>
 	);
 }
 
-/** @deprecated Prefer ReleaseTimeline — kept for single-blob fallback. */
 export function ReleaseNotes({ markdown, className }: { markdown: string; className?: string }) {
 	return <MarkdownBody markdown={markdown} className={className} />;
 }

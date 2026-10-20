@@ -96,6 +96,22 @@ jobs:
           fs.writeFileSync(p, next);
           EOF
 
+      - name: Validate user-facing release notes
+        if: github.ref_type == 'tag' && steps.getVersion.outputs.ok == 'true'
+        shell: bash
+        env:
+          APP_VERSION: ${{ steps.getVersion.outputs.value }}
+        run: |
+          notes="release-notes/$APP_VERSION.md"
+          if [[ ! -s "$notes" ]] || [[ -z "$(tr -d '[:space:]' < "$notes")" ]]; then
+            echo "::error::Add a short user-facing summary in $notes before releasing."
+            exit 1
+          fi
+          if [[ $(wc -w < "$notes") -gt 100 ]]; then
+            echo "::error::Keep $notes to at most 100 words focused on user benefits."
+            exit 1
+          fi
+
       - name: Install dependencies
         run: node scripts/install-dependencies.mjs
         env:
@@ -366,42 +382,11 @@ jobs:
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - name: Build release notes from commits
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Read reviewed release notes
         shell: bash
-        run: |
-          tag="${{ steps.version.outputs.tag }}"
-          prev=""
-          if prev=$(gh release list --exclude-drafts --limit 20 --json tagName --jq ".[] | select(.tagName != \"$tag\") | .tagName" | head -n1); then
-            :
-          else
-            prev=""
-          fi
-
-          if [ -z "$prev" ]; then
-            prev=$(git describe --tags --abbrev=0 "${tag}^" 2>/dev/null || true)
-          fi
-
-          if [ -z "$prev" ]; then
-            echo "No previous published release — listing all commits reachable from $tag"
-            git log --pretty=tformat:"- %s (%h)" "$tag" > release-notes-commits.txt || true
-          else
-            echo "Commits: $prev..$tag"
-            git log --pretty=tformat:"- %s (%h)" "$prev..$tag" > release-notes-commits.txt || true
-          fi
-
-          if [ ! -s release-notes-commits.txt ]; then
-            echo "- No commits listed for this range." > release-notes-commits.txt
-          fi
-
-          {
-            echo "## Changes"
-            echo
-            cat release-notes-commits.txt
-            echo
-          } > release-notes.md
-          cat release-notes.md
+        env:
+          APP_VERSION: ${{ steps.version.outputs.version }}
+        run: cp "release-notes/$APP_VERSION.md" release-notes.md
 
       - name: Set draft release title and notes
         env:
@@ -412,5 +397,5 @@ jobs:
           version="${{ steps.version.outputs.version }}"
           gh release edit "$tag" \
             --draft \
-            --title "v$version - " \
+            --title "Sweet Spot $version" \
             --notes-file release-notes.md
