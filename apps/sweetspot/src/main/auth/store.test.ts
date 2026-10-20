@@ -5,7 +5,7 @@ const state = vi.hoisted(() => ({ create: vi.fn(() => { throw new Error("unexpec
 vi.mock("@main/lib/store/createYmlStore", () => ({ createEncryptedStore: state.create }));
 vi.mock("electron", () => ({ app: { getPath: () => join(tmpdir(), "sweetspot-unused-pairing-store-fixture") } }));
 import { readAuthClients } from "./store";
-it("does not create a store or unlock the keychain when pairing has never been used", () => {
-	expect(readAuthClients()).toEqual([]);
+it("does not create a store or unlock the keychain when pairing has never been used", async () => {
+	expect(await readAuthClients()).toEqual([]);
 	expect(state.create).not.toHaveBeenCalled();
 });

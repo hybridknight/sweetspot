@@ -8,18 +8,21 @@ interface AuthStoreShape {
 	clients: AuthClientRecord[];
 }
 
-let authStore: ReturnType<typeof createEncryptedStore<AuthStoreShape>> | undefined;
+let authStore: Awaited<ReturnType<typeof createEncryptedStore<AuthStoreShape>>> | undefined;
+let opening: Promise<NonNullable<typeof authStore>> | undefined;
 export function getAuthStore() {
-	return authStore ??= createEncryptedStore<AuthStoreShape>("ytm-auth", { defaults: { clients: [] } });
+	return opening ??= createEncryptedStore<AuthStoreShape>("ytm-auth", { defaults: { clients: [] } }).then((store) => authStore = store);
 }
 
-export function readAuthClients(): AuthClientRecord[] {
+export async function readAuthClients(): Promise<AuthClientRecord[]> {
 	// An unused pairing feature needs neither a keychain key nor an empty store.
 	if (!authStore && !existsSync(join(app.getPath("userData"), "ytm-auth.ytm"))) return [];
-	const clients = getAuthStore().get("clients", []);
+	const clients = (await getAuthStore()).get("clients", []);
 	return Array.isArray(clients) ? clients : [];
 }
 
 export function writeAuthClients(clients: AuthClientRecord[]): void {
-	getAuthStore().set("clients", clients);
+	// Mutations prepare the store before changing the manager, so persistence stays synchronous.
+	if (!authStore) throw new Error("Paired-client storage is not initialized yet.");
+	authStore.set("clients", clients);
 }

@@ -11,9 +11,12 @@ vi.mock("electron", () => ({
 		isEncryptionAvailable: () => state.available,
 		getSelectedStorageBackend: () => state.backend,
 		encryptString: (s: string) => Buffer.from(`protected:${s}`),
+		encryptStringAsync: vi.fn(async (s: string) => Buffer.from(`protected:${s}`)),
+		decryptStringAsync: vi.fn(async (b: Buffer) => ({ result: b.toString().slice(10), shouldReEncrypt: false })),
 		decryptString: (b: Buffer) => { if (!b.toString().startsWith("protected:")) throw new Error("OS decryption failed"); return b.toString().slice(10); },
 	},
 }));
+vi.mock("@main/infra/secureStorage", () => ({ prepareSecureStorage: async () => {} }));
 import { createCacheEncryption, createEncryptedStore, createEncryption, getOrCreateEncryptionSecret } from "./createYmlStore";
 import { safeStorage } from "electron";
 
@@ -24,7 +27,7 @@ function legacy(value: unknown, secret: string) {
 	const raw = `${data}.${iv.toString("base64")}`;
 	return `${raw}.${createHash("sha256").update(raw).digest("base64")}`;
 }
-beforeEach(() => { state.directory = fs.mkdtempSync(path.join(os.tmpdir(), "sweetspot-store-")); state.available = true; state.backend = "gnome_libsecret"; });
+beforeEach(() => { vi.clearAllMocks(); vi.stubGlobal("process", { ...process, platform: "linux" }); state.directory = fs.mkdtempSync(path.join(os.tmpdir(), "sweetspot-store-")); state.available = true; state.backend = "gnome_libsecret"; });
 afterEach(() => { fs.rmSync(state.directory, { force: true, recursive: true }); vi.unstubAllGlobals(); });
 
 describe("OS protected stores", () => {
@@ -40,45 +43,70 @@ describe("OS protected stores", () => {
 		expect(fs.readdirSync(state.directory)).toEqual([]);
 		vi.restoreAllMocks();
 	});
-	it("migrates paired clients once and keeps the original as a restricted backup", () => {
+	it("shares concurrent macOS key loads and avoids the separate synchronous provider", async () => {
+		vi.stubGlobal("process", { ...process, platform: "darwin" });
+		const syncCheck = vi.spyOn(safeStorage, "isEncryptionAvailable");
+		const syncEncrypt = vi.spyOn(safeStorage, "encryptString");
+		const encrypt = vi.spyOn(safeStorage, "encryptStringAsync");
+		const keys = await Promise.all([getOrCreateEncryptionSecret("mac"), getOrCreateEncryptionSecret("mac")]);
+		expect(keys[0]).toBe(keys[1]);
+		expect(encrypt).toHaveBeenCalledTimes(1);
+		expect(syncCheck).not.toHaveBeenCalled();
+		expect(syncEncrypt).not.toHaveBeenCalled();
+		vi.restoreAllMocks();
+	});
+	it("does not retry a failed macOS unlock across repeated requests", async () => {
+		vi.stubGlobal("process", { ...process, platform: "darwin" });
+		const encrypt = vi.spyOn(safeStorage, "encryptStringAsync").mockRejectedValueOnce(new Error("Access denied"));
+		await expect(getOrCreateEncryptionSecret("denied")).rejects.toThrow("Access denied");
+		await expect(getOrCreateEncryptionSecret("denied")).rejects.toThrow("Access denied");
+		expect(encrypt).toHaveBeenCalledTimes(1);
+		expect(fs.readdirSync(state.directory)).toEqual([]);
+		vi.restoreAllMocks();
+	});
+	it("migrates paired clients once and keeps the original as a restricted backup", async () => {
 		const name = "ytm-auth", secret = "legacy-profile-encryption-secret";
 		const clients = [{ appId: "assistant", token: "old-opaque-bearer" }];
 		fs.writeFileSync(path.join(state.directory, "ytm-auth.key"), legacy({ name, secret }, Buffer.from(name.padStart(32, "0")).toString("base64")));
 		const old = legacy({ clients }, secret), filename = path.join(state.directory, "ytm-auth.ytm");
 		fs.writeFileSync(filename, old);
-		const store = createEncryptedStore(name, { defaults: { clients: [] as typeof clients } });
+		const store = await createEncryptedStore(name, { defaults: { clients: [] as typeof clients } });
 		expect(store.get("clients")).toEqual(clients);
 		expect(fs.readFileSync(filename, "utf8")).toMatch(/^ssenc2\./);
 		const backup = fs.readFileSync(`${filename}.legacy-backup`, "utf8");
 		expect(backup).not.toBe(old);
-		expect(createEncryption(name).decrypt(backup)).toEqual({ legacy: old });
+		expect((await createEncryption(name)).decrypt(backup)).toEqual({ legacy: old });
 		expect(fs.statSync(`${filename}.legacy-backup`).mode & 0o777).toBe(0o600);
-		expect(createEncryptedStore(name).get("clients")).toEqual(clients);
+		expect((await createEncryptedStore(name)).get("clients")).toEqual(clients);
 		store.set("clients", []);
-		expect(createEncryptedStore(name).get("clients")).toEqual([]);
+		expect((await createEncryptedStore(name)).get("clients")).toEqual([]);
 		expect(fs.readFileSync(`${filename}.legacy-backup`, "utf8")).toBe(backup);
 	});
-	it("preserves corrupt stores instead of overwriting them with defaults", () => {
+	it("preserves corrupt stores instead of overwriting them with defaults", async () => {
 		const filename = path.join(state.directory, "ytm-auth.ytm"), corrupt = "ssenc2.bad.bad.bad";
 		fs.writeFileSync(filename, corrupt);
-		expect(() => createEncryptedStore("ytm-auth", { defaults: { clients: [] } })).toThrow("refusing to replace");
+		await expect(createEncryptedStore("ytm-auth", { defaults: { clients: [] } })).rejects.toThrow("refusing to replace");
 		expect(fs.readFileSync(filename, "utf8")).toBe(corrupt);
 	});
-	it("does not write keys when OS encryption is unavailable", () => {
+	it("does not write keys when OS encryption is unavailable", async () => {
 		state.available = false;
-		expect(() => getOrCreateEncryptionSecret("test")).toThrow("Secure storage is unavailable");
+		await expect(getOrCreateEncryptionSecret("test")).rejects.toThrow("Secure storage is unavailable");
 		expect(fs.readdirSync(state.directory)).toEqual([]);
 	});
-	it("refuses Linux plaintext fallback", () => {
+	it("refuses Linux plaintext fallback", async () => {
 		vi.stubGlobal("process", { ...process, platform: "linux" }); state.backend = "basic_text";
-		expect(() => getOrCreateEncryptionSecret("test")).toThrow("Secure storage is unavailable");
+		await expect(getOrCreateEncryptionSecret("test")).rejects.toThrow("Secure storage is unavailable");
 		expect(fs.readdirSync(state.directory)).toEqual([]);
 	});
-	it("reuses protected keys and never replaces unreadable keys", () => {
-		const key = getOrCreateEncryptionSecret("test"), filename = path.join(state.directory, "test.key.v2");
-		expect(getOrCreateEncryptionSecret("test")).toBe(key);
+	it("reuses protected keys and never replaces unreadable keys", async () => {
+		const key = await getOrCreateEncryptionSecret("test"), filename = path.join(state.directory, "test.key.v2");
+		expect(await getOrCreateEncryptionSecret("test")).toBe(key);
 		fs.writeFileSync(filename, "unreadable");
-		expect(() => getOrCreateEncryptionSecret("test")).toThrow("OS decryption failed");
+		// Successful keys stay in memory until restart; an unreadable different key is preserved.
+		expect(await getOrCreateEncryptionSecret("test")).toBe(key);
+		const unreadable = path.join(state.directory, "broken.key.v2");
+		fs.writeFileSync(unreadable, "unreadable");
+		await expect(getOrCreateEncryptionSecret("broken")).rejects.toThrow("OS decryption failed");
 		expect(fs.readFileSync(filename, "utf8")).toBe("unreadable");
 	});
 });

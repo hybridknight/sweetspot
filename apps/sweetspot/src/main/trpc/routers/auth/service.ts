@@ -1,4 +1,4 @@
-import { type AuthClientRecord, appAuth, type PendingAuthRequest, readAuthClients, writeAuthClients } from "@main/auth";
+import { type AuthClientRecord, appAuth, type PendingAuthRequest, getAuthStore, readAuthClients, writeAuthClients } from "@main/auth";
 import { AfterInit, BaseProvider } from "@main/core/baseProvider";
 import { type App } from "electron";
 import { Subject } from "rxjs";
@@ -10,14 +10,17 @@ import { Subject } from "rxjs";
 export default class AuthProvider extends BaseProvider implements AfterInit {
 	private _bound = false;
 	private storageReady = false;
-	private requireStorage() {
+	private loading: Promise<void> | undefined;
+	private async requireStorage(forWrite = false) {
 		if (!this._bound) throw new Error("Paired-client storage is not initialized yet.");
-		if (this.storageReady) return;
 		try {
-			appAuth.loadClients(readAuthClients());
-			this.storageReady = true;
+			await (this.loading ??= (async () => {
+				appAuth.loadClients(await readAuthClients());
+				this.storageReady = true;
+			})());
+			if (forWrite) await getAuthStore();
 		} catch (cause) {
-			throw new Error("Paired-client storage is unavailable. Unlock your OS keychain or restore a valid store, then try again.", { cause });
+			throw new Error("Paired-client storage is unavailable. Unlock your OS keychain or restore a valid store, then restart Sweet Spot.", { cause });
 		}
 	}
 
@@ -45,14 +48,15 @@ export default class AuthProvider extends BaseProvider implements AfterInit {
 		appAuth.on("resolved", () => {
 			this.pendingAuth$.next(appAuth.listPending()[0] ?? null);
 		});
+		// API and MCP also load snapshots; reads must never create or rewrite a store.
+		appAuth.on("loaded", (next: AuthClientRecord[]) => this.clients$.next(next));
 		appAuth.on("clients", (next: AuthClientRecord[]) => {
-			// Loading a snapshot emits too; don't rewrite it or create an empty store.
 			if (this.storageReady) writeAuthClients(next);
 			this.clients$.next(next);
 		});
 		const settings = this.getProvider("settings").instance;
 		if (settings.mcp?.enabled || (settings.api?.enabled && settings.api?.authRequired)) {
-			try { this.requireStorage(); }
+			try { await this.requireStorage(); }
 			catch (error) { this.logger.error("Paired clients unavailable", error); }
 		}
 	}
@@ -65,13 +69,13 @@ export default class AuthProvider extends BaseProvider implements AfterInit {
 		return appAuth.listPending();
 	}
 
-	getClients(): AuthClientRecord[] {
-		this.requireStorage();
+	async getClients(): Promise<AuthClientRecord[]> {
+		await this.requireStorage();
 		return appAuth.listClients();
 	}
 
-	approveAuth(id: string): AuthClientRecord | null {
-		this.requireStorage();
+	async approveAuth(id: string): Promise<AuthClientRecord | null> {
+		await this.requireStorage(true);
 		return appAuth.approve(id);
 	}
 
@@ -79,23 +83,23 @@ export default class AuthProvider extends BaseProvider implements AfterInit {
 		return appAuth.deny(id);
 	}
 
-	revokeClient(appId: string): boolean {
-		this.requireStorage();
+	async revokeClient(appId: string): Promise<boolean> {
+		await this.requireStorage(true);
 		return appAuth.revoke(appId);
 	}
 
-	revokeAllClients() {
-		this.requireStorage();
+	async revokeAllClients() {
+		await this.requireStorage(true);
 		appAuth.revokeAll();
 	}
 
-	createManualClient(input: { appId: string; appName: string; appVersion?: string }): AuthClientRecord {
-		this.requireStorage();
+	async createManualClient(input: { appId: string; appName: string; appVersion?: string }): Promise<AuthClientRecord> {
+		await this.requireStorage(true);
 		return appAuth.createManual(input);
 	}
 
-	getClientToken(appId: string): string | null {
-		this.requireStorage();
+	async getClientToken(appId: string): Promise<string | null> {
+		await this.requireStorage();
 		return appAuth.getClientToken(appId);
 	}
 }

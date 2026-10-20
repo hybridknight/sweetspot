@@ -74,7 +74,7 @@ export const createApiWorker = async (api: ApiProvider, parent?: BrowserWindow):
 	const initialize = async (settings: SettingsProvider["instance"]) => {
 		if (handle) await destroy();
 		// Encrypted auth store is source of truth (AuthProvider may migrate legacy settings first).
-		appAuth.loadClients(readAuthClients());
+		appAuth.loadClients(await readAuthClients());
 		handle = await startApiServer({
 			config: { ...settings },
 			routes: Object.keys(apiMap),

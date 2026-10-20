@@ -18,36 +18,36 @@ const createClientInput = z.object({
 });
 
 export const authRouter = router({
-	status: publicProcedure.query(({ ctx }) => {
+	status: publicProcedure.query(async ({ ctx }) => {
 		const auth = provider(ctx, "auth");
 		const settings = provider(ctx, "settings").instance;
 		return {
 			authRequired: settings.api?.authRequired === true,
 			pending: auth.getPendingAuth(),
-			clients: auth.getClients().map(toSafeClient),
+			clients: (await auth.getClients()).map(toSafeClient),
 		};
 	}),
 	pending: publicProcedure.query(({ ctx }) => provider(ctx, "auth").getPendingAuth()),
-	clients: publicProcedure.query(({ ctx }) => provider(ctx, "auth").getClients().map(toSafeClient)),
-	approve: publicProcedure.input(z.object({ id: z.string() })).mutation(({ ctx, input }) => {
-		const client = provider(ctx, "auth").approveAuth(input.id);
+	clients: publicProcedure.query(async ({ ctx }) => (await provider(ctx, "auth").getClients()).map(toSafeClient)),
+	approve: publicProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+		const client = await provider(ctx, "auth").approveAuth(input.id);
 		return client ? toSafeClient(client) : null;
 	}),
 	deny: publicProcedure.input(z.object({ id: z.string() })).mutation(({ ctx, input }) => provider(ctx, "auth").denyAuth(input.id)),
 	revoke: publicProcedure.input(z.object({ appId: z.string() })).mutation(({ ctx, input }) => provider(ctx, "auth").revokeClient(input.appId)),
-	revokeAll: publicProcedure.mutation(({ ctx }) => {
-		provider(ctx, "auth").revokeAllClients();
+	revokeAll: publicProcedure.mutation(async ({ ctx }) => {
+		await provider(ctx, "auth").revokeAllClients();
 		return true;
 	}),
-	create: publicProcedure.input(createClientInput).mutation(({ ctx, input }) => {
-		const client = provider(ctx, "auth").createManualClient({
+	create: publicProcedure.input(createClientInput).mutation(async ({ ctx, input }) => {
+		const client = await provider(ctx, "auth").createManualClient({
 			appId: input.appId,
 			appName: input.appName,
 			appVersion: input.appVersion,
 		});
 		return { client: toSafeClient(client), token: client.token };
 	}),
-	revealToken: publicProcedure.input(z.object({ appId: z.string() })).mutation(({ ctx, input }) => {
+	revealToken: publicProcedure.input(z.object({ appId: z.string() })).mutation(async ({ ctx, input }) => {
 		return provider(ctx, "auth").getClientToken(input.appId);
 	}),
 	onPending: publicProcedure.subscription(({ ctx }) => {
@@ -62,8 +62,11 @@ export const authRouter = router({
 		const auth = provider(ctx, "auth");
 		return observable<SafeClient[]>((emit) => {
 			const sub = auth.clients$.subscribe((clients) => emit.next(clients.map(toSafeClient)));
-			emit.next(auth.getClients().map(toSafeClient));
-			return () => sub.unsubscribe();
+			let active = true;
+			void auth.getClients().then((clients) => {
+				if (active) emit.next(clients.map(toSafeClient));
+			}, (error) => { if (active) emit.error(error); });
+			return () => { active = false; sub.unsubscribe(); };
 		});
 	}),
 });

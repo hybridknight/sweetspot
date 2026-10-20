@@ -18,14 +18,14 @@ function authEncryption() {
 }
 
 /** Encrypt client state into a single bearer token. */
-export function createAuthToken(state: AuthTokenState): string {
-	return authEncryption().encrypt(state, undefined, AUTH_TOKEN_PURPOSE);
+export async function createAuthToken(state: AuthTokenState): Promise<string> {
+	return (await authEncryption()).encrypt(state, undefined, AUTH_TOKEN_PURPOSE);
 }
 
 /** Decrypt bearer token → state, or null if tampered / wrong purpose. */
-export function parseAuthToken(token: string): AuthTokenState | null {
+export async function parseAuthToken(token: string): Promise<AuthTokenState | null> {
 	if (!token) return null;
-	const state = authEncryption().decrypt<AuthTokenState>(token, AUTH_TOKEN_PURPOSE);
+	const state = (await authEncryption()).decrypt<AuthTokenState>(token, AUTH_TOKEN_PURPOSE);
 	if (!state?.appId) return null;
 	return state;
 }

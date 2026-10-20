@@ -5,6 +5,7 @@ import slugify, { type SlugifyOptions } from "@shared/slug";
 import { app, safeStorage } from "electron";
 import { type ConfOptions as Options, Conf as Store } from "electron-conf/main";
 import { parse as deserialize, stringify as serialize } from "yaml";
+import { prepareSecureStorage } from "@main/infra/secureStorage";
 import { AuthenticatedEncryption, decryptLegacy } from "./encryption";
 
 const slugifyOptions: SlugifyOptions = { lower: true, replacement: "_", trim: true, remove: /[*+~.()'"!:@]/g };
@@ -17,21 +18,40 @@ function requireKeyStorage(): void {
 	}
 }
 
-export function getOrCreateEncryptionSecret(name: string): string {
-	requireKeyStorage();
+const secrets = new Map<string, Promise<string>>();
+
+export function getOrCreateEncryptionSecret(name: string): Promise<string> {
 	const keyPath = `${fileStem(name)}.key.v2`;
-	mkdirSync(path.dirname(keyPath), { recursive: true, mode: 0o700 });
-	if (!existsSync(keyPath)) {
-		writeFileSync(keyPath, safeStorage.encryptString(randomBytes(32).toString("base64")), { mode: 0o600, flag: "wx" });
+	let pending = secrets.get(keyPath);
+	if (!pending) {
+		pending = loadEncryptionSecret(keyPath);
+		// Cache both success and failure: simultaneous integrations must not re-prompt.
+		secrets.set(keyPath, pending);
 	}
-	const secret = safeStorage.decryptString(readFileSync(keyPath));
+	return pending;
+}
+
+async function loadEncryptionSecret(keyPath: string): Promise<string> {
+	await prepareSecureStorage();
+	const asyncMac = process.platform === "darwin";
+	if (!asyncMac) requireKeyStorage();
+	mkdirSync(path.dirname(keyPath), { recursive: true, mode: 0o700 });
+	let secret: string;
+	if (!existsSync(keyPath)) {
+		secret = randomBytes(32).toString("base64");
+		const encrypted = asyncMac ? await safeStorage.encryptStringAsync(secret) : safeStorage.encryptString(secret);
+		writeFileSync(keyPath, encrypted, { mode: 0o600, flag: "wx" });
+	} else {
+		const encrypted = readFileSync(keyPath);
+		secret = asyncMac ? (await safeStorage.decryptStringAsync(encrypted)).result : safeStorage.decryptString(encrypted);
+	}
 	if (Buffer.from(secret, "base64").length !== 32) throw new Error("Invalid secure storage key");
 	chmodSync(keyPath, 0o600);
 	return secret;
 }
 
-export function createEncryption(name: string): AuthenticatedEncryption {
-	return new AuthenticatedEncryption(getOrCreateEncryptionSecret(name));
+export async function createEncryption(name: string): Promise<AuthenticatedEncryption> {
+	return new AuthenticatedEncryption(await getOrCreateEncryptionSecret(name));
 }
 
 const cacheEncryptors = new Map<string, AuthenticatedEncryption>();
@@ -57,8 +77,8 @@ export const createYmlStore = <T extends Record<string, any> = Record<string, an
 	new Store<T>({ ext: ".yml", ...options, serializer: { read: deserialize, write: serialize }, name });
 
 /** Construct after app.ready, when the OS keychain is available. */
-export function createEncryptedStore<T extends Record<string, any> = Record<string, any>>(name: string, options: Options<T> = {} as Options<T>) {
-	const encryptor = createEncryption(name);
+export async function createEncryptedStore<T extends Record<string, any> = Record<string, any>>(name: string, options: Options<T> = {} as Options<T>) {
+	const encryptor = await createEncryption(name);
 	const filePath = path.join(options.dir ?? app.getPath("userData"), `${name}.ytm`);
 	if (existsSync(filePath)) {
 		const raw = readFileSync(filePath, "utf8");

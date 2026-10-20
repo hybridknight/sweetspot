@@ -18,10 +18,10 @@ describe("MCP setup client creation", () => {
 		manager.revoke("legacy");
 		expect(manager.isValidToken("old.ciphertext.checksum")).toBe(false);
 	});
-	it("creates a valid paired client using the setup form's metadata", () => {
+	it("creates a valid paired client using the setup form's metadata", async () => {
 		const manager = new AppAuthManager();
 		const input = createMcpClientInput("  My AI assistant  ");
-		const client = manager.createManual(input);
+		const client = await manager.createManual(input);
 		expect(client).toMatchObject({ appId: input.appId, appName: "My AI assistant", appVersion: "1.0.0" });
 		expect(manager.listClients()).toEqual([client]);
 		expect(manager.isValidToken(client.token)).toBe(true);
@@ -29,10 +29,10 @@ describe("MCP setup client creation", () => {
 		expect(manager.isValidToken(client.token)).toBe(false);
 	});
 
-	it("creates distinct clients without replacing another assistant's access", () => {
+	it("creates distinct clients without replacing another assistant's access", async () => {
 		const manager = new AppAuthManager();
-		const first = manager.createManual(createMcpClientInput("My AI assistant"));
-		const second = manager.createManual(createMcpClientInput("My AI assistant"));
+		const first = await manager.createManual(createMcpClientInput("My AI assistant"));
+		const second = await manager.createManual(createMcpClientInput("My AI assistant"));
 		expect(first.appId).not.toBe(second.appId);
 		expect(manager.listClients()).toHaveLength(2);
 		expect(manager.isValidToken(first.token)).toBe(true);

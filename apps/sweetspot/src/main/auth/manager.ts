@@ -55,7 +55,7 @@ export class AppAuthManager extends EventEmitter {
 			if (!client?.appId || !client?.token) continue;
 			this.clients.set(client.appId, client);
 		}
-		this.emit("clients", this.listClients());
+		this.emit("loaded", this.listClients());
 	}
 
 	listClients(): AuthClientRecord[] {
@@ -153,17 +153,19 @@ export class AppAuthManager extends EventEmitter {
 		});
 	}
 
-	approve(id: string): AuthClientRecord | null {
+	async approve(id: string): Promise<AuthClientRecord | null> {
 		const pending = this.waiting.get(id);
 		if (!pending) return null;
 
 		const createdAt = Date.now();
-		const token = createAuthToken({
+		const token = await createAuthToken({
 			appId: pending.appId,
 			appName: pending.appName,
 			appVersion: pending.appVersion,
 			createdAt,
 		});
+		// Approval may have expired or been denied while Keychain was opening.
+		if (this.waiting.get(id) !== pending) return null;
 		const client: AuthClientRecord = {
 			appId: pending.appId,
 			appName: pending.appName,
@@ -196,12 +198,12 @@ export class AppAuthManager extends EventEmitter {
 	}
 
 	/** Manually create / replace a paired client and return record including token. */
-	createManual(input: { appId: string; appName: string; appVersion?: string }): AuthClientRecord {
+	async createManual(input: { appId: string; appName: string; appVersion?: string }): Promise<AuthClientRecord> {
 		const appId = normalizeAppId(input.appId);
 		const appName = normalizeAppName(input.appName);
 		const appVersion = normalizeAppVersion(input.appVersion?.trim() ? input.appVersion : "1.0.0");
 		const createdAt = Date.now();
-		const token = createAuthToken({ appId, appName, appVersion, createdAt });
+		const token = await createAuthToken({ appId, appName, appVersion, createdAt });
 		const client: AuthClientRecord = { appId, appName, appVersion, createdAt, token };
 		this.clients.set(appId, client);
 		this.emit("clients", this.listClients());

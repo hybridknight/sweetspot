@@ -6,13 +6,14 @@ import { attachTrayState } from "@main/handlers/trayState";
 import { initializeCustomElectronEnvironment } from "@main/infra/electron";
 import { serverMain } from "@main/ipc/serverEvents";
 import { runLifecycle, setLifecycleContext } from "@main/lifecycle";
+import { prepareSecureStorage, SecureStorageCancelledError } from "@main/infra/secureStorage";
 import { thumbnailCache } from "@main/services/thumbnailCache";
 import { attachTrpcWindow, initElectronTrpc } from "@main/trpc/handler";
 import { WindowManager } from "@main/windows/windowManager";
 import { onWindowLoad } from "@main/windows/windowUtils";
 import { logger } from "@shared/utils/console";
 import { waitMs } from "@shared/utils/promises";
-import { app, BrowserWindow, protocol } from "electron";
+import { app, BrowserWindow, dialog, protocol } from "electron";
 
 // Side-effect: register track router lifecycle handlers
 import "@main/trpc/routers/track";
@@ -84,8 +85,9 @@ const runApp = async function () {
 	const windowManager = new WindowManager();
 	let mainWindow: ReturnType<typeof windowManager.createRootWindow> extends Promise<infer T> ? T : never;
 
+	let storagePrepared = false;
 	const reactivate = async () => {
-		if (isAppQuitting()) return;
+		if (!storagePrepared || isAppQuitting()) return;
 		if (BrowserWindow.getAllWindows().length === 0) {
 			mainWindow = await windowManager.createRootWindow();
 			await waitMs(); // next tick
@@ -108,9 +110,18 @@ const runApp = async function () {
 
 	app.on("activate", reactivate); // runs when the app is activated (e.g. when the app is brought back from the background)
 	app.on("ready", async () => {
+		try {
+			await prepareSecureStorage();
+		} catch (error) {
+			log.error("Secure storage startup stopped", error);
+			if (!(error instanceof SecureStorageCancelledError)) dialog.showErrorBox("Sweet Spot secure storage", "Secure storage was not unlocked. Sweet Spot will quit without retrying or changing your stored credentials. Reopen the app when you are ready to unlock Keychain.");
+			app.quit();
+			return;
+		}
 		thumbnailCache.registerProtocol();
 		await waitMs(); // next tick
 		mainWindow = await windowManager.createRootWindow();
+		storagePrepared = true;
 		attachTrpcWindow(mainWindow.main);
 		serviceCollection.registerWindows(mainWindow);
 		serverMain.emit("app.windowsReady");

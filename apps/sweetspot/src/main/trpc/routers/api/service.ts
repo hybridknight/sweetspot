@@ -61,7 +61,7 @@ export default class ApiProvider extends BaseProvider implements AfterInit, OnDe
 				try {
 					const port = this.mcpStatus.port;
 					if (!Number.isInteger(port) || port < 9999 || port > 39999) throw new Error("Choose an MCP port between 9999 and 39999.");
-					appAuth.loadClients(readAuthClients());
+					appAuth.loadClients(await readAuthClients());
 					const caller = createMainCaller();
 					this._mcp = await startMcpServer({
 						port,
@@ -141,7 +141,7 @@ export default class ApiProvider extends BaseProvider implements AfterInit, OnDe
 
 		const port = this.settingsProvider.instance.api.port;
 		try {
-			if (this.settingsProvider.instance.api.authRequired) appAuth.loadClients(readAuthClients());
+			if (this.settingsProvider.instance.api.authRequired) appAuth.loadClients(await readAuthClients());
 			const worker = await createApiWorker(this, this.windowContext.main);
 			if (this._destroyed || !this.isApiEnabled()) {
 				await worker.destroy();

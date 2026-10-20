@@ -9,6 +9,8 @@ vi.mock("electron", () => ({
 		isEncryptionAvailable: () => true,
 		getSelectedStorageBackend: () => "gnome_libsecret",
 		encryptString: (value: string) => Buffer.from(value),
+		encryptStringAsync: async (value: string) => Buffer.from(value),
+		decryptStringAsync: async (value: Buffer) => ({ result: value.toString(), shouldReEncrypt: false }),
 		decryptString: (value: Buffer) => value.toString(),
 	},
 	app: {
@@ -81,10 +83,10 @@ test.each([false, true])("encryption keys use the selected profile (production: 
 	vi.stubGlobal("process", { ...process, platform: "darwin" });
 	await import("./appIdentity");
 	const { getOrCreateEncryptionSecret } = await import("../lib/store/createYmlStore");
-	const secret = getOrCreateEncryptionSecret("profile-check");
+	const secret = await getOrCreateEncryptionSecret("profile-check");
 	const selected = path.join(state.appData, production ? "sweetspot-preview" : "sweetspot-dev");
 	expect(state.name).toBe("Sweet Spot");
 	expect(fs.existsSync(path.join(selected, "profile-check.key.v2"))).toBe(true);
-	expect(getOrCreateEncryptionSecret("profile-check")).toBe(secret);
+	expect(await getOrCreateEncryptionSecret("profile-check")).toBe(secret);
 	expect(fs.existsSync(path.join(state.appData, "unselected-profile"))).toBe(false);
 });
