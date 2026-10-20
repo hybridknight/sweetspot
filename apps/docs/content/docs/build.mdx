@@ -43,13 +43,13 @@ pnpm build:mac
 pnpm release
 ```
 
-For a local macOS ZIP without a Developer ID certificate, use:
+All packaged releases use the **Sweet Spot** name, the `ooo.bkk.sweetspot` app identity, and the standard installed-app profile. Development and unpackaged previews retain their separate profiles.
+
+To package an already compiled build for a specific Mac architecture:
 
 ```bash
-pnpm release:compile
-pnpm release:pack:mac:local --arm64
+pnpm release:pack:mac --arm64
+pnpm release:pack:mac --x64
 ```
 
-Use `--x64` for Intel Macs. Local packages are named **Sweet Spot Local**, use ad-hoc signing, and are not notarized. They keep settings, sign-in sessions, and paired clients in a separate `sweetspot-local` profile and retain Keychain encryption. Sign in again in this local profile. Their separate entitlements allow Electron’s framework to load without a matching Developer ID team; normal signed releases retain the production entitlements.
-
-Each local packaging run creates the next numbered folder, such as `apps/sweetspot/dist/release-1.0.0-build-001`, then `release-1.0.0-build-002`. Earlier builds are preserved.
+Public macOS distribution normally uses Developer ID signing and Apple notarization. If a build is ad-hoc signed and not notarized, disclose that status in the release notes; its product name and app identity stay the same. The ad-hoc entitlement file is `build/entitlements.mac.adhoc.plist`; the standard signed workflow continues to use `build/entitlements.mac.plist`.

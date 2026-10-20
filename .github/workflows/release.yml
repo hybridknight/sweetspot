@@ -19,7 +19,7 @@ env:
   COMPILE_ARTIFACT: electron-compile
 
 jobs:
-  # Shared electron-vite build (sidecar builds world0 + embeds).
+  # Shared electron-vite build (sidecar builds world0).
   # Pack jobs download this artifact and run electron-builder only (no vite).
   compile:
     runs-on: ubuntu-latest
@@ -82,17 +82,15 @@ jobs:
         shell: bash
         run: |
           test -f apps/sweetspot/out/main/index.js
-          test -f apps/sweetspot/resources/embeds/now-playing/index.html
           test -f apps/sweetspot/src/preload/generated/sweetspot-world0-host.js
 
-      # out/ + resources/embeds (sidecar). upload-artifact strips common apps/sweetspot prefix.
+      # Upload the compiled app output; the world0 host is bundled into preload.
       - name: Upload compile artifact
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.COMPILE_ARTIFACT }}
           path: |
             apps/sweetspot/out
-            apps/sweetspot/resources/embeds
           if-no-files-found: error
           retention-days: 3
 
@@ -155,21 +153,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           npm_config_msvs_version: "2026"
 
-      # Artifact root is out/ + resources/ (common apps/sweetspot prefix stripped).
+      # Artifact root contains the compiled app output.
       - name: Download compile artifact
         uses: actions/download-artifact@v8
         with:
           name: ${{ env.COMPILE_ARTIFACT }}
-          path: apps/sweetspot
+          path: apps/sweetspot/out
 
       - name: Verify compile output
         shell: pwsh
         run: |
           if (-not (Test-Path -LiteralPath "apps/sweetspot/out/main/index.js")) {
             throw "missing apps/sweetspot/out/main/index.js"
-          }
-          if (-not (Test-Path -LiteralPath "apps/sweetspot/resources/embeds/now-playing/index.html")) {
-            throw "missing embeds now-playing/index.html"
           }
 
       - name: Pack Windows release
@@ -216,13 +211,12 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: ${{ env.COMPILE_ARTIFACT }}
-          path: apps/sweetspot
+          path: apps/sweetspot/out
 
       - name: Verify compile output
         shell: bash
         run: |
           test -f apps/sweetspot/out/main/index.js
-          test -f apps/sweetspot/resources/embeds/now-playing/index.html
 
       # Outside Mac App Store: Developer ID Application + notarize
       # Secrets: MACOS_DEVELOPER_ID_APPLICATION_P12 (+ _PASSWORD),

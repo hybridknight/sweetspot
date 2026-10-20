@@ -25,7 +25,7 @@ Only approve a request when you recognize Sweet Spot, trust the installed build,
 
 Repeated requests can happen when the keychain is locked or macOS no longer recognizes a build as the same app. Electron recommends a valid, consistent app signature to preserve keychain access across updates. Install official releases from the [download page](/) and avoid switching between installed releases and unsigned local builds with the same profile.
 
-Packages made with `pnpm release:pack:mac:local` use the name **Sweet Spot Local** and a separate profile. They retain Keychain encryption and do not open the release’s saved browser sessions or paired-client credentials. Existing release data stays in its original profile; local builds require a separate sign-in.
+Packaged releases use the standard Sweet Spot identity and profile. Signing status does not change their product name or disable OS-backed credential protection.
 
 Local macOS development and preview builds use separate profiles to avoid opening the installed app's protected data. Installed builds retain OS-backed credential protection. A local preview may need its own sign-in.
 

@@ -26,7 +26,6 @@
 		"release:pack": "cross-env NODE_ENV=production electron-builder",
 		"release:pack:win": "cross-env NODE_ENV=production electron-builder --win",
 		"release:pack:mac": "cross-env NODE_ENV=production electron-builder --mac",
-		"release:pack:mac:local": "node scripts/package-local-mac.mjs",
 		"build:unpack": "pnpm build && electron-builder --dir",
 		"build:win": "pnpm build && electron-builder --win",
 		"build:mac": "pnpm build && electron-builder --mac",

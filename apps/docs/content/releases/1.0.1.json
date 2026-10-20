@@ -2,41 +2,41 @@
   "tag_name": "v1.0.1",
   "name": "Sweet Spot 1.0.1",
   "html_url": "https://github.com/hybridknight/sweetspot/releases/tag/v1.0.1",
-  "published_at": "2026-10-20T09:41:43.814Z",
-  "body": "Windows x64: the installer is unsigned.\nmacOS Apple Silicon and Intel: Sweet Spot Local builds, ad-hoc signed and not notarized.\nIncludes all five packages and SHA-256 checksums.",
+  "published_at": "2026-10-20T09:47:47Z",
+  "body": "Windows x64: the installer is unsigned.\nmacOS Apple Silicon and Intel: Sweet Spot builds, ad-hoc signed and not notarized.\nIncludes all five packages and SHA-256 checksums.",
   "prerelease": false,
   "draft": false,
-  "distribution_notice": "Windows is unsigned. macOS downloads are Sweet Spot Local builds, ad-hoc signed and not notarized. GitHub access is required while the repository is private.",
+  "distribution_notice": "Windows is unsigned. macOS downloads are Sweet Spot builds, ad-hoc signed and not notarized. GitHub access is required while the repository is private.",
   "checksum_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.1/SHA256SUMS.txt",
   "assets": [
     {
       "name": "sweetspot-1.0.1-setup.exe",
       "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.1/sweetspot-1.0.1-setup.exe",
-      "size": 133975526,
+      "size": 134004933,
       "content_type": "application/vnd.microsoft.portable-executable"
     },
     {
-      "name": "Sweet-Spot-Local-1.0.1-arm64.dmg",
-      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.1/Sweet-Spot-Local-1.0.1-arm64.dmg",
-      "size": 183976919,
+      "name": "Sweet-Spot-1.0.1-arm64.dmg",
+      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.1/Sweet-Spot-1.0.1-arm64.dmg",
+      "size": 184672835,
       "content_type": "application/x-apple-diskimage"
     },
     {
-      "name": "Sweet-Spot-Local-1.0.1.dmg",
-      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.1/Sweet-Spot-Local-1.0.1.dmg",
-      "size": 191995478,
+      "name": "Sweet-Spot-1.0.1.dmg",
+      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.1/Sweet-Spot-1.0.1.dmg",
+      "size": 192457763,
       "content_type": "application/x-apple-diskimage"
     },
     {
-      "name": "Sweet-Spot-Local-1.0.1-arm64-mac.zip",
-      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.1/Sweet-Spot-Local-1.0.1-arm64-mac.zip",
-      "size": 160136269,
+      "name": "Sweet-Spot-1.0.1-arm64-mac.zip",
+      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.1/Sweet-Spot-1.0.1-arm64-mac.zip",
+      "size": 160354593,
       "content_type": "application/zip"
     },
     {
-      "name": "Sweet-Spot-Local-1.0.1-mac.zip",
-      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.1/Sweet-Spot-Local-1.0.1-mac.zip",
-      "size": 166982126,
+      "name": "Sweet-Spot-1.0.1-mac.zip",
+      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.1/Sweet-Spot-1.0.1-mac.zip",
+      "size": 167200425,
       "content_type": "application/zip"
     }
   ]

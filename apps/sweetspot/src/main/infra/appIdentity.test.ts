@@ -32,20 +32,19 @@ afterEach(() => {
 	state.packaged = false;
 });
 
-test("packaged local macOS builds isolate cookies and credentials without bypassing Keychain", async () => {
+test("packaged macOS releases use the standard name and profile without bypassing Keychain", async () => {
 	vi.resetModules();
 	vi.stubGlobal("process", { ...process, platform: "darwin" });
-	state.appData = fs.mkdtempSync(path.join(os.tmpdir(), "sweetspot-local-profile-"));
-	fs.writeFileSync(path.join(state.appData, "package.json"), JSON.stringify({ sweetspotLocalBuild: true }));
+	state.appData = fs.mkdtempSync(path.join(os.tmpdir(), "sweetspot-release-profile-"));
 	state.production = true;
 	state.packaged = true;
+	state.sessionData = "";
 	state.appendSwitch.mockClear();
 	await import("./appIdentity");
-	expect(state.name).toBe("Sweet Spot Local");
-	expect(state.userData).toBe(path.join(state.appData, "sweetspot-local"));
-	expect(state.sessionData).toBe(path.join(state.userData, "browser"));
+	expect(state.name).toBe("Sweet Spot");
+	expect(state.userData).toBe(path.join(state.appData, "sweetspot"));
+	expect(state.sessionData).toBe("");
 	expect(state.appendSwitch).not.toHaveBeenCalled();
-	expect(fs.existsSync(path.join(state.appData, "sweetspot"))).toBe(false);
 });
 
 test.each([

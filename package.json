@@ -22,7 +22,6 @@
 		"release:pack": "pnpm --filter sweetspot release:pack",
 		"release:pack:win": "pnpm --filter sweetspot release:pack:win",
 		"release:pack:mac": "pnpm --filter sweetspot release:pack:mac",
-		"release:pack:mac:local": "pnpm --filter sweetspot release:pack:mac:local",
 		"build:unpack": "pnpm --filter sweetspot build:unpack",
 		"build:win": "pnpm --filter sweetspot build:win",
 		"build:mac": "pnpm --filter sweetspot build:mac",

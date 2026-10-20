@@ -4,7 +4,7 @@
   <dict>
     <key>com.apple.security.cs.allow-jit</key>
     <true/>
-    <!-- Ad-hoc builds have no Developer ID team to match Electron's framework. -->
+    <!-- Ad-hoc signing has no Developer ID team to match Electron's framework. -->
     <key>com.apple.security.cs.disable-library-validation</key>
     <true/>
   </dict>
