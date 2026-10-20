@@ -34,6 +34,19 @@ Sweet Spot uses its own app identity and data profile. When moving from an earli
 4. Try **Player → Equalizer**, **Player → General**, and **Player → Lyrics** to set up your sound.
 5. Enable the local API only if you need a custom client.
 
+## If macOS blocks Sweet Spot
+
+Current Mac releases aren’t notarized by Apple. On first launch, including after an update, macOS may say **“Sweet Spot” Not Opened** and that Apple could not verify it is free of malware.
+
+For a download you trust from [Sweet Spot’s website](https://sweetspot.bkk.ooo) or its [official GitHub releases](https://github.com/hybridknight/sweetspot/releases), follow these steps:
+
+1. Try opening **Sweet Spot** from **Applications**. In that warning, click **Done**.
+2. Open **System Settings → Privacy & Security**.
+3. Scroll down to the Sweet Spot warning and click **Open Anyway**.
+4. Authenticate if asked, then confirm **Open**.
+
+This creates an exception for Sweet Spot, following [Apple’s instructions](https://support.apple.com/en-us/102445). Your settings are unaffected. These steps apply to the verification warning above; if macOS reports that the app **will damage your computer** or **is damaged**, stop and check the download instead.
+
 ## macOS credential protection
 
 Sweet Spot uses macOS Keychain to protect the keys for stored credentials. This is a security feature that lets the app remember approved integrations without leaving their encryption keys readable in its profile. Disposable caches do not request keychain access.
@@ -47,5 +60,7 @@ Sweet Spot checks GitHub Releases for new versions. Keep the app updated for sec
 On macOS, choose **Download DMG** in the update window or **Settings → About**. Sweet Spot detects Apple Silicon or Intel, including an Intel app running through Rosetta, and opens the matching download in your browser. If a direct download cannot be found, it opens the release page instead.
 
 Open the downloaded DMG, quit Sweet Spot, then drag the new app into **Applications** and choose **Replace**. Your settings are kept. Automatic update checks notify you about new versions; installation uses these manual steps.
+
+Launch Sweet Spot from **Applications**. If macOS blocks it, follow [the Open Anyway steps above](#if-macos-blocks-sweet-spot).
 
 Older versions may still show **Install now** and fail signature validation. Download the matching DMG from the [website](https://sweetspot.bkk.ooo) and replace the app manually to upgrade from those versions.

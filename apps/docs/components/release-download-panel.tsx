@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { ArrowUpRightIcon, ChevronDownIcon, DownloadIcon } from "lucide-react";
 import { buttonVariants } from "fumadocs-ui/components/ui/button";
 import { cn } from "@/lib/cn";
@@ -260,6 +261,15 @@ export function ReleaseDownloadPanel({ releases }: ReleaseDownloadPanelProps) {
       ) : (
         <p className="ss-release-notice">{platformLabel} builds are not available in this release yet.</p>
       )}
+
+      {platform === "macos" && assets.length > 0 ? (
+        <p className="ss-release-notice">
+          macOS may block the first launch.{" "}
+          <Link href="/docs/install#if-macos-blocks-sweet-spot" className="underline underline-offset-2">
+            How to open Sweet Spot
+          </Link>
+        </p>
+      ) : null}
 
       {release.distribution_notice ? (
         <p className="ss-release-notice">{release.distribution_notice}</p>
