@@ -8,5 +8,10 @@ can do or what gets better. Include an installation tip only when needed.
 Use plain paragraphs. Leave out contributor names, avatars, commit hashes,
 build details, test results, and internal implementation details.
 
-Review these notes with the release changes before creating the version tag.
+Before every release, generate the message and show the exact text to the user.
+Wait for explicit confirmation before creating the version tag or publishing.
+If the text changes, ask for confirmation again. A release request alone does
+not count as approval of its message. Prepared version files remain drafts
+until confirmed. See `AGENTS.md`.
+
 Do not publish a version’s notes until its changes are included in that release.
