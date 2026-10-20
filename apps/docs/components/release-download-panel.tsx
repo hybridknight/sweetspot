@@ -5,7 +5,6 @@ import { ArrowUpRightIcon, ChevronDownIcon, DownloadIcon } from "lucide-react";
 import { buttonVariants } from "fumadocs-ui/components/ui/button";
 import { cn } from "@/lib/cn";
 import {
-  type CpuArch,
   type DownloadPlatform,
   type LatestRelease,
   type ReleaseAsset,
@@ -19,7 +18,6 @@ import {
   getReleasesUrl,
   groupDownloadsByPlatform,
   listVisibleReleaseChannels,
-  pickPreferredDownload,
 } from "@/lib/downloads";
 
 function detectPlatform(): DownloadPlatform | null {
@@ -44,36 +42,6 @@ function detectPlatform(): DownloadPlatform | null {
   return null;
 }
 
-function detectCpuArch(): CpuArch {
-  if (typeof navigator === "undefined") {
-    return "unknown";
-  }
-
-  const uaData = (
-    navigator as Navigator & {
-      userAgentData?: { architecture?: string };
-    }
-  ).userAgentData;
-  const arch = uaData?.architecture?.toLowerCase();
-  if (arch) {
-    if (arch.includes("arm")) return "arm64";
-    if (arch.includes("x86") || arch.includes("x64")) return "x64";
-  }
-
-  // Safari / older Chromium: sniff UA (best-effort).
-  const ua = navigator.userAgent.toLowerCase();
-  if (ua.includes("arm64") || ua.includes("aarch64")) return "arm64";
-  // Apple Silicon Macs still report MacIntel in many browsers — prefer arm64 for macOS.
-  if (
-    navigator.platform === "MacIntel" &&
-    (navigator as Navigator & { maxTouchPoints?: number }).maxTouchPoints
-  ) {
-    return "arm64";
-  }
-  if (ua.includes("mac")) return "arm64";
-  return "unknown";
-}
-
 function pickDefaultChannel(
   releases: Partial<Record<ReleaseChannel, LatestRelease | null>>,
 ): ReleaseChannel {
@@ -86,20 +54,15 @@ interface ReleaseDownloadPanelProps {
 
 export function ReleaseDownloadPanel({ releases }: ReleaseDownloadPanelProps) {
   const [platform, setPlatform] = useState<DownloadPlatform>("windows");
-  const [cpuArch, setCpuArch] = useState<CpuArch>("unknown");
-  const [detected, setDetected] = useState(false);
   const [channel, setChannel] = useState<ReleaseChannel>(() => pickDefaultChannel(releases));
   const [channelOpen, setChannelOpen] = useState(false);
-  const [notesExpanded, setNotesExpanded] = useState(false);
   const channelMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const detectedPlatform = detectPlatform();
     if (detectedPlatform) {
       setPlatform(detectedPlatform);
-      setDetected(true);
     }
-    setCpuArch(detectCpuArch());
   }, []);
 
   useEffect(() => {
@@ -108,10 +71,6 @@ export function ReleaseDownloadPanel({ releases }: ReleaseDownloadPanelProps) {
       setChannel(visible[0] ?? "stable");
     }
   }, [releases, channel]);
-
-  useEffect(() => {
-    setNotesExpanded(false);
-  }, [channel]);
 
   useEffect(() => {
     if (!channelOpen) return;
@@ -144,7 +103,7 @@ export function ReleaseDownloadPanel({ releases }: ReleaseDownloadPanelProps) {
 
   if (!release || !groups) {
     return (
-      <aside className="relative rounded-2xl border bg-fd-background/85 p-6 backdrop-blur-md">
+      <aside className="ss-release-panel">
         <p className="text-sm font-medium text-fd-muted-foreground">Latest release</p>
         <h2 className="mt-4 text-xl font-semibold tracking-tight">Release feed unavailable</h2>
         <p className="mt-2 text-sm text-fd-muted-foreground">
@@ -165,11 +124,10 @@ export function ReleaseDownloadPanel({ releases }: ReleaseDownloadPanelProps) {
 
   const notes = getReleaseNotes(release.body, null);
   const assets = groups[platform];
-  const primary = pickPreferredDownload(assets, platform === "macos" ? cpuArch : null);
   const platformLabel = DOWNLOAD_PLATFORMS.find((item) => item.id === platform)?.label;
 
   return (
-    <aside className="relative rounded-2xl border bg-fd-background/85 p-6 backdrop-blur-md">
+    <aside className="ss-release-panel">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="relative" ref={channelMenuRef}>
           <button
@@ -177,7 +135,7 @@ export function ReleaseDownloadPanel({ releases }: ReleaseDownloadPanelProps) {
             aria-haspopup="listbox"
             aria-expanded={channelOpen}
             onClick={() => setChannelOpen((open) => !open)}
-            className="inline-flex items-center gap-1 text-sm font-medium text-fd-muted-foreground transition-colors hover:text-fd-foreground"
+            className="inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-fd-muted-foreground transition-colors hover:text-fd-foreground"
           >
             Latest release
             <ChevronDownIcon
@@ -202,7 +160,7 @@ export function ReleaseDownloadPanel({ releases }: ReleaseDownloadPanelProps) {
                         setChannelOpen(false);
                       }}
                       className={cn(
-                        "flex w-full flex-col gap-0.5 px-3 py-2 text-left text-sm transition-colors hover:bg-fd-accent",
+                        "flex w-full cursor-pointer flex-col gap-0.5 px-3 py-2 text-left text-sm transition-colors hover:bg-fd-accent",
                         selected && "bg-fd-accent/60",
                       )}
                     >
@@ -226,29 +184,16 @@ export function ReleaseDownloadPanel({ releases }: ReleaseDownloadPanelProps) {
         </span>
       </div>
 
-      <h2 className="text-xl font-semibold tracking-tight">{release.name}</h2>
-      {release.distribution_notice ? (
-        <p className="mt-3 rounded-xl border bg-fd-secondary/40 px-3 py-2.5 text-sm text-fd-muted-foreground">
-          {release.distribution_notice}
-        </p>
-      ) : null}
-      <p className="mt-1 text-sm text-fd-muted-foreground">
-        Published {formatReleaseDate(release.published_at)}
+      <h3 className="ss-release-title">Get Sweet Spot</h3>
+      <p className="ss-release-date">
+        Version {release.tag_name.replace(/^v/, "")} · {formatReleaseDate(release.published_at)}
         {channel !== "stable" ? ` · ${RELEASE_CHANNEL_LABELS[channel]}` : ""}
       </p>
 
-      {notes.length > 0 ? (
-        <ReleaseNotesCollapse
-          notes={notes}
-          expanded={notesExpanded}
-          onToggle={() => setNotesExpanded((value) => !value)}
-        />
-      ) : null}
-
       <div
-        role="tablist"
+        role="group"
         aria-label="Download platform"
-        className="mt-5 flex flex-wrap gap-1 rounded-xl border bg-fd-secondary/40 p-1"
+        className="ss-platform-picker"
       >
         {DOWNLOAD_PLATFORMS.map((item) => {
           const selected = platform === item.id;
@@ -258,11 +203,10 @@ export function ReleaseDownloadPanel({ releases }: ReleaseDownloadPanelProps) {
             <button
               key={item.id}
               type="button"
-              role="tab"
-              aria-selected={selected}
+              aria-pressed={selected}
               onClick={() => setPlatform(item.id)}
               className={cn(
-                "flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                "flex-1 cursor-pointer rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 selected
                   ? "bg-fd-background text-fd-foreground shadow-sm"
                   : "text-fd-muted-foreground hover:text-fd-foreground",
@@ -277,154 +221,97 @@ export function ReleaseDownloadPanel({ releases }: ReleaseDownloadPanelProps) {
         })}
       </div>
 
-      {detected ? (
-        <p className="mt-2 text-xs text-fd-muted-foreground">
-          Pre-selected for your system ({platformLabel}
-          {platform === "macos" && cpuArch === "arm64" ? ", Apple Silicon" : ""}
-          {platform === "macos" && cpuArch === "x64" ? ", Intel" : ""}).
-        </p>
-      ) : null}
-
-      {primary ? (
-        <>
-          <a
-            href={primary.browser_download_url}
-            className={cn(buttonVariants({ variant: "primary" }), "mt-4 w-full gap-2 px-4 py-2")}
-          >
-            <DownloadIcon className="size-4" />
-            Download for {platformLabel}
-          </a>
-          <ul className="mt-4 space-y-2">
-            {assets.map((asset) => (
-              <DownloadRow key={asset.name} asset={asset} />
-            ))}
-          </ul>
-        </>
-      ) : (
-        <div className="mt-4 rounded-xl border border-dashed bg-fd-secondary/30 px-4 py-5 text-sm text-fd-muted-foreground">
-          <p className="font-medium text-fd-foreground">
-            {platformLabel} builds not in this release yet
-          </p>
-          <p className="mt-1.5 text-pretty">
-            When a {platformLabel} installer is published to GitHub Releases, it shows up here
-            automatically.
-          </p>
-          <a
-            href={release.html_url}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-fd-primary hover:underline"
-          >
-            Check release assets
-            <ArrowUpRightIcon className="size-3.5" />
-          </a>
+      {assets.length > 0 ? (
+        <div className="ss-download-options" key={`${channel}-${platform}`}>
+          {platform === "macos" ? (
+            <div className="ss-mac-groups">
+              {([
+                { arch: "arm64", title: "Apple Silicon", description: "For Macs with an M-series chip" },
+                { arch: "x64", title: "Intel", description: "For Macs with an Intel processor" },
+                { arch: "universal", title: "Universal", description: "For Apple Silicon and Intel Macs" },
+              ] as const).map(({ arch, title, description }) => {
+                const downloads = assets.filter((asset) => getDownloadLabel(asset).arch === arch);
+                if (!downloads.length) return null;
+                return (
+                  <section className="ss-chip-group" key={arch} aria-label={`${title} downloads`}>
+                    <h4>{title}</h4>
+                    <p>{description}</p>
+                    <ul>
+                      {downloads.map((asset, index) => (
+                        <DownloadRow key={asset.name} asset={asset} primary={index === 0} />
+                      ))}
+                    </ul>
+                  </section>
+                );
+              })}
+            </div>
+          ) : (
+            <section className="ss-windows-download" aria-label="Windows downloads">
+              <h4>Windows</h4>
+              <p>For 64-bit Windows computers</p>
+              <ul>
+                {assets.map((asset, index) => (
+                  <DownloadRow key={asset.name} asset={asset} primary={index === 0} />
+                ))}
+              </ul>
+            </section>
+          )}
         </div>
+      ) : (
+        <p className="ss-release-notice">{platformLabel} builds are not available in this release yet.</p>
       )}
 
-      {release.checksum_url ? (
-        <a href={release.checksum_url} className="mt-4 inline-flex text-xs text-fd-muted-foreground hover:text-fd-foreground hover:underline">
-          SHA-256 checksums
-        </a>
+      {release.distribution_notice ? (
+        <p className="ss-release-notice">{release.distribution_notice}</p>
       ) : null}
 
-      <a
-        href={release.html_url}
-        target="_blank"
-        rel="noreferrer"
-        className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-fd-primary hover:underline"
-      >
-        View on GitHub
-        <ArrowUpRightIcon className="size-3.5" />
-      </a>
+      {notes.length > 0 ? (
+        <details className="ss-release-notes" key={channel}>
+          <summary>Release notes <ChevronDownIcon size={14} /></summary>
+          <ul>
+            {notes.map((note) => <li key={note}>{note}</li>)}
+          </ul>
+        </details>
+      ) : null}
+
+      <div className="ss-release-links">
+        {release.checksum_url ? (
+          <a href={release.checksum_url} className="inline-flex text-xs text-fd-muted-foreground hover:text-fd-foreground hover:underline">
+            SHA-256 checksums
+          </a>
+        ) : null}
+
+        <a
+          href={release.html_url}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-medium hover:underline"
+        >
+          View on GitHub
+          <ArrowUpRightIcon className="size-3.5" />
+        </a>
+      </div>
     </aside>
   );
 }
 
-interface ReleaseNotesCollapseProps {
-  notes: string[];
-  expanded: boolean;
-  onToggle: () => void;
-}
-
-function ReleaseNotesCollapse({ notes, expanded, onToggle }: ReleaseNotesCollapseProps) {
-  const measureRef = useRef<HTMLUListElement>(null);
-  const [needsCollapse, setNeedsCollapse] = useState(() => notes.length > 2);
-
-  useEffect(() => {
-    const el = measureRef.current;
-    if (!el) return;
-    // Collapsed viewport is max-h-20 (5rem)
-    setNeedsCollapse(el.scrollHeight > 80);
-  }, [notes]);
-
-  const list = (
-    <ul
-      ref={measureRef}
-      className={cn(
-        "list-disc space-y-1.5 pl-4 text-sm text-fd-muted-foreground",
-        expanded && needsCollapse && "max-h-[min(32rem,70vh)] overflow-y-auto pr-1",
-      )}
-    >
-      {notes.map((note) => (
-        <li key={note} className="text-pretty">
-          {note}
-        </li>
-      ))}
-    </ul>
-  );
-
-  if (!needsCollapse) {
-    return <div className="mt-4">{list}</div>;
-  }
-
-  if (expanded) {
-    return (
-      <div className="mt-4">
-        <div className="max-h-[min(32rem,70vh)] overflow-hidden transition-[max-height] duration-300 ease-out">
-          {list}
-        </div>
-        <button
-          type="button"
-          onClick={onToggle}
-          className="mt-2 text-xs font-medium text-fd-primary transition-colors hover:text-fd-foreground"
-        >
-          Collapse
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-expanded={false}
-      className="relative mt-4 block w-full max-h-20 overflow-hidden text-left transition-[max-height] duration-300 ease-out"
-    >
-      {list}
-      <span className="pointer-events-none absolute inset-x-0 bottom-0 flex h-14 items-end justify-center bg-linear-to-t from-fd-background via-fd-background/90 to-transparent pb-1">
-        <span className="text-xs font-medium text-fd-primary">Expand</span>
-      </span>
-    </button>
-  );
-}
-
-function DownloadRow({ asset }: { asset: ReleaseAsset }) {
+function DownloadRow({ asset, primary = false }: { asset: ReleaseAsset; primary?: boolean }) {
   const label = getDownloadLabel(asset);
+  const title = label.kind === "macos-dmg" ? "Download DMG"
+    : label.kind === "macos-zip" ? "Download ZIP"
+    : label.kind === "macos-pkg" ? "Download PKG"
+    : "Download installer";
 
   return (
     <li>
       <a
         href={asset.browser_download_url}
-        className="group flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-sm transition-colors hover:bg-fd-accent"
+        aria-label={`${title} — ${label.platform === "macos" ? label.description : "Windows"}`}
+        className={cn("ss-download-file", primary && "ss-download-file-primary")}
       >
-        <span className="min-w-0">
-          <span className="block font-medium">{label.title}</span>
-          <span className="block truncate text-xs text-fd-muted-foreground">
-            {label.description}
-          </span>
-        </span>
-        <span className="shrink-0 text-xs text-fd-muted-foreground">{formatBytes(asset.size)}</span>
+        <DownloadIcon size={15} />
+        <span>{title}</span>
+        <span className="ss-download-size">{formatBytes(asset.size)}</span>
       </a>
     </li>
   );

@@ -185,7 +185,7 @@ export default async function HomePage() {
       </section>
 
       <section id="download" className="ss-download">
-        <div>
+        <div className="ss-download-intro">
           <p className="ss-eyebrow">READY WHEN YOU ARE</p>
           <h2>
             Make yourself

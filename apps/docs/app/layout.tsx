@@ -52,6 +52,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${inter.className} ${parkinsans.variable}`}
       suppressHydrationWarning
     >

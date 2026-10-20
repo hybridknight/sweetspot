@@ -43,6 +43,7 @@
 
 html {
   scrollbar-gutter: stable;
+  scroll-behavior: smooth;
 }
 
 html > body[data-scroll-locked] {
@@ -234,7 +235,7 @@ html > body[data-scroll-locked] {
 }
 .ss-feature p,
 .ss-tools p,
-.ss-download p:not(.ss-eyebrow) {
+.ss-download-intro p:not(.ss-eyebrow) {
   color: var(--color-fd-muted-foreground);
   font-size: 14px;
   line-height: 1.7;
@@ -280,15 +281,16 @@ html > body[data-scroll-locked] {
 }
 .ss-download {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  gap: 60px;
-  padding: 48px;
-  background: var(--color-fd-muted);
+  grid-template-columns: 0.8fr 1.2fr;
+  align-items: start;
+  gap: 48px;
+  padding: 40px;
+  scroll-margin-top: 88px;
+  background: var(--color-fd-card);
   border: 1px solid var(--color-fd-border);
   border-radius: 16px;
 }
-.ss-download p:not(.ss-eyebrow) {
+.ss-download-intro p:not(.ss-eyebrow) {
   margin: 20px 0;
   max-width: 360px;
 }
@@ -312,6 +314,7 @@ html > body[data-scroll-locked] {
     gap: 32px;
   }
   .ss-download {
+    grid-template-columns: 1fr;
     gap: 32px;
     padding: 28px;
   }
@@ -600,3 +603,33 @@ h4,
   font-size: 12px;
 }
 .ss-video-caption > :first-child { font-weight: 600; letter-spacing: 0.04em; }
+
+/* Download choices stay together by processor, with release details below. */
+.ss-download-intro { padding-top: 10px; }
+.ss-release-panel { min-width: 0; }
+.ss-release-title { font-size: 24px; font-weight: 600; letter-spacing: -0.03em; }
+.ss-release-date { margin-top: 6px; font-size: 12px; color: var(--color-fd-muted-foreground); }
+.ss-platform-picker { display: flex; gap: 4px; padding: 4px; margin: 24px 0; border-radius: 10px; background: var(--color-fd-muted); }
+.ss-release-panel button, .ss-release-panel summary { cursor: pointer; }
+.ss-release-panel button:focus-visible, .ss-release-panel summary:focus-visible { outline: 2px solid var(--color-fd-ring); outline-offset: 3px; }
+.ss-mac-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.ss-chip-group { min-width: 0; border: 1px solid var(--color-fd-border); border-radius: 10px; padding: 16px; }
+.ss-chip-group h4, .ss-windows-download h4 { font-size: 16px; font-weight: 600; }
+.ss-chip-group p, .ss-windows-download p { margin: 5px 0 20px; font-size: 11px; line-height: 1.6; color: var(--color-fd-muted-foreground); }
+.ss-chip-group ul, .ss-windows-download ul { display: grid; gap: 8px; }
+.ss-download-file { display: flex; align-items: center; gap: 7px; padding: 10px 8px; font-size: 12px; border-radius: 6px; transition: background 150ms; }
+.ss-download-file svg { flex-shrink: 0; }
+.ss-download-file:hover { background: var(--color-fd-muted); }
+.ss-download-file-primary { background: #b52c39; color: #fff7f0; }
+.ss-download-file-primary:hover { background: #982532; }
+.ss-download-size { margin-left: auto; font-size: 10px; white-space: nowrap; opacity: 0.8; }
+.ss-release-notice { font-size: 12px; line-height: 1.7; color: var(--color-fd-muted-foreground); margin-top: 20px; }
+.ss-release-notes { border-top: 1px solid var(--color-fd-border); margin-top: 20px; padding-top: 16px; font-size: 12px; }
+.ss-release-notes summary { display: flex; align-items: center; justify-content: space-between; list-style: none; }
+.ss-release-notes summary::-webkit-details-marker { display: none; }
+.ss-release-notes[open] summary svg { transform: rotate(180deg); }
+.ss-release-notes ul { margin-top: 12px; padding-left: 16px; list-style: disc; line-height: 1.7; color: var(--color-fd-muted-foreground); }
+.ss-release-links { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-top: 20px; }
+@media (max-width: 1000px) { .ss-download { grid-template-columns: 1fr; } }
+@media (max-width: 580px) { .ss-mac-groups { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
