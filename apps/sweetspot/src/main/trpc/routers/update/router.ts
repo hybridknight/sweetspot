@@ -3,6 +3,8 @@ import { publicProcedure, router } from "@shared/trpc/trpc";
 import { z } from "zod";
 
 export const updateRouter = router({
+	downloadTarget: publicProcedure.query(({ ctx }) => provider(ctx, "update").getDownloadTarget()),
+	downloadDmg: publicProcedure.mutation(({ ctx }) => provider(ctx, "update").openMacDmgDownload()),
 	get: publicProcedure.query(({ ctx }) => provider(ctx, "update").getUpdate()),
 	downloaded: publicProcedure.query(({ ctx }) => provider(ctx, "update").isUpdateDownloaded()),
 	progress: publicProcedure.query(({ ctx }) => provider(ctx, "update").getProgress()),

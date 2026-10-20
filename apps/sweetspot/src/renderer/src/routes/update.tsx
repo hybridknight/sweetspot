@@ -2,7 +2,8 @@ import type { ProgressInfo } from "@shared/utils/updater";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowDownCircleIcon, ArrowRightIcon, CheckCircle2Icon, DownloadIcon, RefreshCwIcon } from "lucide-react";
 import _prettyBytes from "pretty-bytes";
-import { ReleaseTimeline } from "@/components/release-notes";
+import { MacUpdateDownload } from "@/components/mac-update-download";
+import { ReleaseHighlights } from "@/components/release-notes";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress";
@@ -17,7 +18,6 @@ export const Route = createFileRoute("/update")({
 const prettyBytes = (bytes: number) => _prettyBytes(bytes, { binary: true, space: true });
 
 function UpdateActions(props: {
-	isMacOS: boolean;
 	isDownloading: boolean;
 	downloaded: boolean;
 	installing: boolean;
@@ -25,7 +25,7 @@ function UpdateActions(props: {
 	onInstall: (quitAndInstall: boolean) => void;
 	onLater: () => void;
 }) {
-	const { isMacOS, isDownloading, downloaded, installing, progress, onInstall, onLater } = props;
+	const { isDownloading, downloaded, installing, progress, onInstall, onLater } = props;
 	const showDownloadProgress = !!progress && !downloaded && !installing;
 
 	return (
@@ -58,11 +58,9 @@ function UpdateActions(props: {
 						<CheckCircle2Icon />
 						Install now
 					</Button>
-					{!isMacOS ? (
-						<Button variant="outline" className="w-full" onClick={onLater}>
-							Later
-						</Button>
-					) : null}
+					<Button variant="outline" className="w-full" onClick={onLater}>
+						Later
+					</Button>
 				</div>
 			) : installing ? (
 				<div className="flex w-full flex-col items-center gap-2 py-1">
@@ -71,9 +69,9 @@ function UpdateActions(props: {
 				</div>
 			) : (
 				<div className="flex w-full flex-col gap-2">
-					<Button variant="accent" className="w-full" size={"xl"} onClick={() => onInstall(isMacOS)}>
+					<Button variant="accent" className="w-full" size={"xl"} onClick={() => onInstall(false)}>
 						<ArrowDownCircleIcon />
-						{isMacOS ? "Download & install" : "Download"}
+						Download
 					</Button>
 					<Button variant="outline" className="w-full" onClick={onLater}>
 						Later
@@ -87,7 +85,7 @@ function UpdateActions(props: {
 function UpdatePage() {
 	const currentVersion = window.api.version;
 	const isMacOS = window.api.platform.isMacOS;
-	const { updateInfo, downloaded, progress, checking, installing, status, check, install, dismiss } = useUpdater();
+	const { updateInfo, downloaded, progress, checking, installing, status, check, install, dismiss, downloadTarget, openingDownload, downloadOpened, downloadError, downloadDmg } = useUpdater();
 	const isDownloading = status === "downloading" || (!!progress && !downloaded);
 
 	async function installUpdate(quitAndInstall = true) {
@@ -125,7 +123,7 @@ function UpdatePage() {
 		return (
 			<div className="flex h-full min-h-screen bg-background">
 				{/* left — summary + actions */}
-				<aside className="drag flex w-[240px] shrink-0 flex-col border-r border-border p-5">
+				<aside className="drag flex w-[240px] shrink-0 flex-col overflow-y-auto border-r border-border p-5">
 					<div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
 						<div className="flex size-10 items-center justify-center rounded-full bg-muted">
 							<DownloadIcon className="text-primary" />
@@ -144,23 +142,29 @@ function UpdatePage() {
 					</div>
 
 					<div className="no-drag mt-auto pt-4">
-						<UpdateActions
-							isMacOS={isMacOS}
+						{isMacOS ? <MacUpdateDownload
+							targetLabel={downloadTarget?.label}
+							opening={openingDownload}
+							opened={downloadOpened}
+							error={downloadError}
+							onDownload={downloadDmg}
+							onLater={() => void dismiss()}
+						/> : <UpdateActions
 							isDownloading={isDownloading}
 							downloaded={downloaded}
 							installing={installing}
 							progress={progress}
 							onInstall={(quit) => void installUpdate(quit)}
 							onLater={() => void dismiss()}
-						/>
+						/>}
 					</div>
 				</aside>
 
-				{/* right — changelog timeline */}
+				{/* right — release highlights */}
 				<main className="flex min-w-0 flex-1 flex-col">
 					<ScrollArea className="min-h-0 flex-1">
 						<div className="px-5 py-4">
-							<ReleaseTimeline releases={releases} />
+							<ReleaseHighlights releases={releases} />
 						</div>
 					</ScrollArea>
 				</main>

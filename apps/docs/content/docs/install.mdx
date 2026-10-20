@@ -42,4 +42,10 @@ If macOS shows a Keychain or Secret Storage dialog, approve it only when you rec
 
 ## Updates
 
-Official builds use electron-updater against GitHub Releases. Keep the app updated for security and feature fixes.
+Sweet Spot checks GitHub Releases for new versions. Keep the app updated for security and feature fixes.
+
+On macOS, choose **Download DMG** in the update window or **Settings → About**. Sweet Spot detects Apple Silicon or Intel, including an Intel app running through Rosetta, and opens the matching download in your browser. If a direct download cannot be found, it opens the release page instead.
+
+Open the downloaded DMG, quit Sweet Spot, then drag the new app into **Applications** and choose **Replace**. Your settings are kept. Automatic update checks notify you about new versions; installation uses these manual steps.
+
+Older versions may still show **Install now** and fail signature validation. Download the matching DMG from the [website](https://sweetspot.bkk.ooo) and replace the app manually to upgrade from those versions.
