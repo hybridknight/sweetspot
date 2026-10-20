@@ -1,10 +1,8 @@
-name: Deploy docs to GitHub Pages
+name: Validate docs
 
 on:
-  # Docs/workflow changes on default branch, or manual run.
-  # branches: required so tag pushes (which ignore path filters) do not run this job.
-  # Release publishes use docs-on-release.yml → workflow_dispatch on default branch
-  # (github-pages env protection rejects tag refs like v1.0.2).
+  # Vercel hosts production. Validate static exports without requiring Pages.
+  # Optional Pages deployments must use a default-branch ref, not a release tag.
   push:
     branches:
       - master
@@ -12,21 +10,29 @@ on:
     paths:
       - "apps/docs/**"
       - ".github/workflows/docs.yml"
+      - ".github/workflows/docs-on-release.yml"
+  pull_request:
+    paths:
+      - "apps/docs/**"
+      - ".github/workflows/docs.yml"
+      - ".github/workflows/docs-on-release.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
   packages: read # Native media dependencies on GitHub Packages
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: docs-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      pages: read
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -43,6 +49,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Pages
+        if: github.event_name != 'pull_request' && vars.DEPLOY_GITHUB_PAGES == 'true'
         id: pages
         uses: actions/configure-pages@v6
 
@@ -70,14 +77,30 @@ jobs:
           REPO_STARS: ${{ steps.stars.outputs.count }}
 
       - name: Upload Pages artifact
+        if: github.event_name != 'pull_request' && vars.DEPLOY_GITHUB_PAGES == 'true'
         uses: actions/upload-pages-artifact@v5
         with:
           path: apps/docs/out
           # build-pages.mjs writes out/.nojekyll (hidden); v5 excludes dotfiles by default
           include-hidden-files: true
+
+      - name: Upload validated static site
+        if: github.event_name == 'pull_request' || vars.DEPLOY_GITHUB_PAGES != 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-static
+          path: apps/docs/out
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 3
+
   deploy:
     needs: build
+    if: github.event_name != 'pull_request' && vars.DEPLOY_GITHUB_PAGES == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
