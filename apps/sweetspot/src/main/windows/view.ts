@@ -3,7 +3,7 @@ import { defaultUrl, isProduction } from "@main/infra/devUtils";
 import { getGoogleLoginUserAgent } from "@main/infra/userAgent";
 import { createLogger } from "@shared/utils/console";
 import translations from "@translations/index";
-import { BrowserWindow, BrowserWindowConstructorOptions, ipcMain, shell, WebContentsView, WebContentsViewConstructorOptions, WebPreferences } from "electron";
+import { BrowserWindow, BrowserWindowConstructorOptions, ipcMain, screen, shell, WebContentsView, WebContentsViewConstructorOptions, WebPreferences } from "electron";
 import { join } from "path";
 import appIconPath from "~/build/favicon.ico?asset";
 import { LockSizeOptions, loadUrlOfWebContents, lockSizeToParent } from "./webContentUtils";
@@ -86,13 +86,18 @@ export const googleLoginPopup = async (authUrl: string, parent?: Electron.Browse
 		allowRunningInsecureContent: false,
 		preload: join(__dirname, "../preload/login.js"),
 	};
-	const { lockSize, popup } = await createPopup({
+	const { workAreaSize } = parent ? screen.getDisplayMatching(parent.getBounds()) : screen.getPrimaryDisplay();
+	const width = Math.min(800, workAreaSize.width);
+	const height = Math.min(760, workAreaSize.height);
+	const { popup } = await createPopup({
 		icon: appIconPath,
 		title: translations.appName,
-		height: 580,
-		width: 800,
-		resizable: false,
-		maximizable: false,
+		height,
+		width,
+		minWidth: Math.min(640, width),
+		minHeight: Math.min(480, height),
+		resizable: true,
+		maximizable: true,
 		frame: false,
 		...(process.platform === "darwin" ? { transparent: true, titleBarStyle: "hiddenInset" as const } : {}),
 		fullscreenable: false,
@@ -108,15 +113,22 @@ export const googleLoginPopup = async (authUrl: string, parent?: Electron.Browse
 	if (process.platform === "darwin") popup.setWindowButtonVisibility(false);
 	const noticeView = await createApiView("youtube/login-notice");
 	popup.contentView.addChildView(noticeView);
-	const [width, height] = popup.getContentSize();
 	const noticeHeight = 120;
-	noticeView.setBounds({ height: noticeHeight, width, x: 0, y: 0 });
 	const loginView = new WebContentsView({
 		webPreferences,
 	});
 	loginView.webContents.setUserAgent(getGoogleLoginUserAgent());
 	popup.contentView.addChildView(loginView, 0);
-	loginView.setBounds({ height: height - noticeHeight, width, x: 0, y: noticeHeight });
+	// Keep Google's action buttons reachable when the form grows or the user
+	// resizes the window to reach another verification method.
+	const updateLoginBounds = () => {
+		const [contentWidth, contentHeight] = popup.getContentSize();
+		noticeView.setBounds({ height: noticeHeight, width: contentWidth, x: 0, y: 0 });
+		loginView.setBounds({ height: Math.max(0, contentHeight - noticeHeight), width: contentWidth, x: 0, y: noticeHeight });
+	};
+	updateLoginBounds();
+	popup.on("resize", updateLoginBounds);
+	popup.once("closed", () => popup.removeListener("resize", updateLoginBounds));
 	loginView.webContents.setWindowOpenHandler(({ url }) => {
 		if (!url.startsWith("http")) {
 			return { action: "deny" };
