@@ -15,10 +15,10 @@ function LoginNoticePage() {
 					<AlertIcon className="mt-1 size-4 flex-shrink-0" />
 					<div className="flex flex-col leading-tight">
 						<p>
-							If there are any issues logging in, press <strong>try again</strong> until it works.
+							Stuck on a passkey? Choose <strong>Try another way</strong> to use another verification method offered by Google.
 						</p>
 						<p className="break-words">
-							This is happening due to google tightening security on unofficial apps or to be more specific "electron apps".
+							Passkeys may not work in this window. Scroll down or resize the window if you cannot see Google’s sign-in buttons.
 						</p>
 					</div>
 				</div>
