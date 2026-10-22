@@ -1,28 +1,31 @@
-import { THEME_PRESETS } from "@shared/themes/catalog";
-import type ThemesProvider from "@main/trpc/routers/themes/service";
-import { MusicLoadGate } from "./musicLoadGate";
-import { SkinWindowSizes } from "@main/player/window-sizes";
-import { resolveSkin } from "@shared/skins/builtins";
-import type { SkinPackage } from "@shared/skins/schema";
-import { configurePlayerMode, playerMode } from "@main/player/mode";
-import { videoFullscreenPreferences } from "@main/player/video-preferences";
 import { applyYoutubeZoom, bindYoutubeWebContents, TOOLBAR_HEIGHT } from "@main/domain/uiZoom";
-import { getLifecycleContext } from "@main/lifecycle";
-import { chromecastArgvFor, CHROMECAST_SETTING_KEY } from "@shared/chromecast/flag";
 import { defaultUrl, isProduction } from "@main/infra/devUtils";
 import { toChromeUserAgent } from "@main/infra/userAgent";
 import { serverMain } from "@main/ipc/serverEvents";
+import { getLifecycleContext } from "@main/lifecycle";
+import { configurePlayerMode, playerMode } from "@main/player/mode";
+import { videoFullscreenPreferences } from "@main/player/video-preferences";
+import { SkinWindowSizes } from "@main/player/window-sizes";
+import { startSignIn } from "@main/signIn/coordinator";
+import type ThemesProvider from "@main/trpc/routers/themes/service";
+import { CHROMECAST_SETTING_KEY, chromecastArgvFor } from "@shared/chromecast/flag";
+import { GOOGLE_SIGN_IN_URL } from "@shared/signIn";
+import { resolveSkin } from "@shared/skins/builtins";
+import type { SkinPackage } from "@shared/skins/schema";
+import { THEME_PRESETS } from "@shared/themes/catalog";
 import { logger } from "@shared/utils/console";
 import translations from "@translations/index";
 import { app, BrowserWindow, BrowserWindowConstructorOptions, WebContentsView } from "electron";
 import { debounce } from "lodash-es";
 import { join } from "path";
 import appIconPath from "~/build/favicon.ico?asset";
-import { createWindowContext } from "./mappedWindow";
-import { createApiView, createView, googleLoginPopup } from "./view";
-import { pushWindowStates } from "./webContentUtils";
 import { bindWindowDisplayScale } from "./displayScale";
+import { createWindowContext } from "./mappedWindow";
+import { MusicLoadGate } from "./musicLoadGate";
+import { createApiView, createView } from "./view";
+import { pushWindowStates } from "./webContentUtils";
 import { getBoundsWithScaleFactor, wrapWindowHandler } from "./windowUtils";
+
 function isChromecastSettingEnabled(): boolean {
 	try {
 		const settings = getLifecycleContext().getProvider("settings") as { get?: (key: string, fallback?: boolean) => boolean };
@@ -33,7 +36,7 @@ function isChromecastSettingEnabled(): boolean {
 }
 
 export function isGoogleLoginUrl(url: URL): boolean {
-	return /^accounts\.google\.(\w+)/.test(url.hostname);
+	return url.protocol === "https:" && url.hostname === "accounts.google.com" && !/(?:^|\/)(?:logout|signout)(?:\/|$)/i.test(url.pathname);
 }
 export function isPreventedNavOrRedirect(url: URL): boolean {
 	return (
@@ -43,13 +46,6 @@ export function isPreventedNavOrRedirect(url: URL): boolean {
 	);
 }
 
-const GOOGLE_LOGIN_URL =
-	"https://accounts.google.com/ServiceLogin?" +
-	new URLSearchParams({
-		ltmpl: "music",
-		service: "youtube",
-		continue: "https://www.youtube.com/signin?action_handle_signin=true&app=desktop&next=https://music.youtube.com/",
-	}).toString();
 export interface WindowViews extends Record<string, WebContentsView> {
 	youtubeView: WebContentsView;
 	toolbarView: WebContentsView;
@@ -242,7 +238,7 @@ export class WindowManager {
 			if (!lastLocation || new URL(lastLocation).origin !== new URL(location).origin) {
 				logger.info(`will-navigate: ${location}`);
 			}
-			if (location?.match(/^https?\:\/\/(accounts)?.google.([a-z]+)/)) {
+			if (isGoogleLoginUrl(new URL(location))) {
 				ev.preventDefault();
 				this.handleGoogleLogin(location, view);
 			}
@@ -260,6 +256,11 @@ export class WindowManager {
 		// Handle YouTube Music View redirects that may require premium subscription
 		view.webContents.on("will-redirect", (event) => {
 			const url = new URL(event.url);
+			if (isGoogleLoginUrl(url)) {
+				event.preventDefault();
+				void this.handleGoogleLogin(GOOGLE_SIGN_IN_URL, view);
+				return;
+			}
 			if (isPreventedNavOrRedirect(url)) {
 				event.preventDefault();
 				logger.info(`Handling YouTube Music View navigation: ${event.url}`);
@@ -267,7 +268,7 @@ export class WindowManager {
 
 			if (/^(?:www\.)?youtube\.com\/(?:premium|musicpremium)$/i.test(url.hostname + url.pathname)) {
 				// Redirecting to Google sign-in page for YouTube Music access, maybe require premium subscription
-				this.handleGoogleLogin(GOOGLE_LOGIN_URL, view);
+				this.handleGoogleLogin(GOOGLE_SIGN_IN_URL, view);
 			}
 		});
 		// view.webContents.on("did-finish-load", () => {
@@ -281,14 +282,14 @@ export class WindowManager {
 		view.webContents.on("page-title-updated", (ev, title) => view.webContents.emit("window-title-updated", title));
 	}
 
-	private async handleGoogleLogin(location: string, view: WebContentsView) {
+	private async handleGoogleLogin(_location: string, view: WebContentsView) {
 		if (this.isGoogleLoginProcessing) return;
 		this.isGoogleLoginProcessing = true;
 		let isAuthenticated = false;
 		try {
-			isAuthenticated = await googleLoginPopup(location, this.mainWindow!);
+			isAuthenticated = await startSignIn(this.mainWindow!, view.webContents);
 		} catch (error) {
-			logger.error("Error handling Google login", error);
+			logger.error("Unable to complete Google sign-in");
 		} finally {
 			this.isGoogleLoginProcessing = false;
 		}

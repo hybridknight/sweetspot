@@ -5,7 +5,9 @@ description: Protected local credentials, macOS Keychain prompts, and safe shari
 
 Sweet Spot protects paired-client credentials with encryption and your operating system's credential storage. This is a built-in security feature: the app can remember approved integrations while keeping their credentials protected on your device.
 
-Settings such as themes and zoom use readable YAML in your local app profile. Google sign-in sessions are managed separately by the embedded browser.
+Settings such as themes and zoom use readable YAML in your local app profile. Google sign-in sessions are managed separately by Electron's browser cookie store. Browser-first sign-in reads only the fresh sign-in profile, transfers YouTube cookies with their security attributes, and verifies the session before accepting it. Cookies and browser debugging responses stay in the main process and are not sent to the app UI or written to logs. The temporary browser profile is removed after the attempt; interrupted cleanup is retried for owned, inactive profiles on startup.
+
+A transferred Google session has browser-session access; it is not an app-scoped OAuth token. Do not share browser profiles or cookies. Your normal system-browser profile is not imported.
 
 ## Protected local credentials
 

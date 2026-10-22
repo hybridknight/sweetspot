@@ -1,28 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
-import AlertIcon from "@/assets/icons/alert-triangle.svg?react";
-import { ControlBar } from "@/components/control-bar";
+import { Info, Music2 } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import "./sign-in.css";
 
-export const Route = createFileRoute("/youtube/login-notice")({
-	component: LoginNoticePage,
-});
+export const Route = createFileRoute("/youtube/login-notice")({ component: LoginNoticePage });
 
 function LoginNoticePage() {
-	return (
-		<div className="flex h-full flex-col overflow-hidden">
-			<ControlBar title="Google - Login" divider={<span>&nbsp;</span>} />
-			<div className="pointer-events-none flex flex-auto flex-shrink-0 select-none items-center bg-blue-500 text-sm text-white">
-				<div className="container flex items-start justify-center gap-2">
-					<AlertIcon className="mt-1 size-4 flex-shrink-0" />
-					<div className="flex flex-col leading-tight">
-						<p>
-							Stuck on a passkey? Choose <strong>Try another way</strong> to use another verification method offered by Google.
-						</p>
-						<p className="break-words">
-							Passkeys may not work in this window. Scroll down or resize the window if you cannot see Google’s sign-in buttons.
-						</p>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
+  const { data } = trpc.signIn.status.useQuery();
+  const manual = data?.reason === "manual";
+  const unavailable = data?.reason === "unavailable";
+  return (
+    <div className="signin-surface h-full overflow-auto border-b border-border bg-card px-6 py-4 text-card-foreground">
+      <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+        <Music2 size={16} aria-hidden="true" /> Continue in Sweet Spot
+      </div>
+      <p className="mb-2 text-xs leading-relaxed text-muted-foreground">
+        {manual
+          ? "You’re using in-app sign-in."
+          : unavailable
+            ? "A supported browser wasn’t available. You can sign in here instead."
+            : "Browser sign-in couldn’t finish. You can sign in here instead."}
+      </p>
+      <div className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
+        <Info size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
+        <p>
+          Stuck on a passkey? Choose <strong>Try another way</strong> for another verification
+          method. You can resize this window to reach all of Google’s buttons.
+        </p>
+      </div>
+    </div>
+  );
 }

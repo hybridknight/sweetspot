@@ -1,0 +1,196 @@
+.signin-surface {
+  --background: var(--color-neutral-950);
+  --foreground: var(--color-neutral-50);
+  --card: var(--color-neutral-900);
+  --card-foreground: var(--color-neutral-50);
+  --primary: var(--color-neutral-50);
+  --primary-foreground: var(--color-neutral-900);
+  --muted: var(--color-neutral-800);
+  --muted-foreground: var(--color-neutral-400);
+  --ring: var(--color-neutral-500);
+}
+
+.signin-page {
+  min-height: 100dvh;
+  background: var(--background);
+  color: var(--foreground);
+  display: flex;
+  flex-direction: column;
+  font: inherit;
+}
+.signin-header {
+  min-height: 64px;
+  padding: 28px 28px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+.signin-header-label {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+body[data-platform="darwin"] .signin-header {
+  padding-top: 42px;
+}
+.signin-main {
+  width: 100%;
+  max-width: 520px;
+  padding: 20px 28px 12px;
+  margin: auto;
+}
+.signin-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted-foreground);
+  margin-bottom: 10px;
+}
+.signin-main h1 {
+  font-size: clamp(23px, 5vw, 28px);
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  font-weight: 650;
+  margin: 0 0 12px;
+}
+.signin-description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+  margin: 0;
+  min-height: 44px;
+}
+.signin-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+  margin: 20px 0;
+  list-style: none;
+}
+.signin-steps li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+.signin-steps li.active {
+  color: var(--foreground);
+}
+.signin-steps li.complete {
+  color: var(--foreground);
+}
+.signin-step-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 23px;
+  height: 23px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+.active .signin-step-icon {
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+  background: var(--primary);
+}
+.complete .signin-step-icon {
+  background: var(--muted);
+  border-color: transparent;
+}
+.signin-detail {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+  background: var(--card);
+}
+.signin-detail svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--muted-foreground);
+}
+.signin-detail p {
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+}
+.signin-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+}
+.signin-footer {
+  border-top: 1px solid var(--border);
+  padding: 16px 24px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+.signin-action-error {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--destructive);
+  margin-top: 14px;
+}
+.signin-spinner {
+  animation: signin-spin 1.2s linear infinite;
+}
+@keyframes signin-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .signin-spinner {
+    animation: none;
+  }
+}
+@media (max-height: 530px) {
+  .signin-main {
+    padding-top: 16px;
+  }
+  .signin-steps {
+    margin: 16px 0;
+    gap: 10px;
+  }
+  .signin-header {
+    min-height: 48px;
+  }
+  .signin-main {
+    padding-bottom: 12px;
+  }
+}
+
+/* Keep decisions visible while short windows scroll the explanatory content. */
+.signin-page {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+.signin-header,
+.signin-footer {
+  flex-shrink: 0;
+}
+.signin-main {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  margin: 0 auto;
+}
+.signin-actions {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 520px;
+  padding: 10px 28px 20px;
+  margin: 0 auto;
+}
