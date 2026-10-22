@@ -36,6 +36,7 @@
 		"test": "pnpm -w exec vitest run apps/sweetspot",
 		"test:equalizer:audio": "node scripts/check-equalizer.cjs",
 		"test:player:ui": "node scripts/check-player.cjs",
+		"test:signin:ui": "node scripts/check-sign-in.cjs",
 		"test:equalizer:ui": "node scripts/check-equalizer-ui.cjs",
 		"test:watch": "pnpm -w exec vitest apps/sweetspot"
 	},

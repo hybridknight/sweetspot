@@ -1,0 +1,216 @@
+.signin-page {
+  min-height: 100dvh;
+  background: radial-gradient(ellipse at 50% 0%, #242233 0%, transparent 64%), #101014;
+  color: #f4f3f7;
+  display: flex;
+  flex-direction: column;
+  font-family: Inter, system-ui, sans-serif;
+}
+.signin-header {
+  min-height: 64px;
+  padding: 28px 28px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #b8b6c3;
+}
+.signin-header-label {
+  margin-left: auto;
+  font-size: 11px;
+  color: #898693;
+}
+body[data-platform="darwin"] .signin-header {
+  padding-top: 42px;
+}
+.signin-main {
+  width: 100%;
+  max-width: 520px;
+  padding: 28px 36px 20px;
+  margin: auto;
+}
+.signin-symbol {
+  width: 66px;
+  height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+  border-radius: 21px;
+  background: linear-gradient(150deg, #3b3555, #242133);
+  border: 1px solid #514965;
+  color: #d4c6ff;
+  box-shadow: 0 10px 40px #0002;
+}
+.signin-symbol-error {
+  color: #f3cb98;
+  border-color: #69513c;
+  background: #30271f;
+}
+.signin-eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  color: #b4a5d6;
+  margin-bottom: 10px;
+}
+.signin-main h1 {
+  font-size: clamp(23px, 5vw, 28px);
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+.signin-description {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #bab8c5;
+  margin: 0;
+  min-height: 44px;
+}
+.signin-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0;
+  margin: 24px 0;
+  list-style: none;
+}
+.signin-steps li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: #8e8b9b;
+}
+.signin-steps li.active {
+  color: #f4efff;
+}
+.signin-steps li.complete {
+  color: #c7b4ff;
+}
+.signin-step-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 23px;
+  height: 23px;
+  border: 1px solid #403c4e;
+  border-radius: 50%;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+.active .signin-step-icon {
+  color: #cfbaff;
+  border-color: #87709f;
+  background: #30283f;
+}
+.complete .signin-step-icon {
+  background: #30283f;
+  border-color: transparent;
+}
+.signin-detail {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #302c3c;
+  color: #aaa6b7;
+  background: #ffffff03;
+}
+.signin-detail svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #aa96c7;
+}
+.signin-detail p {
+  font-size: 11px;
+  line-height: 1.7;
+  margin: 0;
+}
+.signin-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+}
+.signin-secondary {
+  color: #e8dfff;
+  border-color: #554864;
+  background: #292233;
+}
+.signin-primary {
+  color: #21192e;
+  background: #d6beff;
+}
+.signin-footer {
+  border-top: 1px solid #ffffff0a;
+  padding: 16px 24px;
+  text-align: center;
+  font-size: 10px;
+  color: #a39ead;
+  line-height: 1.6;
+}
+.signin-action-error {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #f3cb98;
+  margin-top: 14px;
+}
+.signin-spinner {
+  animation: signin-spin 1.2s linear infinite;
+}
+@keyframes signin-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .signin-spinner {
+    animation: none;
+  }
+}
+@media (max-height: 530px) {
+  .signin-main {
+    padding-top: 16px;
+  }
+  .signin-symbol {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 14px;
+  }
+  .signin-steps {
+    margin: 16px 0;
+    gap: 10px;
+  }
+  .signin-header {
+    min-height: 48px;
+  }
+  .signin-main {
+    padding-bottom: 12px;
+  }
+}
+
+/* Keep decisions visible while short windows scroll the explanatory content. */
+.signin-page {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+.signin-header,
+.signin-footer {
+  flex-shrink: 0;
+}
+.signin-main {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  margin: 0 auto;
+}
+.signin-actions {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 520px;
+  padding: 10px 36px 20px;
+  margin: 0 auto;
+}

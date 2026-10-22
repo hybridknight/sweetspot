@@ -29,10 +29,20 @@ Sweet Spot uses its own app identity and data profile. When moving from an earli
 ## First launch
 
 1. Install or unpack the build for your OS.
-2. Sign in to YouTube Music in the embedded browser.
+2. Choose **Sign in** and finish Google sign-in in the separate browser window. Sweet Spot brings your session back automatically.
 3. Open **Settings → Appearance → Player skins** to choose a look and open the dedicated player.
 4. Try **Player → Equalizer**, **Player → General**, and **Player → Lyrics** to set up your sound.
 5. Enable the local API only if you need a custom client.
+
+## Signing in
+
+Sweet Spot first uses your default browser when it is Chrome, Edge, Brave, Chromium, Vivaldi, or Helium and a supported installation is available. Otherwise it chooses another installed supported browser. Safari and Firefox are not supported by this browser sign-in method.
+
+The sign-in window uses a fresh, temporary profile. Your usual browser profile stays separate, so saved passwords and existing sign-ins may not be available. Complete any verification Google requests, then Sweet Spot verifies and transfers the YouTube Music session, closes the window, and removes its temporary profile.
+
+If browser sign-in is unavailable or fails, Sweet Spot automatically continues with in-app sign-in. You can also choose **Use in-app sign-in** while waiting. If a passkey gets stuck there, choose Google's **Try another way**. **Cancel** or closing the progress window stops the attempt. A browser attempt times out after five minutes; the in-app flow allows ten minutes and offers retry if it fails.
+
+Google may reject a sign-in method or end a session later. Sign in again when needed. Sandboxed or nonstandard browser installations may use the in-app fallback.
 
 ## If macOS blocks Sweet Spot
 

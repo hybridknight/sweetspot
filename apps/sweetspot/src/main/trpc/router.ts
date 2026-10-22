@@ -2,13 +2,14 @@
 // `export type AppRouter = typeof appRouter` still infers full procedure I/O (not any).
 
 import { playerRouter } from "@main/player/router";
+import { signInRouter } from "@main/signIn/router";
 import { apiRouter } from "@main/trpc/routers/api";
 import { appServiceRouter } from "@main/trpc/routers/app";
 import { authRouter } from "@main/trpc/routers/auth";
 import { chromecastRouter } from "@main/trpc/routers/chromecast";
+import { equalizerRouter } from "@main/trpc/routers/equalizer/router";
 import { navigationRouter } from "@main/trpc/routers/navigation";
 import { settingsRouter } from "@main/trpc/routers/settings";
-import { equalizerRouter } from "@main/trpc/routers/equalizer/router";
 import { themesRouter } from "@main/trpc/routers/themes";
 import { trackRouter } from "@main/trpc/routers/track";
 import { trayRouter } from "@main/trpc/routers/tray";
@@ -23,6 +24,7 @@ import { router } from "@shared/trpc/trpc";
  * Paths flatten to `track.current`, `settings.get`, …
  */
 export const appRouter = router({
+	signIn: signInRouter,
 	track: trackRouter,
 	player: playerRouter,
 	settings: settingsRouter,
