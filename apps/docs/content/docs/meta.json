@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "install",
+    "sign-in",
     "features",
     "integrations",
     "internals",

@@ -1,0 +1,53 @@
+---
+title: Sign in to YouTube Music
+description: Sign in with your browser, bring your session into Sweet Spot, and use the in-app fallback when needed.
+---
+
+Choose **Sign in** in Sweet Spot to connect your Google account and access your YouTube Music library, playlists, and recommendations. Sweet Spot first opens a separate window in a supported browser. If that method is unavailable or fails, you can finish signing in inside the app.
+
+![Sweet Spot waiting for sign-in in Chrome, with Use in-app sign-in and Cancel controls](/screenshots/sign-in.png)
+
+*The sign-in screen captured in an isolated app session. Chrome is an example; your browser name may differ. No real account or credentials are shown.*
+
+## Sign in with your browser
+
+1. Choose **Sign in** in the YouTube Music view.
+2. When Sweet Spot says **Continue in Chrome**, or names another browser, finish Google sign-in in that browser window. Complete any passkey or other verification Google offers.
+3. Leave the browser window open. Sweet Spot detects the signed-in session and shows **Bringing your music home** while it finishes the handoff. The browser window closes automatically.
+4. Sweet Spot verifies the transferred session and returns you to your music.
+
+The browser opens with a fresh, temporary profile. Your usual browser profile stays separate, so existing sign-ins, extensions, and saved passwords are not automatically available. You may need to enter your account details again.
+
+## Supported browsers
+
+Sweet Spot supports installed versions of **Chrome, Microsoft Edge, Brave, Chromium, Vivaldi, and Helium** for this flow. It prefers your system default when supported and available. Otherwise it chooses another supported browser it finds installed.
+
+Safari, Firefox, and Zen are not supported by this browser sign-in method. If one is your default, Sweet Spot uses an available supported browser or continues with in-app sign-in. Sandboxed or nonstandard browser installations may also use the in-app fallback.
+
+You do not need to change your default browser to sign in.
+
+## Use in-app sign-in
+
+Choose **Use in-app sign-in** on the progress screen to switch methods. Sweet Spot closes its temporary browser window before opening Google sign-in inside the app. It also switches automatically if the browser cannot open, Google rejects the browser flow, the attempt times out, or session transfer fails.
+
+Finish Google's steps in the in-app window. If a passkey gets stuck, choose **Try another way** for another verification method offered by Google. Resize the window if you cannot reach a button.
+
+Choose **Cancel**, or close Sweet Spot's progress window, to stop the attempt. Cancellation does not open the fallback window.
+
+## If sign-in does not finish
+
+| What you see | What to do |
+| --- | --- |
+| Chrome is signed in, but Sweet Spot is still waiting | Allow a few seconds for detection and verification. If it stays on **Continue in Chrome**, choose **Use in-app sign-in**. |
+| The browser window was closed before the handoff | Sweet Spot continues with in-app sign-in. Finish there, or close that window to stop. |
+| Google refuses the browser sign-in | Continue with the in-app flow. Google may still require another verification method. |
+| The browser attempt takes too long | After five minutes, Sweet Spot switches to in-app sign-in. You can switch sooner using **Use in-app sign-in**. |
+| **Let’s try that again** | Check your connection and choose **Try again** to retry the in-app method, or **Close** to stop. The in-app attempt allows ten minutes. |
+| **Sign-in needs a restart** | Close and reopen Sweet Spot before trying again. |
+| You were signed in earlier, but the session ended | Choose **Sign in** again. Google can end sessions after account changes or for other account-security reasons. |
+
+## Your session and privacy
+
+Sweet Spot brings the new profile's YouTube session into the app and removes the temporary profile after the attempt. It does not import your usual browser profile. Signing in on Google's page gives Sweet Spot a browser session; it is not a narrowly scoped OAuth connection.
+
+Treat app profiles and session cookies as private. Before sharing a screenshot or bug report, hide account details and personal playlists. See [Local data & privacy](/docs/internals/encrypted-stores) for storage and safe-sharing guidance.
