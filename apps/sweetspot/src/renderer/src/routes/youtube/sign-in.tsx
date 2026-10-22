@@ -1,13 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  Check,
-  Globe2,
-  LoaderCircle,
-  Music2,
-  ShieldCheck,
-  TriangleAlert,
-} from "lucide-react";
+import { ArrowRight, Check, LoaderCircle, Music2, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
@@ -61,7 +53,7 @@ function SignInPage() {
   const activeStep = verifying ? 2 : waiting ? 1 : 0;
   return (
     <div
-      className="signin-page"
+      className="signin-surface signin-page"
       onKeyDown={(event) => {
         if (event.key === "Escape") void act("cancel");
       }}
@@ -72,19 +64,8 @@ function SignInPage() {
         <span className="signin-header-label">Your account</span>
       </header>
       <main className="signin-main">
-        <div className={`signin-symbol ${failed ? "signin-symbol-error" : ""}`} aria-hidden="true">
-          {failed ? (
-            <TriangleAlert size={30} />
-          ) : verifying ? (
-            <ShieldCheck size={32} />
-          ) : (
-            <Globe2 size={32} />
-          )}
-        </div>
         <div role="status" aria-live="polite" aria-atomic="true">
-          <p className="signin-eyebrow">
-            {failed ? "SIGN-IN INTERRUPTED" : "WELCOME TO YOUR SWEET SPOT"}
-          </p>
+          <p className="signin-eyebrow">{failed ? "Sign-in interrupted" : "Google sign-in"}</p>
           <h1>{title}</h1>
           <p className="signin-description">{description}</p>
         </div>
@@ -114,8 +95,8 @@ function SignInPage() {
           <div className="signin-detail">
             <ShieldCheck size={17} aria-hidden="true" />
             <p>
-              A fresh browser window keeps this sign-in separate. Your usual browser profile stays
-              untouched. You may need to enter your details again.
+              This window uses a separate profile. Your usual browser stays untouched; you may need
+              to sign in again.
             </p>
           </div>
         )}
@@ -129,12 +110,7 @@ function SignInPage() {
         {failed ? (
           <>
             {state?.reason === "fallback" && (
-              <Button
-                size="xl"
-                className="signin-primary"
-                disabled={busy}
-                onClick={() => void act("retry")}
-              >
+              <Button size="xl" disabled={busy} onClick={() => void act("retry")}>
                 Try again <ArrowRight size={16} />
               </Button>
             )}
@@ -147,7 +123,6 @@ function SignInPage() {
             <Button
               variant="outline"
               size="xl"
-              className="signin-secondary"
               disabled={!state || busy || stage === "fallback"}
               onClick={() => void act("embedded")}
             >

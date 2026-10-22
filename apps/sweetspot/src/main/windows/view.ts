@@ -121,7 +121,7 @@ export const googleLoginPopup = async (
     fullscreenable: false,
     show: false,
     autoHideMenuBar: true,
-    backgroundColor: "#101014",
+    backgroundColor: "#0a0a0a",
     ...(parent ? { parent } : {}),
     webPreferences: { nodeIntegration: false, sandbox: true, contextIsolation: true },
   });

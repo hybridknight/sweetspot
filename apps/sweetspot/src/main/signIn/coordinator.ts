@@ -73,7 +73,7 @@ async function run(
     minimizable: false,
     maximizable: false,
     fullscreenable: false,
-    backgroundColor: "#101014",
+    backgroundColor: "#0a0a0a",
     autoHideMenuBar: true,
     ...(process.platform === "darwin" ? { titleBarStyle: "hiddenInset" as const } : {}),
     webPreferences: {
