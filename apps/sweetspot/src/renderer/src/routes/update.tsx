@@ -10,6 +10,7 @@ import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { useUpdater } from "@/hooks/use-updater";
+import "./update.css";
 
 export const Route = createFileRoute("/update")({
 	component: UpdatePage,
@@ -100,7 +101,7 @@ function UpdatePage() {
 
 	if (checking && !updateInfo) {
 		return (
-			<div className="drag flex h-full min-h-screen flex-col items-center justify-center gap-4 bg-background p-8 text-center">
+			<div className="update-window drag flex h-full min-h-screen flex-col items-center justify-center gap-4 bg-background p-8 text-center">
 				<div className="flex size-12 items-center justify-center rounded-full bg-muted">
 					<Spinner className="size-5" />
 				</div>
@@ -121,9 +122,9 @@ function UpdatePage() {
 				: [];
 
 		return (
-			<div className="flex h-full min-h-screen bg-background">
+			<div className="update-window flex h-full min-h-screen bg-background">
 				{/* left — summary + actions */}
-				<aside className="drag flex w-[240px] shrink-0 flex-col overflow-y-auto border-r border-border p-5">
+				<aside className="drag flex w-[240px] shrink-0 flex-col overflow-y-auto border-r border-border bg-card p-5">
 					<div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
 						<div className="flex size-10 items-center justify-center rounded-full bg-muted">
 							<DownloadIcon className="text-primary" />
@@ -173,7 +174,7 @@ function UpdatePage() {
 	}
 
 	return (
-		<div className="drag flex h-full min-h-screen flex-col items-center justify-center gap-5 bg-background p-8 text-center">
+		<div className="update-window drag flex h-full min-h-screen flex-col items-center justify-center gap-5 bg-background p-8 text-center">
 			<div className="flex size-12 items-center justify-center rounded-full bg-muted">
 				<CheckCircle2Icon className="text-primary" />
 			</div>

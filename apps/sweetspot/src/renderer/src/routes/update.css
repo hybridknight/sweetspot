@@ -1,0 +1,33 @@
+/* Crimson & Ink from assets/branding/identity.json. Apply at the document
+   level so portaled help content and the window background share the palette. */
+:root:has(.update-window) {
+	--background: #242121;
+	--foreground: #fff7f0;
+	--card: #393331;
+	--card-foreground: #fff7f0;
+	--popover: #393331;
+	--popover-foreground: #fff7f0;
+	--primary: #b52c39;
+	--primary-foreground: #fff7f0;
+	--secondary: #393331;
+	--secondary-foreground: #fff7f0;
+	--muted: #393331;
+	--muted-foreground: #b2a39b;
+	--accent: #b52c39;
+	--accent-foreground: #fff7f0;
+	--border: color-mix(in srgb, #b2a39b 24%, transparent);
+	--input: color-mix(in srgb, #b2a39b 32%, transparent);
+	--ring: #fff7f0;
+	--sweetspot-scrollbar-thumb-color: #b2a39b;
+	--sweetspot-scrollbar-thumb-active-color: #fff7f0;
+}
+
+/* Cream keeps small icons and links readable on the dark brand surfaces. */
+.update-window .text-primary,
+:root:has(.update-window) [data-slot="popover-content"] .text-primary {
+	color: var(--foreground);
+}
+
+.update-window .spinner {
+	--primary: var(--foreground);
+}
