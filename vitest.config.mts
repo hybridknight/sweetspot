@@ -16,6 +16,8 @@ export default defineConfig({
 		server: { deps: { inline: ["electron-conf"] } },
 		name: "sweetspot-workspace",
 		environment: "node",
+		// Render theme regressions with real raw styles instead of Vitest CSS stubs.
+		css: { include: [/themes\/assets\/[^/]+\.scss(?:\?|$)/, /lyrics\/styles\.css/] },
 		include: ["apps/**/src/**/*.{test,spec}.ts", "packages/**/src/**/*.{test,spec}.{ts,tsx}"],
 		exclude: ["**/node_modules/**", "**/out/**", "**/dist/**", "**/.vite/**"],
 		reporters: isCi ? ["default", "junit"] : ["default"],
