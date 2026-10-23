@@ -1,3 +1,21 @@
+# Git workflow
+
+Use Git Flow for branch naming and integration:
+
+- `main` contains production-ready releases.
+- `develop` is the integration branch for upcoming work.
+- Create `feature/<short-description>` branches from `develop` and target
+  `develop` in their pull requests.
+- Create `release/<version>` branches from `develop`; merge completed releases
+  into both `main` and `develop`.
+- Create `hotfix/<short-description>` branches from `main`; merge completed
+  hotfixes into both `main` and `develop`.
+
+Use these prefixes instead of `codex/`. If `develop` does not exist yet, use
+`main` as the feature branch base and pull request target until it is established.
+Do not create release tags or publish releases without the release-message
+confirmation required below.
+
 # Release messages
 
 Before every release, draft a short, user-facing change message and show it to
