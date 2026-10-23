@@ -396,3 +396,87 @@ html ytmusic-av-toggle[toggle-disabled] :is(.song-button, .video-button)[aria-pr
 	color: var(--sweetspot-theme-on-accent) !important;
 	box-shadow: none !important;
 }
+
+// Comments embed YouTube components with their own dark-mode colors. Keep the
+// text and editor readable even when those components load after the theme.
+html
+	:is(ytmusic-comments, ytd-comments)
+	:is(
+		#content-text,
+		#author-text,
+		.count-text,
+		#simplebox-placeholder,
+		#placeholder-area,
+		#contenteditable-root,
+		.ytAttributedStringHost,
+		.yt-core-attributed-string,
+		yt-sort-filter-sub-menu-renderer
+	) {
+	color: var(--sweetspot-theme-text) !important;
+	--yt-endpoint-color: var(--sweetspot-theme-text);
+	--yt-endpoint-hover-color: var(--sweetspot-theme-accent);
+	--yt-endpoint-visited-color: var(--sweetspot-theme-text);
+}
+html
+	:is(ytmusic-comments, ytd-comments)
+	:is(
+		.published-time-text,
+		.published-time-text a,
+		#vote-count-middle,
+		.more-button,
+		.less-button,
+		#simplebox-placeholder,
+		#placeholder-area
+	) {
+	color: var(--sweetspot-theme-muted) !important;
+}
+html :is(ytmusic-comments, ytd-comments) :is(input, textarea, [contenteditable="true"]) {
+	caret-color: var(--sweetspot-theme-text);
+	border-color: var(--sweetspot-theme-border);
+}
+html :is(ytmusic-comments, ytd-comments) :is(yt-icon, .ytIconWrapperHost) {
+	color: var(--sweetspot-theme-text);
+}
+
+// Native lyrics, queue guidance, and signed-out/empty states have additional
+// literal secondary colors that are independent of the normal metadata tokens.
+html
+	:is(
+		.footer.ytmusic-description-shelf-renderer,
+		.index.ytmusic-responsive-list-item-renderer,
+		.subtitle.ytmusic-tab-renderer,
+		.descriptive-text.ytmusic-guide-signin-promo-renderer,
+		.description.ytmusic-message-renderer,
+		.text.ytmusic-message-renderer
+	) {
+	color: var(--sweetspot-theme-muted) !important;
+	opacity: 1;
+}
+html .autoplay.ytmusic-player-queue .title.ytmusic-player-queue {
+	color: var(--sweetspot-theme-text) !important;
+	opacity: 1;
+}
+
+// Playlist save buttons paint their fill on the host, outside the paper button.
+html ytmusic-responsive-header-renderer ytmusic-toggle-button-renderer[is-paper-button] {
+	background-color: var(--sweetspot-theme-elevated) !important;
+	color: var(--sweetspot-theme-text) !important;
+	border-color: var(--sweetspot-theme-border);
+}
+
+// Charts' region picker has its own fixed white label and icon colors.
+html ytmusic-sort-filter-button-renderer :is(yt-formatted-string, yt-icon, button, tp-yt-paper-button) {
+	color: var(--sweetspot-theme-text) !important;
+}
+
+// Secondary palette text already carries the inactive-tab distinction.
+html ytmusic-app .tab-content.tp-yt-paper-tab {
+	opacity: 1 !important;
+}
+
+// Timestamp and URL links inside attributed comments use a separate fixed blue.
+// Underlining keeps links identifiable with every theme's readable foreground.
+html :is(ytmusic-comments, ytd-comments) :is(.ytAttributedStringLink, .yt-core-attributed-string__link) {
+	color: var(--sweetspot-theme-text) !important;
+	text-decoration: underline;
+}

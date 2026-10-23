@@ -1,0 +1,50 @@
+<!doctype html>
+<html dark darker-dark-theme>
+<head><meta charset="utf-8"><style>
+/* Representative upstream rules, including the dark baseline's specificity. */
+html[darker-dark-theme][dark] { --yt-sys-color-baseline--text-primary: #f1f1f1; }
+#content-text.ytd-comment-view-model, #author-text.ytd-comment-view-model,
+.count-text.ytd-comments-header-renderer { color: #f1f1f1; }
+.published-time-text a, .index.ytmusic-responsive-list-item-renderer,
+.footer.ytmusic-description-shelf-renderer, .subtitle.ytmusic-tab-renderer { color: #aaa; }
+.ytAttributedStringLink { color: #3ea6ff; }
+.tab-content.tp-yt-paper-tab { opacity: .8; }
+ytmusic-responsive-header-renderer ytmusic-toggle-button-renderer { background: #fff; }
+ytmusic-sort-filter-button-renderer yt-formatted-string { color: #fff; }
+/* Keep every state visible at once and freeze animations at a readable frame. */
+* { transition: none !important; animation: none !important; }
+body { margin: 0; }
+ytmusic-app, ytmusic-player-page, ytmusic-comments { display: block; }
+#sweetspot-lyrics-root { height: 530px; max-width: 800px; }
+.sweetspot-lyrics-spinner-blade { opacity: 1 !important; }
+[data-check] { min-height: 16px; }
+</style></head>
+<body><ytmusic-app><ytmusic-player-page class="ytmusic-app">
+<div id="sweetspot-lyrics-root"><div class="sweetspot-lyrics-body">
+<div class="sweetspot-lyrics-meta" data-check="provider">Provider</div>
+<div class="sweetspot-lyrics-status" data-check="status">No lyrics found<div class="sweetspot-lyrics-status-hint" data-check="hint">Try another provider</div></div>
+<div class="sweetspot-lyrics-loading-label" data-check="loading">Loading lyrics</div>
+<div class="sweetspot-lyrics-spinner"><div class="sweetspot-lyrics-spinner-blade" style="--i: 0" data-check="spinner" data-paint="background"></div></div>
+<div class="sweetspot-lyrics-list">
+<button class="sweetspot-lyrics-line"><span class="sweetspot-lyrics-line-content" data-check="inactive line">Inactive line</span></button>
+<button class="sweetspot-lyrics-line is-active"><span class="sweetspot-lyrics-line-content has-timecode"><span class="sweetspot-lyrics-time" data-check="timecode">0:24</span><span class="sweetspot-lyrics-text" data-check="active line">Active line</span></span></button>
+<button class="sweetspot-lyrics-line is-active line-bar" style="--sweetspot-line-progress: .5"><span class="sweetspot-lyrics-line-content" data-check="line progress">Line progress</span></button>
+<button class="sweetspot-lyrics-line is-active"><span class="sweetspot-lyrics-line-content"><span class="sweetspot-lyrics-word is-sung" data-check="sung word">Sung </span><span class="sweetspot-lyrics-word is-current" data-check="current word">current </span><span class="sweetspot-lyrics-word" data-check="upcoming word">upcoming</span></span></button>
+<button class="sweetspot-lyrics-line is-active word-fill"><span class="sweetspot-lyrics-line-content"><span class="sweetspot-lyrics-word" style="--sweetspot-word-progress: 50%" data-check="word progress">Word progress</span></span></button>
+</div><div class="sweetspot-lyrics-plain" data-check="plain lyrics">Plain lyrics</div>
+</div></div>
+<ytmusic-comments>
+<div class="count-text ytd-comments-header-renderer" data-check="comment count">582 comments</div>
+<a id="author-text" class="ytd-comment-view-model" data-check="author">Author</a>
+<div id="content-text" class="ytd-comment-view-model" data-check="comment">Comment body</div>
+<a class="ytAttributedStringLink" style="color: #3ea6ff" data-check="comment link">0:20</a>
+<div class="published-time-text"><a data-check="comment date">Two days ago</a></div>
+<div id="placeholder-area" data-check="comment placeholder">Add a comment</div>
+</ytmusic-comments>
+<div class="tab-content tp-yt-paper-tab" style="color:var(--sweetspot-theme-muted)" data-check="inactive tab">Comments</div>
+<yt-formatted-string class="footer ytmusic-description-shelf-renderer" data-check="lyric credit">Lyrics credit</yt-formatted-string>
+<div class="subtitle ytmusic-tab-renderer" data-check="queue hint">Add similar content</div>
+<yt-formatted-string class="index ytmusic-responsive-list-item-renderer" data-check="track number">1</yt-formatted-string>
+<ytmusic-responsive-header-renderer><ytmusic-toggle-button-renderer is-paper-button><tp-yt-paper-button data-check="playlist save">Save to library</tp-yt-paper-button></ytmusic-toggle-button-renderer></ytmusic-responsive-header-renderer>
+<ytmusic-sort-filter-button-renderer><yt-formatted-string data-check="chart region">Thailand</yt-formatted-string></ytmusic-sort-filter-button-renderer>
+</ytmusic-player-page></ytmusic-app></body></html>

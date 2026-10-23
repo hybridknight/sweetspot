@@ -37,7 +37,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run vitest
-        run: pnpm test
+        run: xvfb-run --auto-servernum pnpm test
 
       - name: Upload JUnit results
         if: always()
