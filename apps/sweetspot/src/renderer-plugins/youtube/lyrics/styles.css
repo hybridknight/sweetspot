@@ -1,4 +1,8 @@
 #sweetspot-lyrics-root {
+	/* Read inherited tokens so changing themes updates mounted lyrics immediately.
+	 * Fall back to Music's palette when built-in themes are disabled. */
+	--sweetspot-lyrics-text: var(--sweetspot-theme-text, var(--ytmusic-text-primary, #fff));
+	--sweetspot-lyrics-muted: var(--sweetspot-theme-muted, var(--ytmusic-text-secondary, #b5b5c0));
 	display: flex;
 	flex-direction: column;
 	box-sizing: border-box;
@@ -10,7 +14,7 @@
 	min-height: 0;
 	padding: 12px 16px 16px;
 	overflow: hidden;
-	color: #fff;
+	color: var(--sweetspot-lyrics-text);
 	font-family: "YouTube Sans", Roboto, Arial, sans-serif;
 	font-size: 16px;
 	line-height: 1.5;
@@ -32,11 +36,10 @@
 }
 
 #sweetspot-lyrics-root .sweetspot-lyrics-status {
-	opacity: 0.7;
+	color: var(--sweetspot-lyrics-muted);
 	font-size: 14px;
 	padding: 24px 8px;
 	text-align: center;
-	color: #fff;
 }
 
 #sweetspot-lyrics-root .sweetspot-lyrics-status-hint {
@@ -44,7 +47,6 @@
 	max-width: 36em;
 	font-size: 12px;
 	line-height: 1.5;
-	opacity: 0.8;
 }
 
 #sweetspot-lyrics-root .sweetspot-lyrics-loading {
@@ -58,7 +60,7 @@
 }
 
 #sweetspot-lyrics-root .sweetspot-lyrics-loading-label {
-	opacity: 0.7;
+	color: var(--sweetspot-lyrics-muted);
 	font-size: 14px;
 }
 
@@ -78,7 +80,7 @@
 	margin-top: -4%;
 	margin-left: -12%;
 	border-radius: 2px;
-	background-color: #fff;
+	background-color: var(--sweetspot-lyrics-text);
 	opacity: 0.15;
 	transform: rotate(calc(var(--i) * 30deg)) translate(146%);
 	animation: sweetspot-lyrics-spinner 1.2s linear infinite;
@@ -97,8 +99,7 @@
 #sweetspot-lyrics-root .sweetspot-lyrics-meta {
 	flex: 0 0 auto;
 	font-size: 12px;
-	opacity: 0.55;
-	color: #fff;
+	color: var(--sweetspot-lyrics-muted);
 }
 
 #sweetspot-lyrics-root .sweetspot-lyrics-meta-row {
@@ -141,9 +142,9 @@
 	border-radius: 8px;
 	background-color: transparent;
 	background-image: none;
-	color: #fff !important;
-	-webkit-text-fill-color: #fff !important;
-	caret-color: #fff;
+	color: var(--sweetspot-lyrics-muted) !important;
+	-webkit-text-fill-color: currentColor !important;
+	caret-color: var(--sweetspot-lyrics-text);
 	text-align: left;
 	text-indent: 0;
 	text-transform: none;
@@ -160,31 +161,38 @@
 	font-style: normal !important;
 	font-stretch: normal !important;
 	line-height: 1.35 !important;
-	opacity: 0.32;
+	opacity: 1;
 	cursor: pointer;
 	overflow: hidden;
 	user-select: none;
 	-webkit-user-select: none;
 	/* Ease-out so the hand-off between lines settles instead of snapping. */
 	transition:
-		opacity 420ms cubic-bezier(0.22, 1, 0.36, 1),
+		color 420ms cubic-bezier(0.22, 1, 0.36, 1),
 		background-color 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+#sweetspot-lyrics-root .sweetspot-lyrics-line:hover,
+#sweetspot-lyrics-root .sweetspot-lyrics-line.is-active {
+	color: var(--sweetspot-lyrics-text) !important;
+}
+
 #sweetspot-lyrics-root .sweetspot-lyrics-line:hover {
-	opacity: 0.72;
+	opacity: 1;
 	transition-duration: 160ms;
 }
 
 #sweetspot-lyrics-root .sweetspot-lyrics-line.is-active {
 	opacity: 1;
 	font-weight: 600 !important;
-	background-color: rgba(255, 255, 255, 0.08);
+	background-color: color-mix(in srgb, var(--sweetspot-lyrics-text) 8%, transparent);
 }
 
 /* "Active line background" off: only the text brightens. The bar style keeps its row gradient
  * since that is the indicator the user asked for. */
-#sweetspot-lyrics-root .sweetspot-lyrics-list.text-only .sweetspot-lyrics-line.is-active:not(.line-bar) {
+#sweetspot-lyrics-root
+	.sweetspot-lyrics-list.text-only
+	.sweetspot-lyrics-line.is-active:not(.line-bar) {
 	background-color: transparent;
 }
 
@@ -193,10 +201,12 @@
 	background-color: transparent;
 	background-image: linear-gradient(
 		to right,
-		rgba(255, 255, 255, 0.18) 0%,
-		rgba(255, 255, 255, 0.18) calc(var(--sweetspot-line-progress, 0) * 100%),
-		rgba(255, 255, 255, 0.06) calc(var(--sweetspot-line-progress, 0) * 100%),
-		rgba(255, 255, 255, 0.06) 100%
+		color-mix(in srgb, var(--sweetspot-lyrics-text) 18%, transparent) 0%,
+		color-mix(in srgb, var(--sweetspot-lyrics-text) 18%, transparent)
+			calc(var(--sweetspot-line-progress, 0) * 100%),
+		color-mix(in srgb, var(--sweetspot-lyrics-text) 6%, transparent)
+			calc(var(--sweetspot-line-progress, 0) * 100%),
+		color-mix(in srgb, var(--sweetspot-lyrics-text) 6%, transparent) 100%
 	);
 }
 
@@ -207,8 +217,8 @@
 	width: 100%;
 	max-width: 100%;
 	min-width: 0;
-	color: #fff !important;
-	-webkit-text-fill-color: #fff !important;
+	color: inherit !important;
+	-webkit-text-fill-color: currentColor !important;
 	font: inherit;
 	letter-spacing: inherit;
 	white-space: normal;
@@ -239,20 +249,23 @@
 #sweetspot-lyrics-root .sweetspot-lyrics-word {
 	display: inline;
 	color: inherit;
-	-webkit-text-fill-color: inherit;
-	transition: opacity 180ms ease;
+	-webkit-text-fill-color: currentColor;
+	transition: color 180ms ease;
 }
 
 #sweetspot-lyrics-root .sweetspot-lyrics-line.is-active .sweetspot-lyrics-word {
-	opacity: 0.45;
+	opacity: 1;
+	color: var(--sweetspot-lyrics-muted);
 }
 
 #sweetspot-lyrics-root .sweetspot-lyrics-line.is-active .sweetspot-lyrics-word.is-sung {
-	opacity: 0.78;
+	opacity: 1;
+	color: var(--sweetspot-lyrics-text);
 }
 
 #sweetspot-lyrics-root .sweetspot-lyrics-line.is-active .sweetspot-lyrics-word.is-current {
 	opacity: 1;
+	color: var(--sweetspot-lyrics-text);
 	font-weight: 700 !important;
 }
 
@@ -264,8 +277,8 @@
 	font-weight: inherit !important;
 	background-image: linear-gradient(
 		to right,
-		#fff var(--sweetspot-word-progress, 0%),
-		rgba(255, 255, 255, 0.35) var(--sweetspot-word-progress, 0%)
+		var(--sweetspot-lyrics-text) var(--sweetspot-word-progress, 0%),
+		var(--sweetspot-lyrics-muted) var(--sweetspot-word-progress, 0%)
 	);
 	background-clip: text;
 	-webkit-background-clip: text;
@@ -284,17 +297,13 @@
 	display: block;
 	width: 100%;
 	color: inherit;
-	-webkit-text-fill-color: inherit;
+	-webkit-text-fill-color: currentColor;
 	overflow-wrap: break-word;
 }
 
 #sweetspot-lyrics-root .sweetspot-lyrics-part.is-secondary {
-	opacity: 0.72;
+	opacity: 1;
 	font-weight: 500 !important;
-}
-
-#sweetspot-lyrics-root .sweetspot-lyrics-line.is-active .sweetspot-lyrics-part.is-secondary {
-	opacity: 0.85;
 }
 
 #sweetspot-lyrics-root .sweetspot-lyrics-line .sweetspot-lyrics-time {
@@ -306,14 +315,14 @@
 	font-size: 11px !important;
 	font-weight: 400 !important;
 	line-height: 1.2 !important;
-	opacity: 0.55;
+	opacity: 1;
 	font-variant-numeric: tabular-nums;
 	white-space: nowrap;
 	text-align: right;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	color: #fff !important;
-	-webkit-text-fill-color: #fff !important;
+	color: var(--sweetspot-lyrics-muted) !important;
+	-webkit-text-fill-color: currentColor !important;
 }
 
 #sweetspot-lyrics-root .sweetspot-lyrics-plain {
@@ -321,7 +330,7 @@
 	font-size: 16px;
 	line-height: 1.5;
 	letter-spacing: normal;
-	opacity: 0.85;
+	opacity: 1;
 	overflow-x: hidden;
 	overflow-y: auto;
 	padding: 8px;
@@ -329,7 +338,7 @@
 	min-height: 0;
 	width: 100%;
 	overflow-wrap: break-word;
-	color: #fff !important;
+	color: var(--sweetspot-lyrics-text) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -350,31 +359,40 @@
  * Do NOT use a sticky hijack class on shared #tab-renderer — breaks Up Next / whole side panel.
  * ATV/song mode often injects ytmusic-description-shelf-renderer under the same page-type. */
 #tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]:not([data-sweetspot-lyrics="stock"]) > *,
-ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]:not([data-sweetspot-lyrics="stock"]) > * {
+ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]:not([data-sweetspot-lyrics="stock"])
+	> * {
 	display: none !important;
 }
 
-#tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]:not([data-sweetspot-lyrics="stock"]) > #sweetspot-lyrics-root,
-ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]:not([data-sweetspot-lyrics="stock"]) > #sweetspot-lyrics-root {
+#tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]:not([data-sweetspot-lyrics="stock"])
+	> #sweetspot-lyrics-root,
+ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]:not([data-sweetspot-lyrics="stock"])
+	> #sweetspot-lyrics-root {
 	display: flex !important;
 	flex-direction: column;
 	height: 100%;
 	min-height: 200px;
 }
 
-#tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]:not([data-sweetspot-lyrics="stock"]) ytmusic-description-shelf-renderer,
-ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]:not([data-sweetspot-lyrics="stock"]) ytmusic-description-shelf-renderer {
+#tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]:not([data-sweetspot-lyrics="stock"])
+	ytmusic-description-shelf-renderer,
+ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]:not([data-sweetspot-lyrics="stock"])
+	ytmusic-description-shelf-renderer {
 	/* ATV/song native lyrics shelf — page-type scoped only (never sticky hijack class). */
 	display: none !important;
 }
 
 /* Plain provider + YTM already has lyrics → leave stock visible. */
-#tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"][data-sweetspot-lyrics="stock"] > #sweetspot-lyrics-root,
-ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"][data-sweetspot-lyrics="stock"] > #sweetspot-lyrics-root {
+#tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"][data-sweetspot-lyrics="stock"]
+	> #sweetspot-lyrics-root,
+ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"][data-sweetspot-lyrics="stock"]
+	> #sweetspot-lyrics-root {
 	display: none !important;
 }
 
-#tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"][data-sweetspot-lyrics="stock"] ytmusic-description-shelf-renderer,
-ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"][data-sweetspot-lyrics="stock"] ytmusic-description-shelf-renderer {
+#tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"][data-sweetspot-lyrics="stock"]
+	ytmusic-description-shelf-renderer,
+ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"][data-sweetspot-lyrics="stock"]
+	ytmusic-description-shelf-renderer {
 	display: block !important;
 }

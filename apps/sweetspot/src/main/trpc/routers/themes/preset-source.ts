@@ -1,8 +1,8 @@
-import presetStyles from "./assets/presets.scss?raw";
+import type { ThemePreset } from "@shared/themes/catalog";
+import interFont from "./assets/inter-latin-variable.woff2?inline";
 import interactionStyles from "./assets/interactions.scss?raw";
 import mnmlStyles from "./assets/mnml.scss?raw";
-import interFont from "./assets/inter-latin-variable.woff2?inline";
-import type { ThemePreset } from "@shared/themes/catalog";
+import presetStyles from "./assets/presets.scss?raw";
 
 /** Current Music uses both legacy music tokens and the newer baseline system. */
 export function createPresetSource(theme: ThemePreset): string {
@@ -90,7 +90,9 @@ export function createPresetSource(theme: ThemePreset): string {
 				"ytmusic-overlay-text-disabled",
 				"ytmusic-icon-inactive",
 				"yt-spec-text-secondary",
+				"yt-spec-text-disabled",
 				"yt-spec-icon-inactive",
+				"yt-spec-icon-disabled",
 				"yt-sys-color-baseline--text-secondary",
 				"yt-sys-color-baseline--text-disabled",
 				"yt-sys-color-baseline--overlay-text-secondary",
@@ -138,7 +140,10 @@ export function createPresetSource(theme: ThemePreset): string {
 		tokens[`yt-sys-color-baseline--scrim-background-gradient-${index + 1}`] = `${theme.background}${alpha}`;
 	}
 	return `
-html, ytmusic-app, html ytmusic-dialog {
+/* Music can load YouTube's more-specific dark baseline after our stylesheet.
+ * Cover the document theme flags and component boundaries used by comments/dialogs. */
+html:root, html:root[dark], html:root[light], html:root[darker-dark-theme][dark], html:root[darker-dark-theme][light],
+ytmusic-app, html ytmusic-dialog, html ytmusic-comments, html ytd-comments {
   color-scheme: ${theme.light ? "light" : "dark"};
 ${Object.entries(tokens)
 	.map(([name, value]) => `  --${name}: ${value};`)
