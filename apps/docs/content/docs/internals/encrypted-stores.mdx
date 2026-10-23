@@ -19,13 +19,13 @@ Sweet Spot opens pairing storage when you manage paired clients or an enabled in
 
 ## Why macOS may ask for your password
 
-Before opening its browser windows, the installed macOS app explains why Keychain access may be needed. Choose **Continue** to unlock secure storage or **Quit** to leave your stored data unchanged. macOS may then display a Keychain or Safe Storage permission dialog when Sweet Spot accesses a protected encryption key. The password is requested by macOS to authorize access to the named keychain item. Sweet Spot does not receive your Mac login password from this dialog.
+Before opening its browser windows, the installed macOS app checks secure storage without showing an extra startup notice. macOS may display a Keychain or Safe Storage permission dialog when Sweet Spot accesses a protected encryption key. The password is requested by macOS to authorize access to the named keychain item. Sweet Spot does not receive your Mac login password from this dialog.
 
 Using Keychain is the safer way to remember credentials than leaving their encryption key readable beside the data.
 
 Only approve a request when you recognize Sweet Spot, trust the installed build, and expect it to access stored credentials. Enter your Mac password only in the macOS system dialog, never in a Sweet Spot settings field or a web page. You can deny access; features that need the protected credentials may then be unavailable.
 
-Sweet Spot shares one Keychain initialization between browser sign-in storage and paired integrations, and keeps unlocked credential keys in memory for the app session. If access is cancelled or denied, the app does not automatically retry; reopen it when you are ready to unlock Keychain.
+Sweet Spot shares one Keychain initialization between browser sign-in storage and paired integrations, and keeps unlocked credential keys in memory for the app session. If access is denied or the system dialog is cancelled, the app does not automatically retry; reopen it when you are ready to unlock Keychain.
 
 ### Repeated prompts
 
