@@ -1,12 +1,12 @@
-import { type PlayerSkin, type PlayerWindowSize, type SkinWindowSizes } from "./window-sizes";
-import { installPlayerModeMenu } from "./menu";
-import { YtmClient } from "@main/ytm/ytm-client";
 import { join } from "node:path";
-import { BrowserWindow, WebContentsView, screen } from "electron";
-import { registerPlayer } from "./access";
-import { isDevelopment } from "@main/infra/devUtils";
-import { BehaviorSubject } from "rxjs";
 import { lockAppChromeZoom } from "@main/domain/uiZoom";
+import { isDevelopment } from "@main/infra/devUtils";
+import { YtmClient } from "@main/ytm/ytm-client";
+import { BrowserWindow, screen, WebContentsView } from "electron";
+import { BehaviorSubject } from "rxjs";
+import { registerPlayer } from "./access";
+import { installPlayerModeMenu } from "./menu";
+import { type PlayerSkin, type PlayerWindowSize, type SkinWindowSizes } from "./window-sizes";
 
 export type VideoBounds = { x: number; y: number; width: number; height: number; pictureFrame?: boolean } | null;
 /** Native media view moves between full UI and a skin's video slot. No second player. */
@@ -308,11 +308,27 @@ export class PlayerMode {
     } else this.youtube.setVisible(false);
   }
   private async removeVideoCss() {
+    // Disable presentation before removing its stylesheet. The plugin bridge can
+    // time out during navigation; full mode must still restore the page itself.
+    await YtmClient.cmdTimed("api", "skinVideoPresentation", 2000, false).catch(async () => {
+      if (this.youtube.webContents.isDestroyed()) return;
+      await this.youtube.webContents.executeJavaScript(`(() => {
+        const root = document.documentElement;
+        root.removeAttribute("data-sweetspot-skin-video-active");
+        root.removeAttribute("data-sweetspot-picture-frame");
+        root.removeAttribute("data-sweetspot-video-fullscreen");
+        root.style.removeProperty("--sweetspot-video-quality-width");
+        root.style.removeProperty("--sweetspot-video-quality-height");
+        document.querySelectorAll("[data-sweetspot-skin-video]")
+          .forEach(element => element.removeAttribute("data-sweetspot-skin-video"));
+        document.querySelectorAll("[data-sweetspot-video-controls], [data-sweetspot-video-frame]")
+          .forEach(element => element.remove());
+      })()`).catch(() => {});
+    });
     if (this.videoCss && !this.youtube.webContents.isDestroyed())
       await this.youtube.webContents.removeInsertedCSS(this.videoCss).catch(() => {});
     this.videoCss = null;
     this.youtube.setBackgroundColor(this.originalBackground);
-    await YtmClient.cmdTimed("api", "skinVideoPresentation", 2000, false).catch(() => {});
   }
   setVideo(bounds: VideoBounds) {
     if (this.videoFullscreen) return this.videoTask;

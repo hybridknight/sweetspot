@@ -1,6 +1,6 @@
 import { EventEmitter } from "node:events";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { BrowserWindow, WebContentsView } from "electron";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("./menu", () => ({ installPlayerModeMenu: () => vi.fn() }));
 vi.mock("./access", () => ({ registerPlayer: () => vi.fn() }));
@@ -31,6 +31,8 @@ vi.mock("electron", async () => {
     },
   };
 });
+
+import { YtmClient } from "@main/ytm/ytm-client";
 import { WebContentsView as View } from "electron";
 import { PlayerMode } from "./mode";
 import { SkinWindowSizes } from "./window-sizes";
@@ -155,5 +157,54 @@ describe("saved player window sizes", () => {
     sizes.save("skin-b", { width: 1400, height: 1200 });
     mode.selectSkin({ id: "skin-b", width: 500 });
     expect(win.size).toEqual([1400, 1200]);
+  });
+});
+
+describe("full mode presentation cleanup", () => {
+  beforeEach(() => vi.mocked(YtmClient.cmdTimed).mockReset().mockResolvedValue(null));
+  afterEach(() => vi.mocked(YtmClient.cmdTimed).mockReset().mockResolvedValue(null));
+
+  function setup() {
+    const win = windowMock();
+    const youtube = new View();
+    Object.assign(youtube.webContents, {
+      insertCSS: vi.fn().mockResolvedValue("video-css"),
+      removeInsertedCSS: vi.fn().mockResolvedValue(undefined),
+      executeJavaScript: vi.fn().mockResolvedValue(undefined),
+    });
+    const toolbar = new View();
+    const layout = vi.fn();
+    const mode = new PlayerMode(win as unknown as BrowserWindow, youtube, toolbar, layout);
+    return { mode, youtube, toolbar, layout };
+  }
+
+  it("disables page presentation before removing the video stylesheet", async () => {
+    const { mode, youtube } = setup();
+    await mode.enter();
+    await mode.setVideo({ x: 0, y: 0, width: 400, height: 240 });
+    const cleanup = vi.mocked(YtmClient.cmdTimed).mockImplementation(async () => {
+      expect(youtube.webContents.removeInsertedCSS).not.toHaveBeenCalled();
+      return undefined;
+    });
+    await mode.full();
+    expect(cleanup).toHaveBeenCalledWith("api", "skinVideoPresentation", 2000, false);
+    expect(youtube.webContents.removeInsertedCSS).toHaveBeenCalledWith("video-css");
+    expect(youtube.webContents.executeJavaScript).not.toHaveBeenCalled();
+  });
+
+  it("restores full mode when both plugin cleanup and stylesheet removal fail", async () => {
+    const { mode, youtube, toolbar, layout } = setup();
+    await mode.enter();
+    await mode.setVideo({ x: 0, y: 0, width: 400, height: 240 });
+    vi.mocked(YtmClient.cmdTimed).mockRejectedValue(new Error("Request timed out"));
+    vi.mocked(youtube.webContents.removeInsertedCSS).mockRejectedValue(new Error("Stale CSS key"));
+    await mode.full();
+    expect(youtube.webContents.executeJavaScript).toHaveBeenCalledWith(
+      expect.stringContaining('root.removeAttribute("data-sweetspot-skin-video-active")'),
+    );
+    expect(mode.active).toBe(false);
+    expect(youtube.setVisible).toHaveBeenLastCalledWith(true);
+    expect(toolbar.setVisible).toHaveBeenLastCalledWith(true);
+    expect(layout).toHaveBeenCalledOnce();
   });
 });
