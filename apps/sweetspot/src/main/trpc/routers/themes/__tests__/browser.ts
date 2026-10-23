@@ -26,7 +26,6 @@ const fs = require("node:fs");
 const path = require("node:path");
 app.setPath("userData", path.join(__dirname, "profile"));
 app.disableHardwareAcceleration();
-if (process.platform === "linux") app.commandLine.appendSwitch("no-sandbox");
 app.whenReady().then(async () => {
   const win = new BrowserWindow({ show: false, width: 1440, height: 1000,
     webPreferences: { sandbox: true, backgroundThrottling: false } });
@@ -55,7 +54,10 @@ app.whenReady().then(async () => {
 		const env = { ...process.env };
 		delete env.ELECTRON_RUN_AS_NODE;
 		const electron = createRequire(import.meta.url)("electron") as string;
-		await promisify(execFile)(electron, [path.join(directory, "main.cjs")], { env, timeout: 120_000, maxBuffer: 1024 * 1024 });
+		// Linux's native sandbox initializes before main.cjs runs, so this must be
+		// a launch argument. It applies only to this isolated test process.
+		const args = process.platform === "linux" ? ["--no-sandbox", path.join(directory, "main.cjs")] : [path.join(directory, "main.cjs")];
+		await promisify(execFile)(electron, args, { env, timeout: 120_000, maxBuffer: 1024 * 1024 });
 		return new Map(JSON.parse(await readFile(path.join(directory, "results.json"), "utf8")));
 	} finally {
 		await rm(directory, { recursive: true, force: true });
