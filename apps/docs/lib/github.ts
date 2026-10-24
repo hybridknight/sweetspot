@@ -1,5 +1,4 @@
-import { createFetch } from "@better-fetch/fetch";
-import preparedRelease from "@/content/releases/1.0.2.json";
+import preparedRelease from "@/content/releases/latest.json";
 import {
   type LatestRelease,
   type ReleaseChannel,
@@ -80,26 +79,27 @@ function mapRelease(data: GitHubReleaseResponse): LatestRelease {
   };
 }
 
-/** Next.js fetch keeps `next.revalidate`; better-fetch does not forward unknown init fields. */
-const nextFetch: typeof fetch = (input, init) =>
-  fetch(input, {
-    ...init,
-    next: { revalidate: 3600 },
-  });
-
-const githubRepoFetch = createFetch({
-  baseURL: `https://api.github.com/repos/${repoOwner}/${repoName}`,
-  throw: false as const,
-  headers: {
+async function fetchReleasePage(page: number): Promise<GitHubReleaseResponse[]> {
+  // The catalog version changes after publication, invalidating the build cache.
+  const url = `https://api.github.com/repos/${repoOwner}/${repoName}/releases?per_page=30&page=${page}&catalog=${preparedRelease.tag_name}`;
+  const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
     "User-Agent": `${repoName}-docs`,
-  },
-  auth: {
-    type: "Bearer",
-    token: () => process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN,
-  },
-  customFetchImpl: nextFetch,
-});
+  };
+  const token = (process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN)?.trim();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const request = () => fetch(url, { headers, cache: "force-cache", signal: AbortSignal.timeout(15000) });
+  let response = await request();
+  // A stale build token must not hide releases from this public repository.
+  if (token && [401, 403, 404].includes(response.status)) {
+    delete headers.Authorization;
+    response = await request();
+  }
+  if (!response.ok) throw new Error(`GitHub releases returned HTTP ${response.status}`);
+  const data: unknown = await response.json();
+  if (!Array.isArray(data)) throw new Error("GitHub releases returned an invalid response");
+  return data as GitHubReleaseResponse[];
+}
 
 export function getBlobUrl(path: string): string {
   const normalized = path.replace(/^\/+/, "");
@@ -152,10 +152,8 @@ export async function listReleases(options?: {
 
   try {
     for (let page = 1; page <= maxPages; page += 1) {
-      const { data: batch, error } = await githubRepoFetch<GitHubReleaseResponse[]>("/releases", {
-        query: { per_page: 30, page },
-      });
-      if (error || !batch?.length) {
+      const batch = await fetchReleasePage(page);
+      if (!batch.length) {
         break;
       }
 
@@ -169,8 +167,8 @@ export async function listReleases(options?: {
         break;
       }
     }
-  } catch {
-    // Keep the prepared download catalog available when GitHub is unreachable or private.
+  } catch (error) {
+    console.warn("Unable to fetch GitHub releases; using the saved release catalog if needed.", error);
   }
 
   if (releases.length === 0 && (!preparedRelease.prerelease || includePrereleases)) {

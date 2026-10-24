@@ -1,0 +1,43 @@
+{
+  "tag_name": "v1.0.5",
+  "name": "Sweet Spot 1.0.5",
+  "html_url": "https://github.com/hybridknight/sweetspot/releases/tag/v1.0.5",
+  "published_at": "2026-10-24T15:07:30Z",
+  "body": "Read lyrics and browse your music more comfortably, with clearer text across light, dark, and custom themes.\n\nSwitch back to the full player more reliably, with the music page’s layout and styling restored correctly.\n\nEnjoy a smoother startup on macOS without the extra Sweet Spot Keychain notice.\n\nmacOS: This release is not notarized. If macOS blocks it, open System Settings → Privacy & Security → Open Anyway.\n",
+  "prerelease": false,
+  "draft": false,
+  "distribution_notice": "Windows is unsigned. macOS downloads are ad-hoc signed and not notarized.",
+  "checksum_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.5/SHA256SUMS.txt",
+  "assets": [
+    {
+      "name": "Sweet-Spot-1.0.5-arm64-mac.zip",
+      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.5/Sweet-Spot-1.0.5-arm64-mac.zip",
+      "size": 159321918,
+      "content_type": "application/zip"
+    },
+    {
+      "name": "Sweet-Spot-1.0.5-arm64.dmg",
+      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.5/Sweet-Spot-1.0.5-arm64.dmg",
+      "size": 159189379,
+      "content_type": "application/octet-stream"
+    },
+    {
+      "name": "Sweet-Spot-1.0.5-mac.zip",
+      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.5/Sweet-Spot-1.0.5-mac.zip",
+      "size": 166167788,
+      "content_type": "application/zip"
+    },
+    {
+      "name": "Sweet-Spot-1.0.5.dmg",
+      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.5/Sweet-Spot-1.0.5.dmg",
+      "size": 166000095,
+      "content_type": "application/octet-stream"
+    },
+    {
+      "name": "sweetspot-1.0.5-setup.exe",
+      "browser_download_url": "https://github.com/hybridknight/sweetspot/releases/download/v1.0.5/sweetspot-1.0.5-setup.exe",
+      "size": 132837700,
+      "content_type": "application/octet-stream"
+    }
+  ]
+}

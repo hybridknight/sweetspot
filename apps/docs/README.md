@@ -46,6 +46,20 @@ pnpm --ignore-workspace run build
 
 When changing docs dependencies, update both the workspace lockfile and the standalone docs lockfile. To refresh the latter, run `pnpm install --ignore-workspace --lockfile-only --no-frozen-lockfile` from `apps/docs`.
 
+### Release downloads
+
+The static build fetches published releases from GitHub. If GitHub is unavailable,
+it uses `content/releases/latest.json`. Run
+`node apps/docs/scripts/update-release-catalog.mjs` from the repository root to
+refresh that saved catalog from the latest published stable release.
+
+The **Refresh website release catalog** workflow runs after a stable release is
+published (and can be run manually). It commits the updated catalog to the default
+branch, triggering the Vercel Git integration to rebuild the production site.
+This ensures the site refreshes after publication, rather than only when the
+release preparation is merged. GitHub API failures are logged during builds;
+invalid build tokens are retried using public access.
+
 ## Static build (GitHub Pages)
 
 Production is hosted on Vercel. The **Validate docs** GitHub Actions workflow checks the static export and uploads it as an artifact without requiring GitHub Pages.

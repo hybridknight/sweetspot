@@ -1,0 +1,43 @@
+name: Refresh website release catalog
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: website-release-catalog
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Validate catalog generation
+        run: node --test apps/docs/scripts/update-release-catalog.test.mjs
+      - name: Update published release catalog
+        run: node apps/docs/scripts/update-release-catalog.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Commit catalog to trigger Vercel deployment
+        run: |
+          if git diff --quiet -- apps/docs/content/releases/latest.json; then
+            echo "Website catalog is already up to date."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/docs/content/releases/latest.json
+          git commit -m 'docs: refresh published release downloads'
+          git pull --rebase origin "${{ github.event.repository.default_branch }}"
+          git push origin "HEAD:${{ github.event.repository.default_branch }}"
