@@ -61,15 +61,20 @@ createRoot(document.querySelector('#sweetspot-lyrics-root')).render(React.create
 			await new Promise((resolve, reject) => {
 				const deadline = Date.now() + 1200;
 				let previous = '', stable = 0;
+				const positions = [];
 				const poll = () => {
 					const list = document.querySelector('.sweetspot-lyrics-list');
 					const active = list.querySelector('.is-active');
 					const current = [list.scrollTop, active.getBoundingClientRect().top, active.offsetHeight, list.clientWidth].join('/');
 					stable = current === previous ? stable + 1 : 0;
+					positions.push(current);
+					if (positions.length > 8) positions.shift();
 					previous = current;
 					if (stable >= 4) return resolve();
-					if (Date.now() > deadline) return reject(new Error('Lyric layout did not settle'));
-					requestAnimationFrame(poll);
+					if (Date.now() > deadline) return reject(new Error('Lyric layout did not settle: ' + positions.join(', ')));
+					// Hidden Linux windows can throttle animation frames even with
+					// backgroundThrottling disabled. Poll geometry with a timer.
+					setTimeout(poll, 16);
 				}; poll();
 			});
 		})()`,
