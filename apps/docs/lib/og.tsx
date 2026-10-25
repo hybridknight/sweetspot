@@ -17,7 +17,7 @@ type OgLogoFormat = 'svg' | 'png';
 export type OgImageType = 'screenshot' | 'render' | 'render-auto';
 
 const OG_FONT_FAMILY = 'Inter';
-const DEFAULT_OG_IMAGE = '/images/opengraph-banner.png';
+const DEFAULT_OG_IMAGE = '/images/opengraph-desktop.png';
 
 type OgFontWeight = 500 | 600 | 700 | 800;
 type Rgb = [number, number, number];
@@ -685,8 +685,8 @@ export async function createOgImage({
   });
 }
 
-/** Root / landing OG — presents the app (PNG logo). */
+/** Root / landing OG — YouTube Music on desktop for Mac and Windows. */
 export async function createHomeOgImage() {
-  const image = await readFile(join(process.cwd(), 'public/images/opengraph-banner.png'));
+  const image = await readFile(resolvePublicPath(DEFAULT_OG_IMAGE));
   return new Response(new Uint8Array(image), { headers: { 'Content-Type': 'image/png' } });
 }
