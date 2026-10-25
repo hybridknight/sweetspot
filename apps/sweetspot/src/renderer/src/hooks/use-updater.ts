@@ -1,5 +1,6 @@
 import type { ProgressInfo, UpdateInfo, UpdateStatus } from "@shared/utils/updater";
 import { useCallback, useEffect, useMemo } from "react";
+import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
 /**
@@ -17,7 +18,12 @@ export function useUpdater() {
 
 	useEffect(() => { dmgMutation.reset(); }, [updateInfo?.version]);
 
-	const checkMutation = trpc.update.check.useMutation();
+	const checkMutation = trpc.update.check.useMutation({
+		onSuccess: (info) => {
+			if (!info) toast.success("You're up to date", { description: "You're using the latest version available for your update channel." });
+		},
+		onError: () => toast.error("Could not check for updates. Please try again."),
+	});
 	const installMutation = trpc.update.install.useMutation();
 	const cancelMutation = trpc.update.cancel.useMutation();
 	const dismissMutation = trpc.update.dismiss.useMutation();
@@ -42,7 +48,7 @@ export function useUpdater() {
 	const check = useCallback(
 		(showDialog = true) => {
 			if (checking || checkMutation.isLoading) return Promise.resolve(null);
-			return checkMutation.mutateAsync({ showDialog });
+			return checkMutation.mutateAsync({ showDialog }).catch(() => null);
 		},
 		[checking, checkMutation],
 	);

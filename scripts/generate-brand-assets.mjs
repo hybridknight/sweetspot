@@ -44,13 +44,42 @@ icoSizes.forEach((size, index) => {
 const ico = Buffer.concat([directory, ...icoSizes.map(size => raster.get(size))]);
 for (const relative of ['apps/sweetspot/build/icon.ico', 'apps/sweetspot/build/favicon.ico', 'apps/sweetspot/resources/favicon.ico', 'apps/sweetspot/src/renderer/src/assets/icons/win/icon.ico', 'apps/docs/public/favicon.ico']) await save(relative, ico);
 
-// Modern ICNS PNG elements, including Retina representations; portable generation.
-const icnsTypes = [['icp4',16], ['icp5',32], ['icp6',64], ['ic07',128], ['ic08',256], ['ic09',512], ['ic10',1024], ['ic11',32], ['ic12',64], ['ic13',256], ['ic14',512]];
-const elements = icnsTypes.map(([type,size]) => {
-  const image = raster.get(size), header = Buffer.alloc(8);
+// Finder scrambles PNG-backed icp4/icp5/icp6 frames at title-bar sizes.
+// Match iconutil: small 1x frames use ARGB planes with ICNS run-length encoding;
+// larger and Retina frames use PNG. Keep generation portable across platforms.
+function encodeArgb(rgba) {
+  const bytes = [...Buffer.from('ARGB')];
+  for (const channel of [3, 0, 1, 2]) {
+    const plane = Buffer.from(rgba.filter((_, index) => index % 4 === channel));
+    let cursor = 0;
+    const runLength = start => {
+      let count = 1;
+      while (count < 130 && start + count < plane.length && plane[start + count] === plane[start]) count++;
+      return count;
+    };
+    while (cursor < plane.length) {
+      const count = runLength(cursor);
+      if (count >= 3) {
+        bytes.push(count + 125, plane[cursor]);
+        cursor += count;
+      } else {
+        const start = cursor++;
+        while (cursor - start < 128 && cursor < plane.length && runLength(cursor) < 3) cursor++;
+        bytes.push(cursor - start - 1, ...plane.subarray(start, cursor));
+      }
+    }
+  }
+  return Buffer.from(bytes);
+}
+const icnsTypes = [['ic04',16], ['ic05',32], ['ic07',128], ['ic08',256], ['ic09',512], ['ic10',1024], ['ic11',32], ['ic12',64], ['ic13',256], ['ic14',512]];
+const elements = await Promise.all(icnsTypes.map(async ([type,size]) => {
+  const image = type === 'ic04' || type === 'ic05'
+    ? encodeArgb(await sharp(raster.get(size)).ensureAlpha().raw().toBuffer())
+    : raster.get(size);
+  const header = Buffer.alloc(8);
   header.write(type); header.writeUInt32BE(image.length + 8, 4);
   return Buffer.concat([header,image]);
-});
+}));
 const icnsHeader = Buffer.alloc(8);
 icnsHeader.write('icns'); icnsHeader.writeUInt32BE(8 + elements.reduce((sum,data) => sum + data.length,0),4);
 const icns = Buffer.concat([icnsHeader,...elements]);

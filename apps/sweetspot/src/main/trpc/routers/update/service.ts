@@ -506,16 +506,19 @@ export default class UpdateProvider extends BaseProvider implements BeforeStart,
 	private async resolveBestUpdate(): Promise<ElectronUpdateInfo | null> {
 		const channel = this.getChannel();
 		const candidates: ElectronUpdateInfo[] = [];
+		const failures: unknown[] = [];
 
 		const probe = async (feed: UpdateChannel) => {
 			this.applyUpdaterFeed(feed);
 			try {
 				const result = await autoUpdater.checkForUpdates();
+				if (!result) throw new Error("Update check did not complete");
 				const info = result?.updateInfo;
 				if (info && this.isUpdateInRange(info.version, channel)) {
 					candidates.push(info);
 				}
 			} catch (err) {
+				failures.push(err);
 				this.logger.debug("Channel probe failed", { feed, err: err instanceof Error ? err.message : err });
 			}
 		};
@@ -527,7 +530,10 @@ export default class UpdateProvider extends BaseProvider implements BeforeStart,
 
 		this.applyUpdateChannel();
 
-		if (!candidates.length) return null;
+		if (!candidates.length) {
+			if (failures.length) throw new Error("Could not check for updates. Please try again.");
+			return null;
+		}
 		candidates.sort((a, b) => {
 			const av = cleanVersion(a.version) ?? a.version;
 			const bv = cleanVersion(b.version) ?? b.version;
@@ -543,7 +549,7 @@ export default class UpdateProvider extends BaseProvider implements BeforeStart,
 			const best = await this.resolveBestUpdate();
 			if (!best) {
 				this.setUpdate(null, false);
-				throw new Error("No Update available");
+				return { updateInfo: null };
 			}
 			const info = await this.resolveUpdateInfo(best);
 			this.setUpdate(info, true);
@@ -611,6 +617,7 @@ export default class UpdateProvider extends BaseProvider implements BeforeStart,
 			} catch {
 				/* unbound this (destructured method) */
 			}
+			if (forceDialog) throw err;
 			return null;
 		}
 	}
