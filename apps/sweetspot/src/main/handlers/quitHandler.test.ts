@@ -52,6 +52,17 @@ beforeEach(() => {
 });
 
 describe("quit handler", () => {
+	it("fully quits for the Mac DMG action even when minimize-to-tray is enabled", async () => {
+		const { main, services, settings } = await setup(true);
+		const { serverMain } = await import("@main/ipc/serverEvents");
+		serverMain.emit("app.quit", null, true);
+		await vi.waitFor(() => expect(mocks.quit).toHaveBeenCalledTimes(1));
+		expect(main.hide).not.toHaveBeenCalled();
+		expect(settings.saveToDrive).toHaveBeenCalledTimes(1);
+		expect(services.exec).toHaveBeenCalledExactlyOnceWith("OnDestroy");
+		expect(mocks.quitAndInstall).not.toHaveBeenCalled();
+	});
+
 	it.each([true, false])("allows OS shutdown immediately with minimize-to-tray=%s", async (minimizeToTray) => {
 		const { app, powerMonitor, handler, main, services, settings } = await setup(minimizeToTray);
 		let finishCleanup!: () => void;
