@@ -10,6 +10,7 @@ export interface BrowserCase {
 	css: string;
 	url?: string;
 	prepare?: string;
+	settle?: string;
 	evaluate: string;
 }
 
@@ -45,6 +46,7 @@ app.whenReady().then(async () => {
     key = await win.webContents.insertCSS(test.css);
     // Settle palette transitions before measuring real computed styles.
     await win.webContents.executeJavaScript("new Promise(r => setTimeout(r, 400))");
+    if (test.settle) await win.webContents.executeJavaScript(test.settle);
     results.push([test.id, await win.webContents.executeJavaScript(test.evaluate)]);
   }
   fs.writeFileSync(path.join(__dirname, "results.json"), JSON.stringify(results));

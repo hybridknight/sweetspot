@@ -310,8 +310,7 @@ function SyncedList({
 		}
 	};
 
-	const onListScroll = () => {
-		if (Date.now() < ignoreScrollUntil.current) return;
+	const pauseForUserScroll = () => {
 		userScrollUntil.current = Date.now() + USER_SCROLL_PAUSE_MS;
 		clearCatchUpTimer();
 		const delay = USER_SCROLL_PAUSE_MS + 16;
@@ -321,6 +320,13 @@ function SyncedList({
 			lastScrolledActive.current = -1;
 			setCatchUpNonce((n) => n + 1);
 		}, delay);
+	};
+	const onListScroll = () => {
+		if (Date.now() < ignoreScrollUntil.current) return;
+		// Resize, font reflow and scroll anchoring also dispatch scroll events.
+		// Only extend a pause that started with actual navigation input.
+		if (Date.now() >= userScrollUntil.current) return;
+		pauseForUserScroll();
 	};
 
 	useEffect(() => {
@@ -364,6 +370,9 @@ function SyncedList({
 		applyPad();
 		const ro = new ResizeObserver(applyPad);
 		ro.observe(list);
+		// Theme fonts and wrapping can move the active line without changing
+		// the scroll viewport's dimensions.
+		for (const line of Array.from(list.children)) ro.observe(line);
 		return () => ro.disconnect();
 	}, [lines, videoId, settingsEpoch]);
 
@@ -378,6 +387,14 @@ function SyncedList({
 				className={lineBackground ? "sweetspot-lyrics-list" : "sweetspot-lyrics-list text-only"}
 				role="list"
 				onScroll={onListScroll}
+				onWheel={pauseForUserScroll}
+				onTouchMove={pauseForUserScroll}
+				onPointerDown={(event) => {
+					if (event.target === event.currentTarget) pauseForUserScroll();
+				}}
+				onKeyDownCapture={(event) => {
+					if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"].includes(event.key)) pauseForUserScroll();
+				}}
 			>
 				{lines.map((line, i) => {
 					const isActive = activeSet.has(i);

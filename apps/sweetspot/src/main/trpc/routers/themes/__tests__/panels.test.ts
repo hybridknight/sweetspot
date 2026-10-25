@@ -54,6 +54,25 @@ createRoot(document.querySelector('#sweetspot-lyrics-root')).render(React.create
 	for (const theme of THEME_PRESETS) for (const width of widths) cases.push({
 		id: `${theme.id}/${width}`,
 		css: `${compileString(BUNDLED_THEMES[theme.id].source).css}\n${lyricsCss}`,
+		// Font loading and native smooth-scroll durations differ across OSes.
+		// Measure settled geometry, without scrolling or relaxing assertions.
+		settle: `(async () => {
+			await document.fonts.ready;
+			await new Promise((resolve, reject) => {
+				const deadline = Date.now() + 1200;
+				let previous = '', stable = 0;
+				const poll = () => {
+					const list = document.querySelector('.sweetspot-lyrics-list');
+					const active = list.querySelector('.is-active');
+					const current = [list.scrollTop, active.getBoundingClientRect().top, active.offsetHeight, list.clientWidth].join('/');
+					stable = current === previous ? stable + 1 : 0;
+					previous = current;
+					if (stable >= 4) return resolve();
+					if (Date.now() > deadline) return reject(new Error('Lyric layout did not settle'));
+					requestAnimationFrame(poll);
+				}; poll();
+			});
+		})()`,
 		prepare: `(() => {
 			for (const panel of document.querySelectorAll('.panel')) panel.style.width = '${width}px';
 			if (!window.lyricsMounted) { window.lyricsMounted = true; ${bundle} }
@@ -82,6 +101,16 @@ createRoot(document.querySelector('#sweetspot-lyrics-root')).render(React.create
 	});
 	cases.push({
 		...cases.find(c => c.id === "mnml/320")!,
+		id: "mnml/reflow",
+		prepare: `(() => {
+			const list = document.querySelector('.sweetspot-lyrics-list');
+			list.children[0].style.paddingBottom = '120px';
+			list.dispatchEvent(new Event('scroll'));
+			window.panelSetTime(85000);
+		})()`,
+	});
+	cases.push({
+		...cases.find(c => c.id === "mnml/320")!,
 		id: "mnml/last-line",
 		prepare: "for (const panel of document.querySelectorAll('.panel')) panel.style.width = '320px'; window.panelSetTime(195000); new Promise(resolve => setTimeout(resolve, 550))",
 	});
@@ -89,6 +118,12 @@ createRoot(document.querySelector('#sweetspot-lyrics-root')).render(React.create
 }, 60_000);
 
 describe("lyrics and comments panel layout", () => {
+	it("keeps following playback after reflow-generated scroll events", () => {
+		const result = results.get("mnml/reflow")!;
+		expect(result.activeIndex).toBe(8);
+		expect(result.activeTop).toBeGreaterThanOrEqual(23);
+		expect(result.activeTop).toBeLessThanOrEqual(97);
+	});
 	it("keeps the last lyric at the reading position without scrolling the outer tab", () => {
 		const result = results.get("mnml/last-line")!;
 		expect(result.activeIndex).toBe(19);
