@@ -122,6 +122,9 @@
 	min-height: 0;
 	overflow-x: hidden;
 	overflow-y: auto;
+	/* Playback owns the reading position; native anchoring must not shift it
+	 * again after font or row-height changes. */
+	overflow-anchor: none;
 	scrollbar-gutter: stable;
 	scroll-behavior: smooth;
 	/* JS reserves a bounded reading offset above and scroll space below. */

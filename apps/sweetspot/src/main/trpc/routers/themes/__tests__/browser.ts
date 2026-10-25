@@ -44,8 +44,11 @@ app.whenReady().then(async () => {
       key = undefined;
     }
     if (test.prepare) await win.webContents.executeJavaScript(test.prepare);
-    if (key) await win.webContents.removeInsertedCSS(key);
+    // Match CssInjector: install the new sheet before removing the old one.
+    // An unstyled frame can reset scroll offsets and trigger resize observers.
+    const oldKey = key;
     key = await win.webContents.insertCSS(test.css);
+    if (oldKey) await win.webContents.removeInsertedCSS(oldKey);
     // Settle palette transitions before measuring real computed styles.
     await win.webContents.executeJavaScript("new Promise(r => setTimeout(r, 400))");
     if (test.settle) await win.webContents.executeJavaScript(test.settle);
