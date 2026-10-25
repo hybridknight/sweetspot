@@ -28,7 +28,9 @@ const path = require("node:path");
 app.setPath("userData", path.join(__dirname, "profile"));
 app.disableHardwareAcceleration();
 app.whenReady().then(async () => {
-  const win = new BrowserWindow({ show: false, width: 1440, height: 1000,
+  // Xvfb needs a mapped Linux window to drive animation frames and resize
+  // observers. A hidden window can report stable geometry before either runs.
+  const win = new BrowserWindow({ show: process.platform === "linux", width: 1440, height: 1000,
     webPreferences: { sandbox: true, backgroundThrottling: false } });
   if (!${live}) win.webContents.session.webRequest.onBeforeRequest(
     { urls: ["http://*/*", "https://*/*"] }, (_, reply) => reply({ cancel: true }));

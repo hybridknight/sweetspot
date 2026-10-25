@@ -353,8 +353,10 @@ function SyncedList({
 		const smooth = lastScrolledActive.current >= 0 && !prefersReducedMotion();
 		lastScrolledActive.current = primaryIdx;
 		ignoreScrollUntil.current = Date.now() + (smooth ? 450 : 50);
-		const raf = requestAnimationFrame(() => scrollLineToReadingPosition(list, el, smooth));
-		return () => cancelAnimationFrame(raf);
+		// Effects already run after the rows commit. An extra animation frame
+		// can be cancelled by a resize or delayed while the window is hidden.
+		scrollLineToReadingPosition(list, el, smooth);
+		return undefined;
 	}, [primaryIdx, videoId, settingsEpoch, catchUpNonce]);
 
 	useLayoutEffect(() => {
