@@ -1,6 +1,7 @@
+import { onDocumentDiscarded } from "@shared/utils/document-lifecycle";
 import type { PlayerApi } from "ytm-client-api";
-import type { RendererPluginRegistration } from "./world0/types";
 import { getPagePlayerApi } from "./world0/context";
+import type { RendererPluginRegistration } from "./world0/types";
 
 type PlayerEventTarget = {
 	addEventListener?: (event: string, handler: (...args: never[]) => void) => void;
@@ -435,7 +436,7 @@ const trackPlayerRenderer: RendererPluginRegistration = {
 				/* ignore */
 			}
 		};
-		window.addEventListener("beforeunload", onUnload, { once: true });
+		onDocumentDiscarded(onUnload);
 		ctx.log.debug("track-player renderer hooked");
 	},
 };
