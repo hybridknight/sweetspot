@@ -43,11 +43,29 @@ async function loadEncryptionSecret(keyPath: string): Promise<string> {
 		writeFileSync(keyPath, encrypted, { mode: 0o600, flag: "wx" });
 	} else {
 		const encrypted = readFileSync(keyPath);
-		secret = asyncMac ? (await safeStorage.decryptStringAsync(encrypted)).result : safeStorage.decryptString(encrypted);
+		secret = asyncMac ? await decryptMacSecret(encrypted) : safeStorage.decryptString(encrypted);
 	}
 	if (Buffer.from(secret, "base64").length !== 32) throw new Error("Invalid secure storage key");
 	chmodSync(keyPath, 0o600);
 	return secret;
+}
+
+async function decryptMacSecret(encrypted: Buffer): Promise<string> {
+	try {
+		return (await safeStorage.decryptStringAsync(encrypted)).result;
+	} catch (cause) {
+		// Releases before the async provider stored v10 keys with the synchronous
+		// Keychain provider. Some installed profiles cannot open those keys through
+		// the browser's async provider. Keep the original key intact and try its
+		// original provider; never generate a replacement for an unreadable key.
+		if (encrypted.subarray(0, 3).toString() !== "v10") throw cause;
+		try {
+			requireKeyStorage();
+			return safeStorage.decryptString(encrypted);
+		} catch {
+			throw cause;
+		}
+	}
 }
 
 export async function createEncryption(name: string): Promise<AuthenticatedEncryption> {

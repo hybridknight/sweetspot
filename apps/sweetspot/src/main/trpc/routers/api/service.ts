@@ -60,8 +60,17 @@ export default class ApiProvider extends BaseProvider implements AfterInit, OnDe
 				if (this._destroyed || !this.mcpStatus.enabled) return;
 				try {
 					const port = this.mcpStatus.port;
-					if (!Number.isInteger(port) || port < 9999 || port > 39999) throw new Error("Choose an MCP port between 9999 and 39999.");
-					appAuth.loadClients(await readAuthClients());
+					if (!Number.isInteger(port) || port < 9999 || port > 39999) {
+						this._mcpError = "Choose an MCP port between 9999 and 39999.";
+						return;
+					}
+					try {
+						appAuth.loadClients(await readAuthClients());
+					} catch (error) {
+						this.logger.error("MCP paired-client storage unavailable", error);
+						this._mcpError = "Could not open paired-client storage. Unlock your OS keychain and restart Sweet Spot. Your saved clients have been preserved.";
+						return;
+					}
 					const caller = createMainCaller();
 					this._mcp = await startMcpServer({
 						port,
@@ -85,7 +94,9 @@ export default class ApiProvider extends BaseProvider implements AfterInit, OnDe
 				} catch (error) {
 					this.logger.error("MCP server failed to start", error);
 					this._mcpError =
-						(error as NodeJS.ErrnoException).code === "EADDRINUSE" ? "This port is in use. Choose another MCP port below." : "Could not start MCP. Check the port and try again.";
+						(error as NodeJS.ErrnoException).code === "EADDRINUSE"
+							? "This port is in use. Choose another MCP port below."
+							: "Could not start MCP. Try again or restart Sweet Spot.";
 				}
 			});
 		return this._mcpChain;

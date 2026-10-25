@@ -19,6 +19,7 @@ vi.mock("electron", () => ({
 vi.mock("@main/infra/secureStorage", () => ({ prepareSecureStorage: async () => {} }));
 import { createCacheEncryption, createEncryptedStore, createEncryption, getOrCreateEncryptionSecret } from "./createYmlStore";
 import { safeStorage } from "electron";
+import { AuthenticatedEncryption } from "./encryption";
 
 function legacy(value: unknown, secret: string) {
 	const iv = Buffer.from("0123456789abcdef");
@@ -62,6 +63,36 @@ describe("OS protected stores", () => {
 		await expect(getOrCreateEncryptionSecret("denied")).rejects.toThrow("Access denied");
 		expect(encrypt).toHaveBeenCalledTimes(1);
 		expect(fs.readdirSync(state.directory)).toEqual([]);
+		vi.restoreAllMocks();
+	});
+	it("opens existing release clients with their original macOS key provider when async decryption fails", async () => {
+		vi.stubGlobal("process", { ...process, platform: "darwin" });
+		const secret = Buffer.alloc(32, 7).toString("base64");
+		const key = Buffer.from(`v10${secret}`), keyPath = path.join(state.directory, "ytm-auth.key.v2");
+		const clients = [{ appId: "assistant", token: "existing-client-token" }];
+		const raw = new AuthenticatedEncryption(secret).encrypt({ clients });
+		fs.writeFileSync(keyPath, key);
+		fs.writeFileSync(path.join(state.directory, "ytm-auth.ytm"), raw);
+		vi.spyOn(safeStorage, "decryptStringAsync").mockRejectedValueOnce(new Error("Async provider cannot decrypt legacy key"));
+		const sync = vi.spyOn(safeStorage, "decryptString").mockReturnValueOnce(secret);
+		const store = await createEncryptedStore("ytm-auth", { defaults: { clients: [] as typeof clients } });
+		expect(store.get("clients")).toEqual(clients);
+		expect(sync).toHaveBeenCalledExactlyOnceWith(key);
+		expect(fs.readFileSync(keyPath)).toEqual(key);
+		expect(fs.readFileSync(path.join(state.directory, "ytm-auth.ytm"), "utf8")).toBe(raw);
+		vi.restoreAllMocks();
+	});
+	it.each(["v10", "v11"])("preserves unreadable macOS %s keys and does not retry providers on repeated requests", async (prefix) => {
+		vi.stubGlobal("process", { ...process, platform: "darwin" });
+		const key = Buffer.from(`${prefix}unreadable`), filename = path.join(state.directory, "broken.key.v2");
+		fs.writeFileSync(filename, key);
+		const asyncDecrypt = vi.spyOn(safeStorage, "decryptStringAsync").mockRejectedValueOnce(new Error("Async decryption failed"));
+		const sync = vi.spyOn(safeStorage, "decryptString").mockImplementationOnce(() => { throw new Error("Sync decryption failed"); });
+		await expect(getOrCreateEncryptionSecret("broken")).rejects.toThrow("Async decryption failed");
+		await expect(getOrCreateEncryptionSecret("broken")).rejects.toThrow("Async decryption failed");
+		expect(asyncDecrypt).toHaveBeenCalledTimes(1);
+		expect(sync).toHaveBeenCalledTimes(prefix === "v10" ? 1 : 0);
+		expect(fs.readFileSync(filename)).toEqual(key);
 		vi.restoreAllMocks();
 	});
 	it("migrates paired clients once and keeps the original as a restricted backup", async () => {

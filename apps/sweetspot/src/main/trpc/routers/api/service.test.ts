@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => {
 		start: vi.fn(),
 		destroy: vi.fn(async () => {}),
 		createApi: vi.fn(),
+		readClients: vi.fn(() => []),
 	};
 });
 vi.mock("@main/core/baseProvider", () => ({
@@ -30,7 +31,7 @@ vi.mock("@main/api/createApiWorker", () => ({ createApiWorker: mocks.createApi }
 vi.mock("@main/trpc/caller", () => ({ createMainCaller: () => ({ track: {}, navigation: {} }) }));
 vi.mock("@main/auth", () => ({
 	appAuth: { loadClients: vi.fn(), isValidToken: vi.fn() },
-	readAuthClients: () => [],
+	readAuthClients: mocks.readClients,
 }));
 import ApiProvider from "./service";
 
@@ -41,6 +42,16 @@ beforeEach(() => {
 });
 
 describe("MCP listener lifecycle", () => {
+	it("reports a storage failure without blaming the port or starting a listener", async () => {
+		mocks.readClients.mockImplementationOnce(() => { throw new Error("OS decryption failed"); });
+		const service = new ApiProvider({} as App);
+		await service.restartMcp();
+		expect(service.mcpStatus).toMatchObject({ running: false, error: expect.stringContaining("paired-client storage") });
+		expect(mocks.start).not.toHaveBeenCalled();
+		await service.restartMcp();
+		expect(service.mcpStatus).toMatchObject({ running: true, error: null });
+		await service.OnDestroy();
+	});
 	it("starts independently of the legacy API and closes on app teardown", async () => {
 		const service = new ApiProvider({} as App);
 		await service.restartMcp();
