@@ -3,6 +3,7 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	fetch: vi.fn(), open: vi.fn(), quit: vi.fn(), download: vi.fn(), nativeQuit: vi.fn(), downloaded: vi.fn(),
+	check: vi.fn(),
 }));
 vi.mock("@main/core/baseProvider", () => ({ BaseProvider: class {
 	logger = { debug: vi.fn(), error: vi.fn() };
@@ -16,7 +17,7 @@ vi.mock("@shared/utils/filecache", () => ({ cacheWithFile: (fn: () => unknown) =
 vi.mock("@shared/utils/github", () => ({ authorName: "hybridknight", repoName: "sweetspot", githubRepoFetch: mocks.fetch }));
 vi.mock("electron", () => ({ shell: { openExternal: mocks.open } }));
 vi.mock("electron-updater", () => ({
-	autoUpdater: { app: { baseCachePath: "/tmp/test-updater" }, downloadUpdate: mocks.download, quitAndInstall: mocks.nativeQuit, setFeedURL: vi.fn(), on: vi.fn(), signals: { updateDownloaded: mocks.downloaded } },
+	autoUpdater: { app: { baseCachePath: "/tmp/test-updater" }, checkForUpdates: mocks.check, downloadUpdate: mocks.download, quitAndInstall: mocks.nativeQuit, setFeedURL: vi.fn(), on: vi.fn(), signals: { updateDownloaded: mocks.downloaded } },
 	CancellationToken: vi.fn(),
 }));
 
@@ -34,6 +35,7 @@ beforeEach(() => {
 	vi.stubGlobal("process", { ...process, platform: "darwin", arch: "arm64" });
 	mocks.fetch.mockResolvedValue({ data: { tag_name: "v1.0.3", assets: [{ name: "Sweet-Spot-1.0.3-arm64.dmg", browser_download_url: url }] } });
 	mocks.open.mockResolvedValue(undefined);
+	mocks.check.mockReset();
 });
 afterEach(() => vi.unstubAllGlobals());
 
@@ -73,4 +75,37 @@ it("rejects calls without an offered Mac update and keeps Windows native updates
 	expect(updater.getDownloadTarget()).toBeNull();
 	await expect(updater.openMacDmgDownload()).rejects.toThrow("No Mac update");
 	expect(mocks.open).not.toHaveBeenCalled();
+});
+
+function checkProvider() {
+	return new UpdateProvider({ getVersion: () => "1.0.5" } as App);
+}
+
+it.each(["1.0.5", "1.0.4"])("completes a manual check without an update when the feed offers %s", async (version) => {
+	mocks.check.mockResolvedValue({ updateInfo: { version } });
+	const updater = checkProvider();
+	await expect(updater.onCheckUpdate({ forceDialog: true })).resolves.toBeNull();
+	expect(updater.isChecking()).toBe(false);
+	expect(updater.getUpdate()).toBeNull();
+	expect(updater.logger.error).not.toHaveBeenCalled();
+});
+
+it.each(["network", "incomplete"])("reports a failed manual check instead of claiming the app is current (%s)", async (failure) => {
+	if (failure === "network") mocks.check.mockRejectedValue(new Error("Offline"));
+	else mocks.check.mockResolvedValue(null);
+	const updater = checkProvider();
+	await expect(updater.onCheckUpdate({ forceDialog: true })).rejects.toThrow("Could not check for updates");
+	expect(updater.isChecking()).toBe(false);
+});
+
+it("keeps failed background checks quiet", async () => {
+	mocks.check.mockRejectedValue(new Error("Offline"));
+	await expect(checkProvider().onCheckUpdate()).resolves.toBeNull();
+});
+
+it("still returns newer updates from manual checks", async () => {
+	mocks.check.mockResolvedValue({ updateInfo: { version: "1.0.6" } });
+	const updater = checkProvider();
+	await expect(updater.onCheckUpdate({ forceDialog: true, showDialog: false })).resolves.toMatchObject({ version: "1.0.6" });
+	expect(updater.isChecking()).toBe(false);
 });
