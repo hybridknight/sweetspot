@@ -96,11 +96,15 @@ function prefersReducedMotion(): boolean {
 	}
 }
 
-/** Scroll active line to vertical middle of the list (not nearest / not page ancestors). */
-export function scrollLineToCenter(list: HTMLElement, el: HTMLElement, smooth: boolean): void {
+/** Keep the reading position near the top, leaving room for upcoming lines. */
+function readingOffset(height: number): number {
+	return Math.min(96, Math.max(24, Math.round(height / 4)));
+}
+
+export function scrollLineToReadingPosition(list: HTMLElement, el: HTMLElement, smooth: boolean): void {
 	const listRect = list.getBoundingClientRect();
 	const elRect = el.getBoundingClientRect();
-	const delta = elRect.top - listRect.top - listRect.height / 2 + elRect.height / 2;
+	const delta = elRect.top - listRect.top - readingOffset(list.clientHeight);
 	const top = Math.max(0, list.scrollTop + delta);
 	list.scrollTo({ top, behavior: smooth ? "smooth" : "auto" });
 }
@@ -338,10 +342,12 @@ function SyncedList({
 		const list = listRef.current;
 		const el = list?.querySelector(`[data-index="${primaryIdx}"]`) as HTMLElement | null;
 		if (!list || !el) return undefined;
+		// Mounts, track changes and resizes should settle immediately. Animate
+		// only the normal hand-off between already-positioned lyric lines.
+		const smooth = lastScrolledActive.current >= 0 && !prefersReducedMotion();
 		lastScrolledActive.current = primaryIdx;
-		const smooth = !prefersReducedMotion();
 		ignoreScrollUntil.current = Date.now() + (smooth ? 450 : 50);
-		const raf = requestAnimationFrame(() => scrollLineToCenter(list, el, smooth));
+		const raf = requestAnimationFrame(() => scrollLineToReadingPosition(list, el, smooth));
 		return () => cancelAnimationFrame(raf);
 	}, [primaryIdx, videoId, settingsEpoch, catchUpNonce]);
 
@@ -349,9 +355,9 @@ function SyncedList({
 		const list = listRef.current;
 		if (!list) return undefined;
 		const applyPad = () => {
-			const pad = Math.max(24, Math.round(list.clientHeight / 2));
-			list.style.paddingTop = `${pad}px`;
-			list.style.paddingBottom = `${pad}px`;
+			const offset = readingOffset(list.clientHeight);
+			list.style.paddingTop = `${offset}px`;
+			list.style.paddingBottom = `${Math.max(24, list.clientHeight - offset)}px`;
 			lastScrolledActive.current = -1;
 			setCatchUpNonce((n) => n + 1);
 		};

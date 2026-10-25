@@ -399,6 +399,39 @@ html ytmusic-av-toggle[toggle-disabled] :is(.song-button, .video-button)[aria-pr
 
 // Comments embed YouTube components with their own dark-mode colors. Keep the
 // text and editor readable even when those components load after the theme.
+html :is(ytmusic-comments, ytd-comments) {
+	background: transparent !important;
+	color: var(--sweetspot-theme-text);
+	font-family: var(--sweetspot-theme-font);
+	min-width: 0;
+}
+html ytmusic-comments {
+	box-sizing: border-box;
+	padding: 12px 16px 16px;
+}
+html :is(ytmusic-comments, ytd-comments) :is(#content-text, #contenteditable-root) {
+	font-size: 14px !important;
+	line-height: 20px !important;
+	overflow-wrap: anywhere;
+}
+html :is(ytmusic-comments, ytd-comments) :is(#author-text, #header-author h3) {
+	font-size: 13px !important;
+	line-height: 18px !important;
+	font-weight: 600 !important;
+	letter-spacing: normal;
+}
+html :is(ytmusic-comments, ytd-comments) :is(.count-text, #simplebox-placeholder) {
+	font-size: 16px !important;
+	line-height: 22px !important;
+}
+html :is(ytmusic-comments, ytd-comments) :is(#toolbar, #replies, #action-buttons) :is(button, .ytSpecButtonShapeNextLabel, .yt-spec-button-shape-next__button-text-content) {
+	font-size: 14px !important;
+	line-height: 20px !important;
+}
+html ytmusic-tab-renderer {
+	scrollbar-width: thin;
+	scrollbar-color: var(--sweetspot-theme-muted) transparent;
+}
 html
 	:is(ytmusic-comments, ytd-comments)
 	:is(
@@ -422,6 +455,8 @@ html
 	:is(
 		.published-time-text,
 		.published-time-text a,
+		#published-time-text,
+		#published-time-text a,
 		#vote-count-middle,
 		.more-button,
 		.less-button,
@@ -430,12 +465,25 @@ html
 	) {
 	color: var(--sweetspot-theme-muted) !important;
 }
+html :is(ytmusic-comments, ytd-comments) :is(#published-time-text, #published-time-text a, #vote-count-middle) {
+	font-size: 12px !important;
+	line-height: 18px !important;
+}
 html :is(ytmusic-comments, ytd-comments) :is(input, textarea, [contenteditable="true"]) {
 	caret-color: var(--sweetspot-theme-text);
 	border-color: var(--sweetspot-theme-border);
 }
-html :is(ytmusic-comments, ytd-comments) :is(yt-icon, .ytIconWrapperHost) {
-	color: var(--sweetspot-theme-text);
+html :is(ytmusic-comments, ytd-comments) :is(yt-icon, .ytIconWrapperHost, .ytIconButtonViewModelHost) {
+	color: var(--sweetspot-theme-text) !important;
+}
+html :is(ytmusic-comments, ytd-comments) tp-yt-paper-listbox.yt-dropdown-menu {
+	background: var(--sweetspot-theme-surface) !important;
+}
+html :is(ytmusic-comments, ytd-comments) yt-dropdown-menu :is(.item, #icon-label, a.yt-simple-endpoint) {
+	color: var(--sweetspot-theme-text) !important;
+}
+html :is(ytmusic-comments, ytd-comments) yt-dropdown-menu #subtitle {
+	color: var(--sweetspot-theme-muted) !important;
 }
 
 // Native lyrics, queue guidance, and signed-out/empty states have additional

@@ -13,9 +13,10 @@
 	min-width: 0;
 	min-height: 0;
 	padding: 12px 16px 16px;
+	container-type: inline-size;
 	overflow: hidden;
 	color: var(--sweetspot-lyrics-text);
-	font-family: "YouTube Sans", Roboto, Arial, sans-serif;
+	font-family: var(--sweetspot-theme-font, "YouTube Sans", Roboto, Arial, sans-serif);
 	font-size: 16px;
 	line-height: 1.5;
 	letter-spacing: normal;
@@ -114,16 +115,18 @@
 	display: flex;
 	flex-direction: column;
 	align-items: stretch;
-	gap: 8px;
+	gap: 12px;
 	flex: 1 1 auto;
 	width: 100%;
 	min-width: 0;
 	min-height: 0;
 	overflow-x: hidden;
 	overflow-y: auto;
+	scrollbar-gutter: stable;
 	scroll-behavior: smooth;
-	/* Vertical padding set in JS (~half list height) so active line can sit mid-viewport. */
+	/* JS reserves a bounded reading offset above and scroll space below. */
 	padding: 0;
+	padding-inline-end: 8px;
 	box-sizing: border-box;
 }
 
@@ -137,7 +140,7 @@
 	min-width: 0;
 	max-width: 100%;
 	margin: 0;
-	padding: 14px 12px;
+	padding: 16px 12px;
 	border: 0;
 	border-radius: 8px;
 	background-color: transparent;
@@ -155,12 +158,12 @@
 	white-space: normal !important;
 	word-break: normal;
 	overflow-wrap: break-word;
-	font-family: "YouTube Sans", Roboto, Arial, sans-serif !important;
-	font-size: clamp(22px, 1.55vw, 28px) !important;
-	font-weight: 600 !important;
+	font-family: var(--sweetspot-theme-font, "YouTube Sans", Roboto, Arial, sans-serif) !important;
+	font-size: clamp(18px, 4.25cqi, 22px) !important;
+	font-weight: 500 !important;
 	font-style: normal !important;
 	font-stretch: normal !important;
-	line-height: 1.35 !important;
+	line-height: 1.55 !important;
 	opacity: 1;
 	cursor: pointer;
 	overflow: hidden;
@@ -358,6 +361,13 @@
 /* Hide stock YTM lyrics only while lyrics page-type is active (pear-safe).
  * Do NOT use a sticky hijack class on shared #tab-renderer — breaks Up Next / whole side panel.
  * ATV/song mode often injects ytmusic-description-shelf-renderer under the same page-type. */
+ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]:not([data-sweetspot-lyrics="stock"]):has(> #sweetspot-lyrics-root) {
+	/* The list owns scrolling; avoid a second scrollbar around the whole tab. */
+	box-sizing: border-box;
+	min-height: 0;
+	overflow: hidden !important;
+}
+
 #tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]:not([data-sweetspot-lyrics="stock"]) > *,
 ytmusic-tab-renderer[page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"]:not([data-sweetspot-lyrics="stock"])
 	> * {

@@ -213,6 +213,14 @@ html ytmusic-queue-header-renderer .subtitle {
 	line-height: var(--mnml-text-line) !important;
 	letter-spacing: -0.015em;
 }
+// The compact rail stacks labels under icons in a 72px column. Keep its
+// captions smaller than expanded navigation and playlist titles.
+html ytmusic-guide-entry-renderer[is-collapsed] .title {
+	font-size: 12px !important;
+	font-weight: 500 !important;
+	line-height: 16px !important;
+	letter-spacing: 0;
+}
 html :where(h2, h3, .title.ytmusic-carousel-shelf-basic-header-renderer, .title.ytmusic-shelf-renderer, .title.ytmusic-header-renderer) {
 	font-size: var(--mnml-heading-size) !important;
 	font-weight: 650 !important;

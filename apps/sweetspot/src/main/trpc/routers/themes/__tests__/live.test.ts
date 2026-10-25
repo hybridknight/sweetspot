@@ -11,7 +11,7 @@ const pages = [
 	{ name: "Home", route: "/", ready: "ytmusic-carousel-shelf-renderer .title", selector: "ytmusic-carousel-shelf-renderer .title, ytmusic-carousel-shelf-renderer .subtitle" },
 	{ name: "Explore", route: "/explore", ready: "ytmusic-navigation-button-renderer button", selector: "ytmusic-navigation-button-renderer yt-formatted-string" },
 	{ name: "Search", route: "/search?q=HYBS+Tip+Toe", ready: "ytmusic-responsive-list-item-renderer", selector: "ytmusic-responsive-list-item-renderer .title, ytmusic-responsive-list-item-renderer .secondary-flex-columns yt-formatted-string" },
-	{ name: "Comments", route: "/watch?v=dHUq9xJcaZs", ready: "ytmusic-comments #content-text", selector: "ytmusic-comments #content-text, ytmusic-comments #author-text, ytmusic-comments .published-time-text a, ytmusic-comments .ytAttributedStringLink" },
+	{ name: "Comments", route: "/watch?v=dHUq9xJcaZs", ready: "ytmusic-comments #content-text", selector: "ytmusic-comments #content-text, ytmusic-comments #author-text, ytmusic-comments :is(.published-time-text, #published-time-text) a, ytmusic-comments .ytAttributedStringLink, ytmusic-comments #label-icon, ytmusic-comments .ytIconButtonViewModelHost" },
 ];
 const results = new Map<string, ContrastSample[]>();
 
