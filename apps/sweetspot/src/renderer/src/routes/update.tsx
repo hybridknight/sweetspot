@@ -124,13 +124,13 @@ function UpdatePage() {
 		return (
 			<div className="update-window flex h-full min-h-screen bg-background">
 				{/* left — summary + actions */}
-				<aside className="drag flex w-[240px] shrink-0 flex-col overflow-y-auto border-r border-border bg-card p-5">
+				<aside className={`drag flex shrink-0 flex-col overflow-y-auto border-r border-border bg-card ${isMacOS ? "w-[280px] px-6 py-5" : "w-[240px] p-5"}`}>
 					<div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-						<div className="flex size-10 items-center justify-center rounded-full bg-muted">
+						{!(isMacOS && downloadOpened) && <div className="flex size-10 items-center justify-center rounded-full bg-muted">
 							<DownloadIcon className="text-primary" />
-						</div>
+						</div>}
 						<div className="flex flex-col gap-1">
-							<h2 className="text-sm font-medium">Update available</h2>
+							<h2 className="text-sm font-medium">{isMacOS && downloadOpened ? "Finish your update" : "Update available"}</h2>
 							<p className="text-xs text-muted-foreground text-balance">
 								{updateInfo.releaseName ?? `Version ${updateInfo.version} is ready`}
 							</p>
@@ -149,6 +149,7 @@ function UpdatePage() {
 							opened={downloadOpened}
 							error={downloadError}
 							onDownload={downloadDmg}
+							onQuit={() => window.api.quit(true)}
 							onLater={() => void dismiss()}
 						/> : <UpdateActions
 							isDownloading={isDownloading}

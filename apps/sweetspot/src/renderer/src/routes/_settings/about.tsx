@@ -79,6 +79,7 @@ function AboutSettingsPage() {
 						opened={downloadOpened}
 						error={downloadError}
 						onDownload={downloadDmg}
+						onQuit={() => window.api.quit(true)}
 					/>}
 					<nav aria-label="Sweet Spot links" className="flex flex-wrap gap-4 border-t border-border pt-4">
 						{[
