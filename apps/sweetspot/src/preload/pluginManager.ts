@@ -1,15 +1,16 @@
 import type { PluginOptions } from "@plugins/utils";
 import { ClientPlugin, initializePluginCommandsWithIPC } from "@plugins/utils";
 import { createLogger, Logger } from "@shared/utils/console";
+import { onDocumentDiscarded } from "@shared/utils/document-lifecycle";
 import type { YtmPageBridge } from "@shared/ytm";
 import { debounce, get, merge, set } from "lodash-es";
 import { basename } from "path";
 import type { PlayerApi, PlayerUiService } from "ytm-client-api";
 import pkg from "../../package.json";
+import world0HostSource from "./generated/sweetspot-world0-host.js?raw";
 import { getPreloadApi, getPreloadDomUtils, getSweetspot } from "./preload-local";
 import type { PreloadSweetspotHost } from "./sweetspot-bridge";
 import { createPluginUtils, isYoutubeMusicHost } from "./utils";
-import world0HostSource from "./generated/sweetspot-world0-host.js?raw";
 export type PluginSettings = Record<string, any>;
 export interface PluginContext {
 	name: string;
@@ -207,11 +208,13 @@ export class PluginManager {
 		// Filter out non-function results
 		this.destroyFns = results.filter((fn): fn is () => void => typeof fn === "function");
 
-		// Setup cleanup on beforeunload
-		window.addEventListener("beforeunload", async () => {
-			const currentUrl = new URL(location.href);
-			if (this.destroyFns && currentUrl.hostname !== location.hostname && this.destroyFns.length > 0) {
-				await Promise.all(this.destroyFns.map((fn) => Promise.resolve(fn())));
+		onDocumentDiscarded(() => {
+			for (const fn of this.destroyFns) {
+				try {
+					fn();
+				} catch (error) {
+					this.log.error("Plugin cleanup failed", error);
+				}
 			}
 		});
 	}

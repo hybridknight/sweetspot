@@ -1,3 +1,4 @@
+import { onDocumentDiscarded } from "@shared/utils/document-lifecycle";
 import { createRendererContext, waitForPagePlayerApi } from "./context";
 import type { RendererPluginRegistration } from "./types";
 
@@ -69,20 +70,16 @@ async function boot(): Promise<void> {
 		world0.log.warn("playerApi not ready, skipping onPlayerApiReady hooks");
 	}
 
-	window.addEventListener(
-		"beforeunload",
-		() => {
-			offConfig();
-			for (const fn of destroyFns) {
-				try {
-					fn();
-				} catch {
-					/* ignore */
-				}
+	onDocumentDiscarded(() => {
+		offConfig();
+		for (const fn of destroyFns) {
+			try {
+				fn();
+			} catch {
+				/* ignore */
 			}
-		},
-		{ once: true },
-	);
+		}
+	});
 }
 
 void boot();
