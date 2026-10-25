@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img src="./apps/docs/public/images/opengraph-banner.png" alt="Sweet Spot — Make room for music." />
+  <img src="./apps/docs/public/images/opengraph-desktop.png" alt="Sweet Spot — YouTube Music on your desktop. For Mac &amp; Windows." />
 </p>
 
 <p align="center">
