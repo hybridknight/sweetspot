@@ -96,11 +96,15 @@ function prefersReducedMotion(): boolean {
 	}
 }
 
-/** Scroll active line to vertical middle of the list (not nearest / not page ancestors). */
-export function scrollLineToCenter(list: HTMLElement, el: HTMLElement, smooth: boolean): void {
+/** Keep the reading position near the top, leaving room for upcoming lines. */
+function readingOffset(height: number): number {
+	return Math.min(96, Math.max(24, Math.round(height / 4)));
+}
+
+export function scrollLineToReadingPosition(list: HTMLElement, el: HTMLElement, smooth: boolean): void {
 	const listRect = list.getBoundingClientRect();
 	const elRect = el.getBoundingClientRect();
-	const delta = elRect.top - listRect.top - listRect.height / 2 + elRect.height / 2;
+	const delta = elRect.top - listRect.top - readingOffset(list.clientHeight);
 	const top = Math.max(0, list.scrollTop + delta);
 	list.scrollTo({ top, behavior: smooth ? "smooth" : "auto" });
 }
@@ -306,8 +310,7 @@ function SyncedList({
 		}
 	};
 
-	const onListScroll = () => {
-		if (Date.now() < ignoreScrollUntil.current) return;
+	const pauseForUserScroll = () => {
 		userScrollUntil.current = Date.now() + USER_SCROLL_PAUSE_MS;
 		clearCatchUpTimer();
 		const delay = USER_SCROLL_PAUSE_MS + 16;
@@ -317,6 +320,13 @@ function SyncedList({
 			lastScrolledActive.current = -1;
 			setCatchUpNonce((n) => n + 1);
 		}, delay);
+	};
+	const onListScroll = () => {
+		if (Date.now() < ignoreScrollUntil.current) return;
+		// Resize, font reflow and scroll anchoring also dispatch scroll events.
+		// Only extend a pause that started with actual navigation input.
+		if (Date.now() >= userScrollUntil.current) return;
+		pauseForUserScroll();
 	};
 
 	useEffect(() => {
@@ -338,26 +348,33 @@ function SyncedList({
 		const list = listRef.current;
 		const el = list?.querySelector(`[data-index="${primaryIdx}"]`) as HTMLElement | null;
 		if (!list || !el) return undefined;
+		// Mounts, track changes and resizes should settle immediately. Animate
+		// only the normal hand-off between already-positioned lyric lines.
+		const smooth = lastScrolledActive.current >= 0 && !prefersReducedMotion();
 		lastScrolledActive.current = primaryIdx;
-		const smooth = !prefersReducedMotion();
 		ignoreScrollUntil.current = Date.now() + (smooth ? 450 : 50);
-		const raf = requestAnimationFrame(() => scrollLineToCenter(list, el, smooth));
-		return () => cancelAnimationFrame(raf);
+		// Effects already run after the rows commit. An extra animation frame
+		// can be cancelled by a resize or delayed while the window is hidden.
+		scrollLineToReadingPosition(list, el, smooth);
+		return undefined;
 	}, [primaryIdx, videoId, settingsEpoch, catchUpNonce]);
 
 	useLayoutEffect(() => {
 		const list = listRef.current;
 		if (!list) return undefined;
 		const applyPad = () => {
-			const pad = Math.max(24, Math.round(list.clientHeight / 2));
-			list.style.paddingTop = `${pad}px`;
-			list.style.paddingBottom = `${pad}px`;
+			const offset = readingOffset(list.clientHeight);
+			list.style.paddingTop = `${offset}px`;
+			list.style.paddingBottom = `${Math.max(24, list.clientHeight - offset)}px`;
 			lastScrolledActive.current = -1;
 			setCatchUpNonce((n) => n + 1);
 		};
 		applyPad();
 		const ro = new ResizeObserver(applyPad);
 		ro.observe(list);
+		// Theme fonts and wrapping can move the active line without changing
+		// the scroll viewport's dimensions.
+		for (const line of Array.from(list.children)) ro.observe(line);
 		return () => ro.disconnect();
 	}, [lines, videoId, settingsEpoch]);
 
@@ -372,6 +389,14 @@ function SyncedList({
 				className={lineBackground ? "sweetspot-lyrics-list" : "sweetspot-lyrics-list text-only"}
 				role="list"
 				onScroll={onListScroll}
+				onWheel={pauseForUserScroll}
+				onTouchMove={pauseForUserScroll}
+				onPointerDown={(event) => {
+					if (event.target === event.currentTarget) pauseForUserScroll();
+				}}
+				onKeyDownCapture={(event) => {
+					if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End"].includes(event.key)) pauseForUserScroll();
+				}}
 			>
 				{lines.map((line, i) => {
 					const isActive = activeSet.has(i);

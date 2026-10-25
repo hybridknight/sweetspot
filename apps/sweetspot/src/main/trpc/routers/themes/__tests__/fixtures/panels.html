@@ -1,0 +1,27 @@
+<!doctype html>
+<html dark darker-dark-theme><head><meta charset="utf-8"><style>
+body { margin: 0; }
+ytmusic-app, ytmusic-tab-renderer, ytmusic-comments { display: block; }
+ytmusic-app { display: flex; gap: 16px; }
+.panel { width: 400px; height: 640px; flex: none; }
+ytmusic-tab-renderer { height: 100%; overflow: hidden scroll; }
+/* Current upstream comment markup uses IDs and literal dark-mode colors. */
+#published-time-text, #published-time-text a { color: #aaa; }
+#label-icon.yt-dropdown-menu, #menu-icon { color: #f1f1f1; }
+.ytIconButtonViewModelHost { color: #f1f1f1; }
+yt-icon, .ytIconButtonViewModelHost { display: inline-block; width: 24px; height: 24px; }
+#content-text { font: 14px/20px Arial; }
+.ytSpecButtonShapeNextLabel { font-size: 16px; }
+* { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+</style></head><body><ytmusic-app>
+<div class="panel"><ytmusic-tab-renderer page-type="MUSIC_PAGE_TYPE_TRACK_LYRICS"><div id="sweetspot-lyrics-root"></div></ytmusic-tab-renderer></div>
+<div class="panel"><ytmusic-tab-renderer page-type="MUSIC_PAGE_TYPE_COMMENTS"><ytmusic-comments>
+<div class="ytmusicCommentsComponentHeader"><yt-formatted-string class="count-text">454 Comments</yt-formatted-string>
+<yt-sort-filter-sub-menu-renderer><yt-icon id="label-icon" class="yt-dropdown-menu" data-check="sort icon">≡</yt-icon></yt-sort-filter-sub-menu-renderer></div>
+<ytd-comment-view-model><div id="header-author"><h3><a id="author-text">@listener</a></h3><span id="published-time-text"><a data-check="date">1 year ago</a></span></div>
+<div id="content-text" data-check="body">A long comment should wrap naturally inside the panel, including a very long link: https://example.test/abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz</div>
+<div id="toolbar"><button><span class="ytSpecButtonShapeNextLabel">Reply</span></button></div>
+<yt-icon id="menu-icon" data-check="menu icon">⋮</yt-icon><span class="ytIconButtonViewModelHost" data-check="modern icon">⋮</span>
+</ytd-comment-view-model>
+</ytmusic-comments></ytmusic-tab-renderer></div>
+</ytmusic-app></body></html>
