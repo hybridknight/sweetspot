@@ -1,6 +1,6 @@
 import { Provider } from "@/components/provider";
 import { assetPath } from "@/lib/paths";
-import { appDescription, appName, appTagline, siteUrl } from "@/lib/shared";
+import { appDescription, appName, appTitle, siteUrl } from "@/lib/shared";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./global.css";
@@ -25,7 +25,7 @@ const parkinsans = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: `${appName} — ${appTagline}`,
+    default: appTitle,
     template: `%s | ${appName}`,
   },
   description: appDescription,
@@ -37,13 +37,13 @@ export const metadata: Metadata = {
     type: "website",
     url: siteUrl,
     siteName: appName,
-    title: `${appName} — ${appTagline}`,
+    title: appTitle,
     description: appDescription,
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: `${appName} — ${appTagline}`,
+    title: appTitle,
     description: appDescription,
   },
 };

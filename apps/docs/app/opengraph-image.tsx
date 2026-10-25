@@ -1,7 +1,7 @@
 import { createHomeOgImage } from '@/lib/og';
-import { appName, appTagline } from '@/lib/shared';
+import { appTitle } from '@/lib/shared';
 
-export const alt = `${appName} — ${appTagline}`;
+export const alt = appTitle;
 export const size = {
   width: 1200,
   height: 630,

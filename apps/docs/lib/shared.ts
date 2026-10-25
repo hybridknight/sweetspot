@@ -91,8 +91,9 @@ export const brandColor = '#B52C39';
 export const brandColorRgb = '181, 44, 57';
 
 export const appTagline = 'Make room for music.';
+export const appTitle = `${appName} — YouTube Music Desktop App for Mac & Windows`;
 export const appDescription =
-  'Your desktop home for YouTube Music.';
+  'Enjoy YouTube Music on your desktop with Sweet Spot for Mac and Windows. Customize your player with skins, an equalizer, lyrics, and media controls.';
 
 export const docsDescription = `Documentation for ${appName} — features, install, API, and changelog.`;
 
