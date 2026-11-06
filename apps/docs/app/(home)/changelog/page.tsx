@@ -9,11 +9,13 @@ import {
   listReleases,
 } from '@/lib/github';
 import { appName } from '@/lib/shared';
+import { createPageMetadata } from '@/lib/metadata';
 
-export const metadata = {
+export const metadata = createPageMetadata({
   title: 'Changelog',
-  description: `Release history for ${appName}`,
-};
+  description: `See what's new in ${appName} for Mac and Windows. Browse release notes, new features, improvements, and fixes for your YouTube Music desktop player.`,
+  path: '/changelog',
+});
 
 export default async function ChangelogPage() {
   const releases = await listReleases({ includePrereleases: true });
