@@ -71,43 +71,33 @@ export default class StartupProvider extends BaseProvider implements AfterInit, 
 		return ["--processStart", `"${basename(process.execPath)}"`, "--startup"];
 	}
 	get isStartupContext() {
-		return !!process.argv.find((arg) => arg === "--startup");
+		// macOS launches the bundle without the Windows-only login-item args.
+		return process.argv.includes("--startup") || (platform.isMacOS && this.app.isPackaged && this.app.getLoginItemSettings().wasOpenedAtLogin);
 	}
 	get isMinimizedArg() {
 		return !!process.argv.find((arg) => arg === "--minimized");
 	}
 	async AfterInit() {
-		this.settingsInstance.onSettingChange("app.autostart", (enabled) => void this.onAutoStartToggle("app.autostart", enabled as boolean), {
+		if (!platform.isMacOS && !platform.isWindows) return;
+		if (!this.app.isPackaged) {
+			// Older dev/preview runs could register the shared Electron.app bundle.
+			// macOS reopens it without our app path, displaying Electron's welcome page.
+			if (platform.isMacOS && this.app.getLoginItemSettings().openAtLogin) {
+				this.app.setLoginItemSettings({ openAtLogin: false });
+			}
+			return;
+		}
+		if (!isProduction) return;
+		this.settingsInstance.onSettingChange("app.autostart", (enabled) => this.syncLoginItem(enabled as boolean), {
 			debounce: 1000,
 		});
-		const app = this.settingsInstance.instance.app;
-		if (isProduction) {
-			if (app.autostart) {
-				this.app.setLoginItemSettings({
-					openAtLogin: true,
-					path: process.execPath,
-					args: this.startArgs,
-				});
-			} else {
-				this.app.setLoginItemSettings({
-					openAtLogin: false,
-					args: this.startArgs,
-				});
-			}
-		}
+		this.syncLoginItem(this.isEnabled);
 	}
-	private async onAutoStartToggle(key: string, enabled: boolean) {
-		if (enabled) {
-			this.app.setLoginItemSettings({
-				openAtLogin: true,
-				path: process.execPath,
-				args: this.startArgs,
-			});
-		} else {
-			this.app.setLoginItemSettings({
-				openAtLogin: false,
-				args: this.startArgs,
-			});
-		}
+	private syncLoginItem(enabled: boolean) {
+		this.app.setLoginItemSettings(platform.isMacOS ? { openAtLogin: enabled } : {
+			openAtLogin: enabled,
+			path: process.execPath,
+			args: this.startArgs,
+		});
 	}
 }
