@@ -93,9 +93,9 @@ export const brandColorRgb = '181, 44, 57';
 export const appTagline = 'Make room for music.';
 export const appTitle = `${appName} — YouTube Music Desktop App for Mac & Windows`;
 export const appDescription =
-  'Enjoy YouTube Music on your desktop with Sweet Spot for Mac and Windows. Customize your player with skins, an equalizer, lyrics, and media controls.';
+  `Download ${appName}, a free, open-source YouTube Music desktop app for Mac and Windows with custom skins, synced lyrics, and a 10-band equalizer.`;
 
-export const docsDescription = `Documentation for ${appName} — features, install, API, and changelog.`;
+export const docsDescription = `Learn how to install and customize ${appName}, the YouTube Music desktop app for Mac and Windows. Explore player skins, sound controls, lyrics, and integrations.`;
 
 /** @deprecated use repoOwner / repoName / repoBranch */
 export const gitConfig = {

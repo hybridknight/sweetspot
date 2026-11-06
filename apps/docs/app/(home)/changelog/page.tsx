@@ -13,7 +13,7 @@ import { createPageMetadata } from '@/lib/metadata';
 
 export const metadata = createPageMetadata({
   title: 'Changelog',
-  description: `See what's new in ${appName} for Mac and Windows. Browse release notes, new features, improvements, and fixes for your YouTube Music desktop player.`,
+  description: `Explore the latest ${appName} updates for Mac and Windows. Read release notes for new YouTube Music player features, improvements, and bug fixes.`,
   path: '/changelog',
 });
 
