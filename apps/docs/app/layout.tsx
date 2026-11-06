@@ -30,6 +30,17 @@ export const metadata: Metadata = {
   },
   description: appDescription,
   applicationName: appName,
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
   icons: {
     icon: assetPath("/favicon.ico"),
   },

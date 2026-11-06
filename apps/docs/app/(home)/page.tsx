@@ -17,6 +17,15 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { createPageMetadata } from "@/lib/metadata";
+import { appDescription, appTitle } from "@/lib/shared";
+
+export const metadata = createPageMetadata({
+  title: appTitle,
+  description: appDescription,
+  path: "/",
+  absoluteTitle: true,
+});
 
 const features = [
   {
