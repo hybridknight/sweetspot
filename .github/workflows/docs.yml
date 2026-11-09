@@ -1,21 +1,6 @@
 name: Validate docs
 
 on:
-  # Vercel hosts production. Validate static exports without requiring Pages.
-  # Optional Pages deployments must use a default-branch ref, not a release tag.
-  push:
-    branches:
-      - master
-      - main
-    paths:
-      - "apps/docs/**"
-      - ".github/workflows/docs.yml"
-      - ".github/workflows/docs-on-release.yml"
-  pull_request:
-    paths:
-      - "apps/docs/**"
-      - ".github/workflows/docs.yml"
-      - ".github/workflows/docs-on-release.yml"
   workflow_dispatch:
 
 permissions:

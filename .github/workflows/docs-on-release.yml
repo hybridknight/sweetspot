@@ -1,10 +1,9 @@
-name: Refresh optional Pages deployment on release
+name: Refresh optional Pages deployment
 
 # Vercel hosts production. Only refresh Pages when explicitly enabled.
 # Dispatch on the default branch because the Pages environment rejects tag refs.
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
 
 permissions:
   actions: write
