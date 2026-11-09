@@ -1,13 +1,6 @@
 name: Build userscript
 
 on:
-  push:
-    branches:
-      - master
-      - main
-    paths:
-      - "packages/userscript/**"
-      - ".github/workflows/userscript.yml"
   workflow_dispatch:
 
 permissions:

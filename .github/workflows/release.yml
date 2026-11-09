@@ -1,11 +1,7 @@
 name: Release Desktop App
 
 on:
-  # Manual runs validate packaging and retain artifacts without publishing.
   workflow_dispatch:
-  push:
-    tags:
-      - "v*"
 
 # One release per tag; do not cancel mid-publish (assets would be partial).
 concurrency:

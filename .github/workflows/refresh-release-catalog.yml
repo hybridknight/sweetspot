@@ -1,8 +1,6 @@
 name: Refresh website release catalog
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
 
 permissions:
